@@ -1,2 +1,2 @@
 # Lazulite
-A modular and extensible framework that empowers developers to create highly advanced programming languages.
+A modular, extensible framework that empowers developers to build advanced programming languages.
