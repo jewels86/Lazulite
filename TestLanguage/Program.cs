@@ -13,14 +13,18 @@ namespace TestLanguage
 		{
 			string content = args[0];
 			BasicTokenizer tokenizer = new();
+
 			tokenizer.AddRule(TokenizationFunctions.CreateRuleFromList(["int", "string", "char"], "type"));
 			tokenizer.AddRule(TokenizationFunctions.CreateRuleFromList(["=", "+", "-", "*", "/"], "operator"));
 			tokenizer.AddRule(TokenizationFunctions.CreateRuleFromRegex(@"\d+", "number"));
-			tokenizer.AddRule(TokenizationFunctions.CreateRuleFromRegex(@"[a-zA-Z_]\w*", "identifier"));
+			tokenizer.AddRule(TokenizationFunctions.CreateRuleFromRegex(@"[a-zA-Z][a-zA-Z0-9]*", "identifier"));
+			//tokenizer.AddRule(TokenizationFunctions.CreateMatchAllRule("unidentified"));
+
 			foreach (Token token in tokenizer.Tokenize(content))
 			{
 				Console.WriteLine($"{token.Value} - {token.Type}");
 			}
+
 			var tokens = tokenizer.Tokenize(content);
 			Console.WriteLine(string.Join(" ", tokens.Select(token => $"{token.Value}")));
 		}

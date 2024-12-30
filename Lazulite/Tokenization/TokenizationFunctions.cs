@@ -89,5 +89,14 @@ namespace Lazulite.Tokenization
 		{
 			return input.Where(token => !string.IsNullOrWhiteSpace(token.Value));
 		}
+
+		public static TokenRuleDelegate CreateMatchAllRule(string type)
+		{
+			return (IEnumerable<PartialToken> parts, PartialToken part, int index, out Token? token) =>
+			{
+				token = new Token(part.StartIndex, part.Value, type);
+				return true;
+			};
+		}
 	}
 }

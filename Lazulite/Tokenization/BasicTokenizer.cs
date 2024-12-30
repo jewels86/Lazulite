@@ -41,7 +41,6 @@ namespace Lazulite.Tokenization
 			_errorHandler = tokenizerErrorDelegate;
 		}
 
-
 		public IEnumerable<Token> Tokenize(string input)
 		{
 			IEnumerable<PartialToken> parts = _inputSplitter(input);
@@ -55,7 +54,12 @@ namespace Lazulite.Tokenization
 					if (rule(parts, part, index, out token))
 					{
 						yield return token!;
+						break;
 					}
+				}
+				if (token == null)
+				{
+					_errorHandler($"No rule matched for token '{part.Value}' at index {part.StartIndex}");
 				}
 			}
 		}
