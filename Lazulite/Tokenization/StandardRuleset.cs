@@ -13,7 +13,7 @@ namespace Lazulite.Tokenization
 		public string EOL { get; set; }
 		public string SingleLineComment { get; set; }
 		public string? BlockComment { get; set; }
-		public Dictionary<string, string> Types { get; set; } = new();
+		public List<KeyValuePair<string, string>> Types { get; set; } = new();
 		public Dictionary<string, Regex> TypeLiterals { get; set; } = new();
 		public Regex? Identifier { get; set; }
 		public List<string> Operators { get; set; } = new();
@@ -30,11 +30,11 @@ namespace Lazulite.Tokenization
 		}
 		public void AddType(string match, string type)
 		{
-			Types.Add(type, match);
+			Types.Add(new(type, match));
 		}
 		public void AddType(string match)
 		{
-			Types.Add("type", match);
+			Types.Add(new("type", match));
 		}
 		public void AddTypes(string[] matches)
 		{

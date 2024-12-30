@@ -85,6 +85,40 @@ namespace Lazulite.Tokenization
 			}
 		}
 
+		public static PostInputSplitterDelegate CreatePostInputSplitter(string? eol = null)
+		{
+			IEnumerable<PartialToken> Function(IEnumerable<PartialToken> input)
+			{
+				input = CleanSpiltInput(input);
+				foreach (PartialToken ptoken in input)
+				{
+					if (eol is not null && ptoken.Value.Contains(eol))
+					{
+						int startIndex = ptoken.StartIndex;
+						string[] parts = ptoken.Value.Split(new[] { eol }, StringSplitOptions.None);
+						for (int i = 0; i < parts.Length; i++)
+						{
+							if (i > 0)
+							{
+								yield return new PartialToken(eol, startIndex);
+								startIndex += eol.Length;
+							}
+							if (!string.IsNullOrEmpty(parts[i]))
+							{
+								yield return new PartialToken(parts[i], startIndex);
+								startIndex += parts[i].Length;
+							}
+						}
+					}
+					else
+					{
+						yield return ptoken;
+					}
+				}
+			}
+			return Function;
+		}
+
 		public static IEnumerable<PartialToken> CleanSpiltInput(IEnumerable<PartialToken> input)
 		{
 			return input.Where(token => !string.IsNullOrWhiteSpace(token.Value));

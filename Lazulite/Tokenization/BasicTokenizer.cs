@@ -12,6 +12,7 @@ namespace Lazulite.Tokenization
 		private readonly List<TokenRuleDelegate> _rules = [];
 		private readonly List<TokenPostProcessorDelegate> _postProcessors = [];
 		private InputSplitterDelegate _inputSplitter = DefaultInputSplitter;
+		private PostInputSplitterDelegate? _postInputSplitter;
 		private TokenizerErrorDelegate _errorHandler = (string message) => throw new Exception(message);
 
 		public void AddRule(TokenRuleDelegate rule)
@@ -36,6 +37,10 @@ namespace Lazulite.Tokenization
 		{
 			_inputSplitter = inputSplitter;
 		}
+		public void SetPostInputSplitter(PostInputSplitterDelegate postInputSplitter)
+		{
+			_postInputSplitter = postInputSplitter;
+		}
 		public void SetErrorHandler(TokenizerErrorDelegate tokenizerErrorDelegate)
 		{
 			_errorHandler = tokenizerErrorDelegate;
@@ -44,6 +49,7 @@ namespace Lazulite.Tokenization
 		public IEnumerable<Token> Tokenize(string input)
 		{
 			IEnumerable<PartialToken> parts = _inputSplitter(input);
+			parts = _postInputSplitter != null ? _postInputSplitter(parts) : parts;
 
 			int index = 0;
 			foreach (PartialToken part in parts)

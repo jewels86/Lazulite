@@ -6,8 +6,12 @@ using System.Threading.Tasks;
 
 namespace Lazulite.Tokenization 
 {
-    public interface IInputSplitting 
-    {
-        public void SetInputSplitter(InputSplitterDelegate inputSplitter);
-    }
+	public delegate IEnumerable<PartialToken> InputSplitterDelegate(string input);
+	public delegate IEnumerable<PartialToken> PostInputSplitterDelegate(IEnumerable<PartialToken> parts);
+
+	public interface IInputSplitting 
+	{
+		public void SetInputSplitter(InputSplitterDelegate inputSplitter);
+		public void SetPostInputSplitter(PostInputSplitterDelegate postInputSplitter);
+	}
 }

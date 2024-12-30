@@ -20,6 +20,7 @@ namespace TestLanguage
 			ruleset.AddOperators(["+", "-", "*", "/", "="]);
 			ruleset.SetIdentifier(@"[a-zA-Z_]\w*");
 			tokenizer.AddRules(ruleset.Unpack());
+			tokenizer.SetPostInputSplitter(TokenizationFunctions.CreatePostInputSplitter(ruleset.EOL));
 
 			foreach (Token token in tokenizer.Tokenize(content))
 			{
