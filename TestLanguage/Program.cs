@@ -18,7 +18,7 @@ namespace TestLanguage
 			ruleset.AddTypes(["int", "string", "char", "float"]);
 			ruleset.AddTypeLiteral("int-literal", @"\d+");
 			ruleset.AddOperators(["+", "-", "*", "/", "="]);
-			ruleset.SetIdentifier(@"[a-zA-Z_]\w*");
+			ruleset.SetIdentifier(TokenizationFunctions.StandardIdentifierRegex);
 			tokenizer.AddRules(ruleset.Unpack());
 			tokenizer.SetPostInputSplitter(TokenizationFunctions.CreatePostInputSplitter(ruleset.EOL));
 

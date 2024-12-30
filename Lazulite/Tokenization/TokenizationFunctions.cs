@@ -8,6 +8,11 @@ namespace Lazulite.Tokenization
 {
 	public static class TokenizationFunctions
 	{
+		public static string StandardIdentifierRegex = @"[a-zA-Z_][a-zA-Z0-9_]*";
+		public static string StandardIntegerLiteralRegex = @"\d+";
+		public static string StandardFloatLiteralRegex = @"\d+\.\d+";
+		public static string StandardStringLiteralRegex = @"""[^""]*""";
+
 		public static TokenRuleDelegate CreateRuleFromList(List<string> matches, string type)
 		{
 			return (IEnumerable<PartialToken> parts, PartialToken part, int index, out Token? token) =>
