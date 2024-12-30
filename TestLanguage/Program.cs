@@ -14,11 +14,10 @@ namespace TestLanguage
 			string content = args[0];
 			BasicTokenizer tokenizer = new();
 
-			StandardRuleset ruleset = new(";", "//");
-			ruleset.AddType("int", "type");
+			Ruleset ruleset = new(";", "//");
+			ruleset.AddTypes(["int", "string", "char", "float"]);
 			ruleset.AddTypeLiteral("int-literal", @"\d+");
-			ruleset.AddOperator("+");
-			ruleset.AddOperator("=");
+			ruleset.AddOperators(["+", "-", "*", "/", "="]);
 			ruleset.SetIdentifier(@"[a-zA-Z_]\w*");
 			tokenizer.AddRules(ruleset.Unpack());
 
