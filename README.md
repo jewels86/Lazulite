@@ -9,4 +9,3 @@ Lazulite is currently in development. Contributions are always welcome!
 
 ## Todos
 - Add StandardRuleset
-- Add IInputSplitting

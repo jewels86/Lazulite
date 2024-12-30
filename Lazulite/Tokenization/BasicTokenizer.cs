@@ -7,7 +7,7 @@ using static Lazulite.Tokenization.TokenizationFunctions;
 
 namespace Lazulite.Tokenization
 {
-	public class BasicTokenizer: ITokenizer
+	public class BasicTokenizer: ITokenizer, IInputSplitting
 	{
 		private readonly List<TokenRuleDelegate> _rules = [];
 		private readonly List<TokenPostProcessorDelegate> _postProcessors = [];
@@ -53,6 +53,10 @@ namespace Lazulite.Tokenization
 				{
 					if (rule(parts, part, index, out token))
 					{
+						foreach (TokenPostProcessorDelegate postProcessor in _postProcessors)
+						{
+							token = postProcessor(token!);
+						}
 						yield return token!;
 						break;
 					}

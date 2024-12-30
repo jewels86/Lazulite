@@ -17,7 +17,6 @@ namespace Lazulite.Tokenization
 		public void AddRules(IEnumerable<TokenRuleDelegate> rules);
 		public void AddPostProcessor(TokenPostProcessorDelegate postProcessor);
 		public void AddPostProcessors(IEnumerable<TokenPostProcessorDelegate> postProcessors);
-		public void SetInputSplitter(InputSplitterDelegate inputSplitter);
 		public void SetErrorHandler(TokenizerErrorDelegate errorHandler);
 		public IEnumerable<Token> Tokenize(string input);
 	}
