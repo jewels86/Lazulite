@@ -12,7 +12,7 @@ namespace TestLanguage
 		public static void Main(string[] args)
 		{
 			string content = args[0];
-			BasicTokenizer tokenizer = new();
+			InputSplittingTokenizer tokenizer = new();
 
 			Ruleset ruleset = new(";", "//");
 			ruleset.AddTypes(["int", "string", "char", "float"]);
@@ -21,7 +21,7 @@ namespace TestLanguage
 			ruleset.AddTypeLiteral("char-literal", TokenizationFunctions.StandardCharLiteralRegex);
 			ruleset.AddOperators(["+", "-", "*", "/", "="]);
 			ruleset.SetIdentifier(TokenizationFunctions.StandardIdentifierRegex);
-			tokenizer.AddRules(ruleset.Unpack());
+			tokenizer.AddRules(ruleset.UnpackForSplitInput().ToArray());
 			tokenizer.SetPostInputSplitter(TokenizationFunctions.CreatePostInputSplitter(ruleset.EOL));
 
 			foreach (Token token in tokenizer.Tokenize(content))
