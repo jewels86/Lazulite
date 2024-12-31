@@ -3,17 +3,227 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 
 namespace Lazulite.Tokenization
 {
 	public static class TokenizationFunctions
 	{
+		#region Standard Tokenization Regexes & Lists
 		public static string StandardIdentifierRegex = @"[a-zA-Z_][a-zA-Z0-9_]*";
 		public static string StandardIntegerLiteralRegex = @"\d+";
 		public static string StandardFloatLiteralRegex = @"\d+\.\d+";
 		public static string StandardStringLiteralRegex = @"""[^""]*""";
 		public static string StandardCharLiteralRegex = @"'\S'";
+		public static string StandardBoolLiteralRegex = @"true|false";
+		public static string[] StandardMathOperators = ["+", "-", "/", "*"];
+		public static string[] StandardComparisonOperators = ["==", "!=", "<", ">", "<=", ">="];
+		#endregion
 
+		#region Token Rules
+		public static TokenRuleDelegate CreateRuleFromList(List<string> matches, string type)
+		{
+			return (string input, int index, out Token? token) =>
+			{
+				token = null;
+				if (index >= input.Length) return false;
+
+				ReadOnlySpan<char> span = input.AsSpan(index);
+
+				foreach (string match in matches)
+				{
+					if (span.StartsWith(match))
+					{
+						token = new Token(index, match, type);
+						return true;
+					}
+				}
+				return false;
+			};
+		}
+		public static TokenRuleDelegate CreateRuleFromPredicate(Func<string, bool> predicate, string type)
+		{
+			return (string input, int index, out Token? token) =>
+			{
+				token = null;
+				if (index >= input.Length) return false;
+
+				ReadOnlySpan<char> span = input.AsSpan(index);
+
+				for (int i = 0; i < span.Length; i++)
+				{
+					var sub = span.Slice(0, i + 1);
+					if (predicate(sub.ToString()))
+					{
+						token = new Token(index, sub.ToString(), type);
+						return true;
+					}
+				}
+
+				return false;
+			};
+		}
+		public static TokenRuleDelegate CreateRuleFromRegex(string pattern, string type)
+		{
+			Regex regex = new Regex(pattern);
+
+			return (string input, int index, out Token? token) =>
+			{
+				token = null;
+				if (index >= input.Length) return false;
+
+				ReadOnlySpan<char> span = input.AsSpan(index);
+
+				for (int i = 0; i < span.Length; i++)
+				{
+					var sub = span.Slice(0, i + 1);
+					if (regex.IsMatch(sub))
+					{
+						token = new Token(index, sub.ToString(), type);
+						return true;
+					}
+				}
+
+				return false;
+			};
+		}
+		public static TokenRuleDelegate CreateSpaceRule(string type = "space")
+		{
+			return (string input, int index, out Token? token) =>
+			{
+				token = null;
+				if (index >= input.Length) return false;
+
+				if (input[index] == ' ')
+				{
+					token = new Token(index, " ", type);
+					return true;
+				}
+
+				return false;
+			};
+		}
+		public static TokenRuleDelegate CreateNewlineRule(string type = "newline")
+		{
+			return (string input, int index, out Token? token) =>
+			{
+				token = null;
+				if (index >= input.Length) return false;
+
+				if (input[index] == '\n')
+				{
+					token = new Token(index, "\n", type);
+					return true;
+				}
+
+				return false;
+			};
+		}
+		public static TokenRuleDelegate CreateTabRule(string type = "tab")
+		{
+			return (string input, int index, out Token? token) =>
+			{
+				token = null;
+				if (index >= input.Length) return false;
+
+				if (input[index] == '\t')
+				{
+					token = new Token(index, "\t", type);
+					return true;
+				}
+
+				return false;
+			};
+		}
+		public static TokenRuleDelegate CreateMatchAllRule(string type = "unidentified")
+		{
+			return (string input, int index, out Token? token) =>
+			{
+				token = new Token(index, input[index].ToString(), type);
+				return true;
+			};
+		}
+		#endregion
+
+		#region Post Processors
+		public static PostProcessorDelegate CreatePostProcessorFilterFromType(string type, bool allow)
+		{
+			return (IEnumerable<Token> tokens) =>
+			{
+				IEnumerable<Token> filtered = new List<Token>();
+				foreach (Token token in tokens)
+				{
+					if (token.Type == type)
+					{
+						if (allow)
+						{
+							filtered.Append(token);
+						}
+					}
+					else
+					{
+						if (!allow)
+						{
+							filtered.Append(token);
+						}
+					}
+				}
+				return filtered;
+			};
+		}
+		public static PostProcessorDelegate CreatePostProcessorFilterFromPredicate(Func<Token, bool> predicate, bool allow)
+		{
+			return (IEnumerable<Token> tokens) =>
+			{
+				IEnumerable<Token> filtered = new List<Token>();
+				foreach (Token token in tokens)
+				{
+					if (predicate(token))
+					{
+						if (allow)
+						{
+							filtered.Append(token);
+						}
+					}
+					else
+					{
+						if (!allow)
+						{
+							filtered.Append(token);
+						}
+					}
+				}
+				return filtered;
+			};
+		}
+		public static PostProcessorDelegate CreatePostProcessorFilterFromTypes(string[] types, bool allow)
+		{
+			return (IEnumerable<Token> tokens) =>
+			{
+				IEnumerable<Token> filtered = new List<Token>();
+				foreach (Token token in tokens)
+				{
+					if (types.Contains(token.Type))
+					{
+						if (allow)
+						{
+							filtered.Append(token);
+						}
+					}
+					else
+					{
+						if (!allow)
+						{
+							filtered.Append(token);
+						}
+					}
+				}
+				return filtered;
+			};
+		}
+		#endregion
+
+		#region Split Input Token Rules
 		public static SplitInputTokenRuleDelegate CreateSplitInputRuleFromList(List<string> matches, string type)
 		{
 			return (IEnumerable<PartialToken> parts, PartialToken part, int index, out Token? token) =>
@@ -53,7 +263,17 @@ namespace Lazulite.Tokenization
 				return false;
 			};
 		}
+		public static SplitInputTokenRuleDelegate CreateMatchAllSplitInputRule(string type)
+		{
+			return (IEnumerable<PartialToken> parts, PartialToken part, int index, out Token? token) =>
+			{
+				token = new Token(part.StartIndex, part.Value, type);
+				return true;
+			};
+		}
+		#endregion
 
+		#region Input Splitters
 		public static IEnumerable<PartialToken> DefaultInputSplitter(string input)
 		{
 			return SeperatorInputSplitter(input, " ", "\n", "\t", "\r");
@@ -90,7 +310,6 @@ namespace Lazulite.Tokenization
 				start = minSeparator != null ? minIndex + minSeparator.Length : minIndex;
 			}
 		}
-
 		public static PostInputSplitterDelegate CreatePostInputSplitter(string? eol = null)
 		{
 			IEnumerable<PartialToken> Function(IEnumerable<PartialToken> input)
@@ -124,19 +343,10 @@ namespace Lazulite.Tokenization
 			}
 			return Function;
 		}
-
 		public static IEnumerable<PartialToken> CleanSpiltInput(IEnumerable<PartialToken> input)
 		{
 			return input.Where(token => !string.IsNullOrWhiteSpace(token.Value));
 		}
-
-		public static SplitInputTokenRuleDelegate CreateMatchAllSplitInputRule(string type)
-		{
-			return (IEnumerable<PartialToken> parts, PartialToken part, int index, out Token? token) =>
-			{
-				token = new Token(part.StartIndex, part.Value, type);
-				return true;
-			};
-		}
+		#endregion
 	}
 }

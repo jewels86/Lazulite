@@ -28,19 +28,15 @@ namespace Lazulite.Tokenization
 		{
 			TypeLiterals.Add(type, new Regex(regex));
 		}
-		public void AddType(string match, string type)
+		public void AddType(string match, string type = "type")
 		{
 			Types.Add(new(type, match));
 		}
-		public void AddType(string match)
-		{
-			Types.Add(new("type", match));
-		}
-		public void AddTypes(string[] matches)
+		public void AddTypes(string[] matches, string type = "type")
 		{
 			foreach (var match in matches)
 			{
-				AddType(match);
+				AddType(match, type);
 			}
 		}
 		public void AddOperator(string op)
@@ -154,6 +150,110 @@ namespace Lazulite.Tokenization
 					return false;
 				};
 			}
+		}
+		public IEnumerable<TokenRuleDelegate> Unpack()
+		{
+			yield return (string input, int index, out Token? token) =>
+			{
+				token = null;
+				if (input.Substring(index).StartsWith(EOL))
+				{
+					token = new Token(index, EOL, "end-of-line");
+					return true;
+				}
+				return false;
+			};
+			yield return (string input, int index, out Token? token) =>
+			{
+				token = null;
+				if (input.Substring(index).StartsWith(SingleLineComment))
+				{
+					for (int i = index; i < input.Length; i++)
+					{
+						if (input[i] == '\n')
+						{
+							token = new Token(index, input.Substring(index, i - index), "single-line-comment");
+							return true;
+						}
+					}
+				}
+				return false;
+			};
+
+			if (BlockComment != null) yield return (string input, int index, out Token? token) =>
+			{
+				token = null;
+				string sub = input.Substring(index);
+				if (sub.StartsWith(BlockComment))
+				{
+					string block = sub.Substring(BlockComment.Length);
+					int end = block.IndexOf(BlockComment);
+					if (end != -1)
+					{
+						token = new Token(index, block.Substring(0, end), "block-comment");
+						return true;
+					}
+				}
+				return false;
+			};
+
+			foreach (var type in Types)
+			{
+				yield return (string input, int index, out Token? token) =>
+				{
+					token = null;
+					if (input.Substring(index).StartsWith(type.Value))
+					{
+						token = new Token(index, type.Value, type.Key);
+						return true;
+					}
+					return false;
+				};
+			}
+			foreach (var typeLiteral in TypeLiterals)
+			{
+				yield return (string input, int index, out Token? token) =>
+				{
+					token = null;
+					string sub = input.Substring(index);
+					if (typeLiteral.Value.IsMatch(sub))
+					{
+						token = new Token(index, typeLiteral.Value.Match(sub).Value, typeLiteral.Key);
+						return true;
+					}
+					return false;
+				};
+			}
+			foreach (var op in Operators)
+			{
+				yield return (string input, int index, out Token? token) =>
+				{
+					token = null;
+					if (input.Substring(index).StartsWith(op))
+					{
+						token = new Token(index, op, "operator");
+						return true;
+					}
+					return false;
+				};
+			}
+
+			if (Identifier != null) yield return (string input, int index, out Token? token) =>
+			{
+				token = null;
+				string sub = input.Substring(index);
+				if (Identifier.IsMatch(sub[0].ToString()))
+				{
+					int length = 1;
+					while (length < sub.Length && Identifier.IsMatch(sub[length].ToString()))
+					{
+						length++;
+					}
+					token = new Token(index, sub.Substring(0, length), "identifier");
+					return true;
+				}
+				return false;
+			};
 		}
 	}
 }

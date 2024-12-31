@@ -11,20 +11,20 @@ namespace Lazulite.Tokenization
 	public delegate IEnumerable<PartialToken> InputSplitterDelegate(string input);
 	public delegate IEnumerable<PartialToken> PostInputSplitterDelegate(IEnumerable<PartialToken> parts);
 	public delegate bool TokenRuleDelegate(string input, int index, out Token? token);
-	public delegate Token TokenPostProcessorDelegate(Token token);
-	public delegate void TokenizerErrorDelegate(string message);
+	public delegate IEnumerable<Token> PostProcessorDelegate(IEnumerable<Token> tokens);
+	public delegate void TokenizerErrorDelegate(string input, int index);
 
 	internal interface ITokenizer
 	{
-		public void AddPostProcessor(TokenPostProcessorDelegate postProcessor);
-		public void AddPostProcessors(IEnumerable<TokenPostProcessorDelegate> postProcessors);
+		public void AddPostProcessor(PostProcessorDelegate postProcessor);
+		public void AddPostProcessors(IEnumerable<PostProcessorDelegate> postProcessors);
 		public void SetErrorHandler(TokenizerErrorDelegate errorHandler);
 		public IEnumerable<Token> Tokenize(string input);
 	}
 	internal interface IInputSplitting
 	{
 		public void AddRule(SplitInputTokenRuleDelegate rule);
-		public void AddRules(params SplitInputTokenRuleDelegate[] rules);
+		public void AddRules(IEnumerable<SplitInputTokenRuleDelegate> rules);
 		public void SetInputSplitter(InputSplitterDelegate inputSplitter);
 		public void SetPostInputSplitter(PostInputSplitterDelegate postInputSplitter);
 	}
