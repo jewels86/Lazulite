@@ -8,4 +8,3 @@ Lazulite is a C#-powered framework for creating compilers for custom languages.
 Lazulite is currently in development. Contributions are always welcome!
 
 ## Todos
-- Add StandardRuleset

@@ -10,6 +10,6 @@ namespace Lazulite.Parsing
 {
     public class BasicParser 
     {
-        public
+        
     }
 }
