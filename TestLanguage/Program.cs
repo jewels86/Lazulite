@@ -21,12 +21,18 @@ namespace TestLanguage
 			ruleset.AddTypeLiteral("float", TokenizationFunctions.StandardFloatLiteralRegex);
 			ruleset.AddTypeLiteral("string", TokenizationFunctions.StandardStringLiteralRegex);
 			ruleset.AddTypeLiteral("char", TokenizationFunctions.StandardCharLiteralRegex);
-			ruleset.AddTypeLiteral("bool", TokenizationFunctions.StandardBoolLiteralRegex);
+			ruleset.AddTypeLiteral("bool", TokenizationFunctions.StandardLowercaseBoolLiteralRegex);
 			ruleset.AddTypeLiteral("void", "void");
 			ruleset.AddOperators(TokenizationFunctions.StandardMathOperators);
 			ruleset.AddOperators(TokenizationFunctions.StandardComparisonOperators);
 			ruleset.AddOperator("=");
 			ruleset.SetIdentifier(TokenizationFunctions.StandardIdentifierRegex);
+			tokenizer.AddRule(TokenizationFunctions.CreateRuleFromString("(", "left-parenthesis"));
+			tokenizer.AddRule(TokenizationFunctions.CreateRuleFromString(")", "right-parenthesis"));
+			tokenizer.AddRule(TokenizationFunctions.CreateRuleFromString("{", "left-brace"));
+			tokenizer.AddRule(TokenizationFunctions.CreateRuleFromString("}", "right-brace"));
+			tokenizer.AddRule(TokenizationFunctions.CreateTabRule());
+			tokenizer.AddRule(TokenizationFunctions.CreateNewlineRule());
 			tokenizer.AddRules(ruleset.Unpack());
 			tokenizer.AddRule(TokenizationFunctions.CreateSpaceRule());
 

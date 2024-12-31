@@ -15,12 +15,29 @@ namespace Lazulite.Tokenization
 		public static string StandardFloatLiteralRegex = @"\d+\.\d+";
 		public static string StandardStringLiteralRegex = @"""[^""]*""";
 		public static string StandardCharLiteralRegex = @"'\S'";
-		public static string StandardBoolLiteralRegex = @"true|false";
+		public static string StandardLowercaseBoolLiteralRegex = @"true|false";
+		public static string StandardUppercaseBoolLiteralRegex = @"True|False";
 		public static string[] StandardMathOperators = ["+", "-", "/", "*"];
 		public static string[] StandardComparisonOperators = ["==", "!=", "<", ">", "<=", ">="];
 		#endregion
 
 		#region Token Rules
+		public static TokenRuleDelegate CreateRuleFromString(string match, string type)
+		{
+			return (string input, int index, out Token? token) =>
+			{
+				token = null;
+				if (index >= input.Length) return false;
+
+				if (input.Substring(index).StartsWith(match))
+				{
+					token = new Token(index, match, type);
+					return true;
+				}
+
+				return false;
+			};
+		}
 		public static TokenRuleDelegate CreateRuleFromList(List<string> matches, string type)
 		{
 			return (string input, int index, out Token? token) =>
