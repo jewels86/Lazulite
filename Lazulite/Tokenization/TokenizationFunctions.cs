@@ -14,7 +14,7 @@ namespace Lazulite.Tokenization
 		public static string StandardStringLiteralRegex = @"""[^""]*""";
 		public static string StandardCharLiteralRegex = @"'\S'";
 
-		public static TokenRuleDelegate CreateRuleFromList(List<string> matches, string type)
+		public static SplitInputTokenRuleDelegate CreateSplitInputRuleFromList(List<string> matches, string type)
 		{
 			return (IEnumerable<PartialToken> parts, PartialToken part, int index, out Token? token) =>
 			{
@@ -27,7 +27,7 @@ namespace Lazulite.Tokenization
 				return false;
 			};
 		}
-		public static TokenRuleDelegate CreateRuleFromPredicate(Func<string, bool> predicate, string type)
+		public static SplitInputTokenRuleDelegate CreateSplitInputRuleFromPredicate(Func<string, bool> predicate, string type)
 		{
 			return (IEnumerable<PartialToken> parts, PartialToken part, int index, out Token? token) =>
 			{
@@ -40,7 +40,7 @@ namespace Lazulite.Tokenization
 				return false;
 			};
 		}
-		public static TokenRuleDelegate CreateRuleFromRegex(string pattern, string type)
+		public static SplitInputTokenRuleDelegate CreateSplitInputRuleFromRegex(string pattern, string type)
 		{
 			return (IEnumerable<PartialToken> parts, PartialToken part, int index, out Token? token) =>
 			{
@@ -130,7 +130,7 @@ namespace Lazulite.Tokenization
 			return input.Where(token => !string.IsNullOrWhiteSpace(token.Value));
 		}
 
-		public static TokenRuleDelegate CreateMatchAllRule(string type)
+		public static SplitInputTokenRuleDelegate CreateMatchAllSplitInputRule(string type)
 		{
 			return (IEnumerable<PartialToken> parts, PartialToken part, int index, out Token? token) =>
 			{

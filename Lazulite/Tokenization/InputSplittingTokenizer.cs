@@ -7,19 +7,19 @@ using static Lazulite.Tokenization.TokenizationFunctions;
 
 namespace Lazulite.Tokenization
 {
-	public class BasicTokenizer: ITokenizer, IInputSplitting
+	public class InputSplittingTokenizer : ITokenizer, IInputSplitting
 	{
-		private readonly List<TokenRuleDelegate> _rules = [];
+		private readonly List<SplitInputTokenRuleDelegate> _rules = [];
 		private readonly List<TokenPostProcessorDelegate> _postProcessors = [];
 		private InputSplitterDelegate _inputSplitter = DefaultInputSplitter;
 		private PostInputSplitterDelegate? _postInputSplitter;
 		private TokenizerErrorDelegate _errorHandler = (string message) => throw new Exception(message);
 
-		public void AddRule(TokenRuleDelegate rule)
+		public void AddRule(SplitInputTokenRuleDelegate rule)
 		{
 			_rules.Add(rule);
 		}
-		public void AddRules(IEnumerable<TokenRuleDelegate> rules)
+		public void AddRules(params SplitInputTokenRuleDelegate[] rules)
 		{
 			_rules.AddRange(rules);
 		}
@@ -55,7 +55,7 @@ namespace Lazulite.Tokenization
 			foreach (PartialToken part in parts)
 			{
 				Token? token = null;
-				foreach (TokenRuleDelegate rule in _rules)
+				foreach (SplitInputTokenRuleDelegate rule in _rules)
 				{
 					if (rule(parts, part, index, out token))
 					{

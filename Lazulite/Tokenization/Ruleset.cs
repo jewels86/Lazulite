@@ -62,7 +62,7 @@ namespace Lazulite.Tokenization
 			Identifier = new Regex(regex);
 		}
 
-		public IEnumerable<TokenRuleDelegate> Unpack()
+		public IEnumerable<SplitInputTokenRuleDelegate> UnpackForSplitInput()
 		{
 			yield return (IEnumerable<PartialToken> parts, PartialToken part, int index, out Token? token) =>
 			{
