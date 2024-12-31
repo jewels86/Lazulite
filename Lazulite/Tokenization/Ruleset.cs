@@ -15,6 +15,7 @@ namespace Lazulite.Tokenization
 		public string? BlockComment { get; set; }
 		public List<KeyValuePair<string, string>> Types { get; set; } = new();
 		public Dictionary<string, Regex> TypeLiterals { get; set; } = new();
+		public Dictionary<string, string> Keywords { get; set; } = new();
 		public Regex? Identifier { get; set; }
 		public List<string> Operators { get; set; } = new();
 
@@ -56,6 +57,17 @@ namespace Lazulite.Tokenization
 		public void SetIdentifier(string regex)
 		{
 			Identifier = new Regex(regex);
+		}
+		public void AddKeyword(string keyword, string type = "keyword")
+		{
+			Keywords.Add(keyword, type);
+		}
+		public void AddKeywords(string[] keywords, string type = "keyword")
+		{
+			foreach (var keyword in keywords)
+			{
+				AddKeyword(keyword, type);
+			}
 		}
 
 		public TokenRuleDelegate EndOfLineRule()
@@ -182,6 +194,22 @@ namespace Lazulite.Tokenization
 				return false;
 			};
 			return null;
+		}
+		public IEnumerable<TokenRuleDelegate> KeywordRules()
+		{
+			foreach (var keyword in Keywords)
+			{
+				yield return (string input, int index, out Token? token) =>
+				{
+					token = null;
+					if (input.Substring(index).StartsWith(keyword.Key))
+					{
+						token = new Token(index, keyword.Key, keyword.Value);
+						return true;
+					}
+					return false;
+				};
+			}
 		}
 
 		public IEnumerable<SplitInputTokenRuleDelegate> UnpackForSplitInput()

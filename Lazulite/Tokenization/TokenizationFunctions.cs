@@ -15,10 +15,13 @@ namespace Lazulite.Tokenization
 		public static string StandardFloatLiteralRegex = @"\d+\.\d+";
 		public static string StandardStringLiteralRegex = @"""[^""]*""";
 		public static string StandardCharLiteralRegex = @"'\S'";
-		public static string StandardLowercaseBoolLiteralRegex = @"true|false";
-		public static string StandardUppercaseBoolLiteralRegex = @"True|False";
+		public static string StandardLowercaseBooleanLiteralRegex = @"true|false";
+		public static string StandardUppercaseBooleanLiteralRegex = @"True|False";
 		public static string[] StandardMathOperators = ["+", "-", "/", "*"];
 		public static string[] StandardComparisonOperators = ["==", "!=", "<", ">", "<=", ">="];
+		public static string[] StandardLogicalOperators = ["&&", "||", "!"];
+		public static string[] StandardAssignmentOperators = ["=", "+=", "-=", "*=", "/="];
+		public static string[] StandardKeywords = ["if", "else", "for"];
 		#endregion
 
 		#region Token Rules
@@ -151,6 +154,62 @@ namespace Lazulite.Tokenization
 
 				return false;
 			};
+		}
+		public static TokenRuleDelegate CreateReturnRule(string type = "return")
+		{
+			return (string input, int index, out Token? token) =>
+			{
+				token = null;
+				if (index >= input.Length) return false;
+
+				if (input[index] == '\r')
+				{
+					token = new Token(index, "\r", type);
+					return true;
+				}
+
+				return false;
+			};
+		}
+		public static IEnumerable<TokenRuleDelegate> CreateWhitespaceRules()
+		{
+			yield return CreateSpaceRule();
+			yield return CreateNewlineRule();
+			yield return CreateTabRule();
+			yield return CreateReturnRule();
+		}
+		public static IEnumerable<TokenRuleDelegate> CreateParenthesisRules()
+		{
+			yield return CreateRuleFromString("(", "left-parenthesis");
+			yield return CreateRuleFromString(")", "right-parenthesis");
+		}
+		public static IEnumerable<TokenRuleDelegate> CreateBracketRules()
+		{
+			yield return CreateRuleFromString("[", "left-bracket");
+			yield return CreateRuleFromString("]", "right-bracket");
+		}
+		public static IEnumerable<TokenRuleDelegate> CreateBraceRules()
+		{
+			yield return CreateRuleFromString("{", "left-brace");
+			yield return CreateRuleFromString("}", "right-brace");
+		}
+		public static IEnumerable<TokenRuleDelegate> CreateAngleBracketRules()
+		{
+			yield return CreateRuleFromString("<", "left-angle-bracket");
+			yield return CreateRuleFromString(">", "right-angle-bracket");
+		}
+		public static IEnumerable<TokenRuleDelegate> CreateQuoteRules()
+		{
+			yield return CreateRuleFromString("\"", "quote");
+			yield return CreateRuleFromString("'", "single-quote");
+		}
+		public static TokenRuleDelegate CreateSemicolonRule() 
+		{
+			return CreateRuleFromString(";", "semicolon");
+		}
+		public static TokenRuleDelegate CreateCommaRule()
+		{
+			return CreateRuleFromString(",", "comma");
 		}
 		public static TokenRuleDelegate CreateMatchAllRule(string type = "unidentified")
 		{

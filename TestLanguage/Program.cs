@@ -12,29 +12,29 @@ namespace TestLanguage
 	{
 		public static void Main(string[] args)
 		{
-			string content = args[0];
+			string content = File.ReadAllText(args[0]);
 			StandardTokenizer tokenizer = new StandardTokenizer();
-
 			Ruleset ruleset = new Ruleset(";", "//");
-			ruleset.AddTypes(["int", "float", "string", "char", "bool", "void"]);
-			ruleset.AddTypeLiteral("int", TokenizationFunctions.StandardIntegerLiteralRegex);
-			ruleset.AddTypeLiteral("float", TokenizationFunctions.StandardFloatLiteralRegex);
-			ruleset.AddTypeLiteral("string", TokenizationFunctions.StandardStringLiteralRegex);
-			ruleset.AddTypeLiteral("char", TokenizationFunctions.StandardCharLiteralRegex);
-			ruleset.AddTypeLiteral("bool", TokenizationFunctions.StandardLowercaseBoolLiteralRegex);
-			ruleset.AddTypeLiteral("void", "void");
+
+			ruleset.AddKeywords(TokenizationFunctions.StandardKeywords);
 			ruleset.AddOperators(TokenizationFunctions.StandardMathOperators);
 			ruleset.AddOperators(TokenizationFunctions.StandardComparisonOperators);
-			ruleset.AddOperator("=");
+			ruleset.AddOperators(TokenizationFunctions.StandardLogicalOperators);
+			ruleset.AddOperators(TokenizationFunctions.StandardAssignmentOperators);
+			ruleset.AddTypes(["int", "float", "char", "void", "bool", "string"]);
+			ruleset.AddTypeLiteral("int", TokenizationFunctions.StandardIntegerLiteralRegex);
+			ruleset.AddTypeLiteral("float", TokenizationFunctions.StandardFloatLiteralRegex);
+			ruleset.AddTypeLiteral("char", TokenizationFunctions.StandardCharLiteralRegex);
+			ruleset.AddTypeLiteral("bool", TokenizationFunctions.StandardLowercaseBooleanLiteralRegex);
+			ruleset.AddTypeLiteral("string", TokenizationFunctions.StandardStringLiteralRegex);
 			ruleset.SetIdentifier(TokenizationFunctions.StandardIdentifierRegex);
-			tokenizer.AddRule(TokenizationFunctions.CreateRuleFromString("(", "left-parenthesis"));
-			tokenizer.AddRule(TokenizationFunctions.CreateRuleFromString(")", "right-parenthesis"));
-			tokenizer.AddRule(TokenizationFunctions.CreateRuleFromString("{", "left-brace"));
-			tokenizer.AddRule(TokenizationFunctions.CreateRuleFromString("}", "right-brace"));
-			tokenizer.AddRule(TokenizationFunctions.CreateTabRule());
-			tokenizer.AddRule(TokenizationFunctions.CreateNewlineRule());
+
 			tokenizer.AddRules(ruleset.Unpack());
-			tokenizer.AddRule(TokenizationFunctions.CreateSpaceRule());
+			tokenizer.AddRules(TokenizationFunctions.CreateParenthesisRules());
+			tokenizer.AddRules(TokenizationFunctions.CreateBraceRules());
+			tokenizer.AddRules(TokenizationFunctions.CreateBracketRules());
+			tokenizer.AddRules(TokenizationFunctions.CreateWhitespaceRules());
+			tokenizer.AddRule(TokenizationFunctions.CreateCommaRule());
 
 			foreach (Token token in tokenizer.Tokenize(content))
 			{
