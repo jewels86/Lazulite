@@ -54,10 +54,10 @@ namespace Lazulite.Parsing
 			}
 		}
 
-        public override string ToString()
-        {
+		public override string ToString()
+		{
 			string value = Value == null ? "" : $": {Value}";
-            return $"{Type}{value}";
-        }
-    }
+			return $"{Type}{value}";
+		}
+	}
 }
