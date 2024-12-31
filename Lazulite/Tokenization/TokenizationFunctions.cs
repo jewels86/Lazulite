@@ -12,6 +12,7 @@ namespace Lazulite.Tokenization
 		public static string StandardIntegerLiteralRegex = @"\d+";
 		public static string StandardFloatLiteralRegex = @"\d+\.\d+";
 		public static string StandardStringLiteralRegex = @"""[^""]*""";
+		public static string StandardCharLiteralRegex = @"'\S'";
 
 		public static TokenRuleDelegate CreateRuleFromList(List<string> matches, string type)
 		{

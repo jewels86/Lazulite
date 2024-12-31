@@ -17,6 +17,8 @@ namespace TestLanguage
 			Ruleset ruleset = new(";", "//");
 			ruleset.AddTypes(["int", "string", "char", "float"]);
 			ruleset.AddTypeLiteral("int-literal", @"\d+");
+			ruleset.AddTypeLiteral("string-literal", TokenizationFunctions.StandardStringLiteralRegex);
+			ruleset.AddTypeLiteral("char-literal", TokenizationFunctions.StandardCharLiteralRegex);
 			ruleset.AddOperators(["+", "-", "*", "/", "="]);
 			ruleset.SetIdentifier(TokenizationFunctions.StandardIdentifierRegex);
 			tokenizer.AddRules(ruleset.Unpack());
