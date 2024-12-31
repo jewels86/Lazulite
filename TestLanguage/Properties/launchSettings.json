@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "TestLanguage": {
+      "commandName": "Project",
+      "commandLineArgs": "\" 5\""
+    }
+  }
+}

@@ -176,6 +176,8 @@ namespace Lazulite.Tokenization
 							return true;
 						}
 					}
+					token = new Token(index, input.Substring(index), "single-line-comment");
+					return true;
 				}
 				return false;
 			};
@@ -218,7 +220,9 @@ namespace Lazulite.Tokenization
 					string sub = input.Substring(index);
 					if (typeLiteral.Value.IsMatch(sub))
 					{
-						token = new Token(index, typeLiteral.Value.Match(sub).Value, typeLiteral.Key);
+						string match = typeLiteral.Value.Match(sub).Value;
+						if (!sub.StartsWith(match)) return false;
+						token = new Token(index, match, typeLiteral.Key);
 						return true;
 					}
 					return false;

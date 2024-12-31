@@ -48,7 +48,7 @@ namespace Lazulite.Tokenization.Tokenizers
 					if (rule(input, index, out token))
 					{
 						tokens.Add(token!);
-						Console.WriteLine($"{token!.Value} - {token!.Type} ({index}-{index + token!.Length})");
+						//Console.WriteLine($"{token!.Value} - {token!.Type} ({index}-{index + token!.Length})");
 						index += token!.Length;
 						break;
 					}
