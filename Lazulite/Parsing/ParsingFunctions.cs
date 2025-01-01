@@ -9,12 +9,21 @@ namespace Lazulite.Parsing
 {
 	public static class ParsingFunctions
 	{
-		public static GrammarRuleDelegate CreateParseLiteralRule(string pattern, string type)
+		public static GrammarRuleDelegate CreateParseLiteralRule(string type)
 		{
-			return (tokens, index) =>
+			return (ParserContext ctx, out IAstNode? node) =>
 			{
-				
-			}
+				node = null;
+
+				if (ctx.CurrentToken().Type == type) 
+				{
+					node = new LiteralAstNode(ctx.CurrentToken().Value, type);
+					return true;
+				}
+
+				return false;
+			};
 		}
+		
 	}
 }
