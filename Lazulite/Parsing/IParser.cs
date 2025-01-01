@@ -9,6 +9,8 @@ using Lazulite.Tokenization;
 
 namespace Lazulite.Parsing
 {
+    public delegate AstNode GrammarRuleDelegate(IEnumerable<Token> tokens, int index);
+
     public interface IParser
     {
         public AstNode Parse(IEnumerable<Token> tokens);

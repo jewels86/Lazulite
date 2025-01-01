@@ -29,6 +29,7 @@ namespace TestLanguage
 			ruleset.AddTypeLiteral("string", TokenizationFunctions.StandardStringLiteralRegex);
 			ruleset.SetIdentifier(TokenizationFunctions.StandardIdentifierRegex);
 
+			tokenizer.AddRule(TokenizationFunctions.CreateRuleFromRegex(@"#include\s*<.*?>", "preprocessor-directive"));
 			tokenizer.AddRules(ruleset.Unpack());
 			tokenizer.AddRules(TokenizationFunctions.CreateParenthesisRules());
 			tokenizer.AddRules(TokenizationFunctions.CreateBraceRules());
