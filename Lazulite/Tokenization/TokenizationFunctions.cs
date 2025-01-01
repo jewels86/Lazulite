@@ -226,21 +226,21 @@ namespace Lazulite.Tokenization
 		{
 			return (IEnumerable<Token> tokens) =>
 			{
-				IEnumerable<Token> filtered = new List<Token>();
+				List<Token> filtered = new List<Token>();
 				foreach (Token token in tokens)
 				{
 					if (token.Type == type)
 					{
 						if (allow)
 						{
-							filtered.Append(token);
+							filtered.Add(token);
 						}
 					}
 					else
 					{
 						if (!allow)
 						{
-							filtered.Append(token);
+							filtered.Add(token);
 						}
 					}
 				}

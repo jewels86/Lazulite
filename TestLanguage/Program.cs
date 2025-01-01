@@ -39,19 +39,31 @@ namespace TestLanguage
 			tokenizer.AddRules(TokenizationFunctions.CreateWhitespaceRules());
 			tokenizer.AddRule(TokenizationFunctions.CreateCommaRule());
 
+			tokenizer.AddPostProcessor(TokenizationFunctions.CreatePostProcessorFilterFromType("space", false));
+
 			var tokens = tokenizer.Tokenize(content);
+
+			foreach (var token in tokens)
+			{
+				Console.WriteLine(token);
+			}
+
 			ParserContext context = new ParserContext(tokens);
 			RecursiveDescentParser parser = new();
 
-			var parseIntLiteral = ParsingFunctions.CreateParseLiteralRule("int-literal");
+			var parseIntLiteral = ParsingFunctions.CreateParseLiteralRule("int");
 			var parseType = ParsingFunctions.CreateParseTypeRule("type");
 			var parseIdentifier = ParsingFunctions.CreateParseIdentifierRule("identifier");
 			var parseExpression = ParsingFunctions.CreateParseExpressionRule([parseIntLiteral, parseIdentifier]);
-			var parseAssignment = ParsingFunctions.CreateParseStaticAssignmentRule("assignment-operator", parseIntLiteral, parseIdentifier, parseExpression);
+			var parseAssignment = ParsingFunctions.CreateParseStaticAssignmentRule("assignment-operator", parseType, parseIdentifier, parseExpression);
 
-			parser.AddRules([parseType, parseIdentifier, parseExpression, parseAssignment]);
+			parser.AddRules([parseAssignment, parseExpression, parseIntLiteral, parseIdentifier, parseType]);
 
 			IAstNode? tree = parser.Parse(context);
+			if (tree is not null) foreach (var node in tree.Traverse())
+			{
+				Console.WriteLine(node);
+			}
 		}
 	}
 }

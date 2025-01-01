@@ -34,6 +34,7 @@ namespace Lazulite.Parsing
 
 				if (ctx.CurrentToken().Type == type)
 				{
+					Console.WriteLine($"Parsing type");
 					node = new TypeAstNode(ctx.CurrentToken().Value);
 					ctx.Consume();
 					return true;
@@ -50,8 +51,11 @@ namespace Lazulite.Parsing
 
 				if (ctx.CurrentToken().Type == type)
 				{
+					Console.WriteLine($"Parsing identifier");
 					node = new IdentifierAstNode(ctx.CurrentToken().Value);
+					Console.WriteLine(ctx.Index);
 					ctx.Consume();
+					Console.WriteLine(ctx.Index);
 					return true;
 				}
 
@@ -84,13 +88,13 @@ namespace Lazulite.Parsing
 				var token = ctx.CurrentToken();
 				if (token.Type != opType)
 					return false;
+				ctx.Consume();
 
 				if (!parseExpression(ctx, out var expressionNode))
 					return false;
 
 				node = new StaticAssignmentAstNode(typeNode!, identifierNode!, expressionNode!);
 				return true;
-
 			};
 		}
 		public static GrammarRuleDelegate CreateParseExpressionRule(List<GrammarRuleDelegate> subRules)

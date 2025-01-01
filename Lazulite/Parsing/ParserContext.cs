@@ -9,18 +9,19 @@ using Lazulite.Tokenization;
 
 namespace Lazulite.Parsing
 {
-    public class ParserContext
-    {
-        public List<Token> Tokens { get; set;}
-        public int Index { get; set;}
+	public class ParserContext
+	{
+		public List<Token> Tokens { get; set;}
+		public int Index { get; set;}
 
-        public ParserContext(IEnumerable<Token> tokens)
-        {
-            Tokens = tokens.ToList();
-            Index = 0;
-        }
+		public ParserContext(IEnumerable<Token> tokens)
+		{
+			Tokens = tokens.ToList();
+			Index = 0;
+		}
 
-        public Token CurrentToken() => Tokens[Index];
-        public void Consume() => Index++;
-    }
+		public Token CurrentToken() => Tokens[Index];
+		public void Consume() => Index += 1;
+		public bool HasNext() => Index < Tokens.Count;
+	}
 }
