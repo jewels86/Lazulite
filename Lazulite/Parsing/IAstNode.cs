@@ -12,5 +12,6 @@ namespace Lazulite.Parsing
     public interface IAstNode
     {
         public string NodeType { get; }
+        public IEnumerable<IAstNode> Transverse();
     }
 }

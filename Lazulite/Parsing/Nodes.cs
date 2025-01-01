@@ -20,6 +20,11 @@ namespace Lazulite.Parsing
 				Value = value;
 				Type = type;
 			}
+
+			public IEnumerable<IAstNode> Transverse() 
+			{
+				yield return this;
+			}
 		}
 		public class BinaryExpressionAstNode : IAstNode
 		{
@@ -35,6 +40,13 @@ namespace Lazulite.Parsing
 				Left = left;
 				Right = right;
 			}
+
+			public IEnumerable<IAstNode> Transverse()
+			{
+				yield return this;
+				foreach (var node in Left.Transverse()) yield return node;
+				foreach (var node in Right.Transverse()) yield return node;
+			}
 		}
 		public class StaticAssignmentAstNode : IAstNode
 		{
@@ -49,6 +61,14 @@ namespace Lazulite.Parsing
 				Type = type;
 				Identifier = identifier;
 				Expression = expression;
+			}
+
+			public IEnumerable<IAstNode> Transverse()
+			{
+				yield return this;
+				foreach (var node in Identifier.Transverse()) yield return node;
+				foreach (var node in Expression.Transverse()) yield return node;
+				foreach (var node in Type.Transverse()) yield return node;
 			}
 		}
 		public class FunctionCallAstNode : IAstNode
