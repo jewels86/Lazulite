@@ -22,5 +22,10 @@ namespace Lazulite.Tokenization
 			Value = value;
 			Type = type;
 		}
+
+		public override string ToString()
+		{
+			return $"Token({StartIndex}, {Type}, {Value})";
+		}
 	}
 }

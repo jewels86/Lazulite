@@ -13,7 +13,7 @@ namespace Lazulite.Parsing.Parsers
     public class RecursiveDescentParser 
     {
         private readonly List<GrammarRuleDelegate> _rules = [];
-        private ParserErrorDelegate _errorHandler = (ctx) => throw new Exception();
+        private ParserErrorDelegate _errorHandler = (ctx) => Console.WriteLine($"Parsing error: token {ctx.CurrentToken()} not matched at index {ctx.Index}");
 
         public void AddRule(GrammarRuleDelegate rule)
         {

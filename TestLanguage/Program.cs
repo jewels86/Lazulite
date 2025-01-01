@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Lazulite.Tokenization;
+using Lazulite.Parsing;
+using Lazulite.Parsing.Parsers;
 using Lazulite.Tokenization.Tokenizers;
 
 namespace TestLanguage
@@ -14,13 +16,13 @@ namespace TestLanguage
 		{
 			string content = File.ReadAllText(args[0]);
 			StandardTokenizer tokenizer = new StandardTokenizer();
-			TokenizationRuleset ruleset = new Ruleset(";", "//");
+			TokenizationRuleset ruleset = new TokenizationRuleset(";", "//");
 
 			ruleset.AddKeywords(TokenizationFunctions.StandardKeywords);
 			ruleset.AddOperators(TokenizationFunctions.StandardMathOperators);
 			ruleset.AddOperators(TokenizationFunctions.StandardComparisonOperators);
 			ruleset.AddOperators(TokenizationFunctions.StandardLogicalOperators);
-			ruleset.AddOperators(TokenizationFunctions.StandardAssignmentOperators);
+			ruleset.AddOperators(TokenizationFunctions.StandardAssignmentOperators, "assignment-operator");
 			ruleset.AddTypes(["int", "float", "char", "void", "bool", "string"]);
 			ruleset.AddTypeLiteral("int", TokenizationFunctions.StandardIntegerLiteralRegex);
 			ruleset.AddTypeLiteral("float", TokenizationFunctions.StandardFloatLiteralRegex);
@@ -37,13 +39,18 @@ namespace TestLanguage
 			tokenizer.AddRules(TokenizationFunctions.CreateWhitespaceRules());
 			tokenizer.AddRule(TokenizationFunctions.CreateCommaRule());
 
-			foreach (Token token in tokenizer.Tokenize(content))
-			{
-				Console.WriteLine($"{token.Value} - {token.Type}");
-			}
-
 			var tokens = tokenizer.Tokenize(content);
-			Console.WriteLine(string.Join("", tokens.Select(token => $"{token.Value}")));
+			ParserContext context = new ParserContext(tokens);
+			RecursiveDescentParser parser = new();
+
+			var parseIntLiteral = ParsingFunctions.CreateParseLiteralRule("int-literal");
+			var parseIdentifier = ParsingFunctions.CreateParseIdentifierRule("identifier");
+			var parseExpression = ParsingFunctions.CreateParseExpressionRule([parseIntLiteral, parseIdentifier]);
+			var parseAssignment = ParsingFunctions.CreateParseStaticAssignmentRule("assignment-operator", parseIntLiteral, parseIdentifier, parseExpression);
+
+			parser.AddRules([parseIntLiteral, parseIdentifier, parseExpression, parseAssignment]);
+
+			IAstNode? tree = parser.Parse(context);
 		}
 	}
 }

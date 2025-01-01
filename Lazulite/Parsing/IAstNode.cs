@@ -11,18 +11,6 @@ namespace Lazulite.Parsing
 {
     public interface IAstNode
     {
-        public string Type { get; set; }
-    }
-
-    public class LiteralAstNode : IAstNode
-    {
-        public string Value { get; set; }
-        public string Type { get; set; }
-
-        public LiteralAstNode(string value, string type)
-        {
-            Value = value;
-            Type = type;
-        }
+        public string NodeType { get; }
     }
 }
