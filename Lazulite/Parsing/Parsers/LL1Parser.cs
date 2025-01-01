@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace Lazulite.Parsing.Parsers
 {
-	public class LRParser : IParser
+	public class LL1Parser : IParser
 	{
+
 	}
 }
