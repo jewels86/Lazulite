@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Lazulite.Tokenization
 {
-	public class Ruleset
+	public class TokenizationRuleset
 	{
 		public string EOL { get; set; }
 		public string SingleLineComment { get; set; }
@@ -19,7 +19,7 @@ namespace Lazulite.Tokenization
 		public Regex? Identifier { get; set; }
 		public List<string> Operators { get; set; } = new();
 
-		public Ruleset(string endOfLine, string singleLineComment)
+		public TokenizationRuleset(string endOfLine, string singleLineComment)
 		{
 			EOL = endOfLine;
 			SingleLineComment = singleLineComment;

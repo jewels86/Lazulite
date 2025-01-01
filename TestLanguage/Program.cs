@@ -14,7 +14,7 @@ namespace TestLanguage
 		{
 			string content = File.ReadAllText(args[0]);
 			StandardTokenizer tokenizer = new StandardTokenizer();
-			Ruleset ruleset = new Ruleset(";", "//");
+			TokenizationRuleset ruleset = new Ruleset(";", "//");
 
 			ruleset.AddKeywords(TokenizationFunctions.StandardKeywords);
 			ruleset.AddOperators(TokenizationFunctions.StandardMathOperators);
