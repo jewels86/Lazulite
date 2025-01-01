@@ -90,5 +90,16 @@ namespace Lazulite.Parsing
 				Name = name;
 			}
 		}
+		public class TypeAstNode : IAstNode 
+		{
+			public string Name { get; set;}
+
+			public string NodeType => "type";
+
+			public TypeAstNode(string name)
+			{
+				Name = name;
+			}
+		}
 	}
 }

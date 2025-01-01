@@ -44,11 +44,12 @@ namespace TestLanguage
 			RecursiveDescentParser parser = new();
 
 			var parseIntLiteral = ParsingFunctions.CreateParseLiteralRule("int-literal");
+			var parseType = ParsingFunctions.CreateParseTypeRule("type");
 			var parseIdentifier = ParsingFunctions.CreateParseIdentifierRule("identifier");
 			var parseExpression = ParsingFunctions.CreateParseExpressionRule([parseIntLiteral, parseIdentifier]);
 			var parseAssignment = ParsingFunctions.CreateParseStaticAssignmentRule("assignment-operator", parseIntLiteral, parseIdentifier, parseExpression);
 
-			parser.AddRules([parseIntLiteral, parseIdentifier, parseExpression, parseAssignment]);
+			parser.AddRules([parseType, parseIdentifier, parseExpression, parseAssignment]);
 
 			IAstNode? tree = parser.Parse(context);
 		}
