@@ -8,8 +8,8 @@ using System.Threading.Tasks;
 
 namespace Lazulite.Parsing
 {
-    public class BasicParser 
+    public interface IAstNode
     {
-        
+        public string? Value { get; set; }
     }
 }

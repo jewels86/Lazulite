@@ -17,7 +17,7 @@ namespace Lazulite.Tokenization
 		public Dictionary<string, Regex> TypeLiterals { get; set; } = new();
 		public Dictionary<string, string> Keywords { get; set; } = new();
 		public Regex? Identifier { get; set; }
-		public List<string> Operators { get; set; } = new();
+		public Dictionary<string, string> Operators { get; set; } = new();
 
 		public TokenizationRuleset(string endOfLine, string singleLineComment)
 		{
@@ -40,18 +40,15 @@ namespace Lazulite.Tokenization
 				AddType(match, type);
 			}
 		}
-		public void AddOperator(string op)
+		public void AddOperator(string op, string type = "operator")
 		{
-			if (!Operators.Contains(op))
-			{
-				Operators.Add(op);
-			}
+			Operators.Add(op, type);
 		}
-		public void AddOperators(string[] ops)
+		public void AddOperators(string[] ops, string type = "operator")
 		{
 			foreach (var op in ops)
 			{
-				AddOperator(op);
+				AddOperator(op, type);
 			}
 		}
 		public void SetIdentifier(string regex)
@@ -166,9 +163,9 @@ namespace Lazulite.Tokenization
 				yield return (string input, int index, out Token? token) =>
 				{
 					token = null;
-					if (input.Substring(index).StartsWith(op))
+					if (input.Substring(index).StartsWith(op.Key))
 					{
-						token = new Token(index, op, "operator");
+						token = new Token(index, op.Key, op.Value);
 						return true;
 					}
 					return false;
@@ -295,9 +292,9 @@ namespace Lazulite.Tokenization
 			{
 				yield return (IEnumerable<PartialToken> parts, PartialToken part, int index, out Token? token) =>
 				{
-					if (part.Value == op)
+					if (part.Value == op.Key)
 					{
-						token = new Token(part.StartIndex, part.Value, "operator");
+						token = new Token(part.StartIndex, part.Value, op.Value);
 						return true;
 					}
 					token = null;

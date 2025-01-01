@@ -9,6 +9,12 @@ namespace Lazulite.Parsing
 {
 	public static class ParsingFunctions
 	{
-		
+		public static GrammarRuleDelegate CreateParseLiteralRule(string pattern, string type)
+		{
+			return (tokens, index) =>
+			{
+				
+			}
+		}
 	}
 }

@@ -9,10 +9,11 @@ using Lazulite.Tokenization;
 
 namespace Lazulite.Parsing
 {
-    public delegate AstNode GrammarRuleDelegate(IEnumerable<Token> tokens, int index);
+    public delegate bool GrammarRuleDelegate(ParserContext context, out IAstNode? node);
+    public delegate void ParserErrorDelegate(ParserContext context);
 
     public interface IParser
     {
-        public AstNode Parse(IEnumerable<Token> tokens);
+        public IAstNode? Parse(ParserContext context);
     }
 }
