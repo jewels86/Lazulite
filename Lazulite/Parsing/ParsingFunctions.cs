@@ -9,14 +9,6 @@ namespace Lazulite.Parsing
 {
 	public static class ParsingFunctions
 	{
-		public static GrammarRuleDelegate Assignment()
-		{
-			return (tokens, index) =>
-			{
-				ReadOnlySpan<Token> span = new(tokens.ToArray(), index, tokens.Count() - index);
-
-				if (span)
-			};
-		}
+		
 	}
 }
