@@ -9,6 +9,7 @@ Lazulite is currently in development. Contributions are always welcome!
 
 Currently, the following features are implemented:
 - Tokenizer
+- Parser (not finished)
 
 ### Test Language
 The test langauge is a C-like langauge with the same syntax as C. The following code is an example of the test language:
