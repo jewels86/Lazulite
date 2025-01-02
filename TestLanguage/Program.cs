@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Lazulite.Tokenization;
 using Lazulite.Parsing;
-using Lazulite.Parsing.Parsers;
 using Lazulite.Tokenization.Tokenizers;
 
 namespace TestLanguage
@@ -47,23 +46,8 @@ namespace TestLanguage
 			{
 				Console.WriteLine(token);
 			}
-
-			ParserContext context = new ParserContext(tokens);
-			RecursiveDescentParser parser = new();
-
-			var parseIntLiteral = ParsingFunctions.CreateParseLiteralRule("int");
-			var parseType = ParsingFunctions.CreateParseTypeRule("type");
-			var parseIdentifier = ParsingFunctions.CreateParseIdentifierRule("identifier");
-			var parseExpression = ParsingFunctions.CreateParseExpressionRule([parseIntLiteral, parseIdentifier]);
-			var parseAssignment = ParsingFunctions.CreateParseStaticAssignmentRule("assignment-operator", parseType, parseIdentifier, parseExpression);
-
-			parser.AddRules([parseAssignment, parseExpression, parseIntLiteral, parseIdentifier, parseType]);
-
-			IAstNode? tree = parser.Parse(context);
-			if (tree is not null) foreach (var node in tree.Traverse())
-			{
-				Console.WriteLine(node);
-			}
+			ParsingFunctions.CreateParsingRuleFromEBNF("expression -> []");
+			ParsingFunctions.CreateParsingRuleFromEBNF("assignment -> [type] [identifier] '=' [expression]");
 		}
 	}
 }
