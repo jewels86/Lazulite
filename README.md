@@ -5,7 +5,7 @@ A modular, extensible framework that empowers developers to build advanced progr
 Lazulite is a C#-powered framework for creating compilers for custom languages. 
 
 ## Development Progress
-Lazulite is currently in development. Contributions are always welcome!
+Lazulite is currently in development. Contributions are always welcome! See the todos for more info.
 
 Currently, the following features are implemented:
 - Tokenizer
@@ -34,3 +34,11 @@ int main(int argc, char** argv) {
 ```
 
 ## Todos
+- Add scannerless parser
+- Create the IR system
+- Create optimization systems
+- Create code generation systems
+- LLVM support
+- Custom VM support
+- Common IR for language integration support
+- Interpreter support
