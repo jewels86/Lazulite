@@ -6,5 +6,8 @@ using System.Threading.Tasks;
 
 namespace Lazulite.Parsing
 {
-    public delegate void GrammarRuleDelegate();
+    public interface IParser
+    {
+
+    }
 }
