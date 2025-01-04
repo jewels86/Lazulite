@@ -6,16 +6,10 @@ using System.Threading.Tasks;
 
 namespace Lazulite.Parsing
 {
-	public delegate List<IAstNode> GrammarRuleActionDelgate(IAstNode node);
-	public class GrammarRule
+	public delegate List<IAstNode> GrammarRuleActionDelegate(IAstNode node);
+
+	public interface IGrammarRule<T>
 	{
-		public List<string> Symbols { get; }
-		public GrammarRuleActionDelgate? Action { get; }
-		
-		public GrammarRule(List<string> symbols, GrammarRuleActionDelgate? action = null)
-		{
-			Symbols = symbols;
-			Action = action;
-		}
+		public bool Match(ParserContext<T> ctx, out IAstNode? node);
 	}
 }

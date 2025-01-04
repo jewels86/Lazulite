@@ -7,18 +7,18 @@ using Lazulite.Tokenization;
 
 namespace Lazulite.Parsing
 {
-	public class ParserContext
+	public class ParserContext<T>
 	{
-		private List<Token> _tokens;
+		private List<T> _list;
 		private int _index;
 
-		public ParserContext(List<Token> tokens)
+		public ParserContext(List<T> list)
 		{
-			_tokens = tokens;
+			_list = list;
 			_index = 0;
 		}
 
-		public Token Current() => _tokens[_index];
+		public T Current() => _list[_index];
 		public void Consume() => _index++;
 		public int Index => _index;
 		public void Restore(int index) => _index = index;

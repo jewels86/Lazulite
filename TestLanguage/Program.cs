@@ -5,7 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Lazulite.Tokenization;
 using Lazulite.Parsing;
-using Lazulite.Tokenization.Tokenizers;
 
 namespace TestLanguage
 {
@@ -46,8 +45,21 @@ namespace TestLanguage
 			{
 				Console.WriteLine(token);
 			}
-			ParsingFunctions.CreateParsingRuleFromEBNF("expression -> []");
-			ParsingFunctions.CreateParsingRuleFromEBNF("assignment -> [type] [identifier] '=' [expression]");
+
+			RecursiveDescentParser<Token> parser = new RecursiveDescentParser<Token>([], null);
+
+			//var expression = 
+
+			var assignment = new GrammarRules.SequenceRule<Token>([
+				new GrammarRules.TokenRule("type", t => new AstNodes.TypeAstNode("int")),
+				new GrammarRules.TokenRule("identifier", t => new AstNodes.IdentifierAstNode(t.Value)),
+				new GrammarRules.TokenRule("assignment-operator", t => null),
+				new GrammarRules.TokenRule("int", t => new AstNodes.LiteralAstNode(t.Value, "int")),
+			], (nodes) => new AstNodes.StaticAssignmentAstNode(nodes[1], nodes[2], nodes[0]));
+			parser.AddRules([assignment]);
+			var node = parser.Parse(new ParserContext<Token>(tokens.ToList()));
+
+			node?.Traverse(node => Console.WriteLine(node));
 		}
 	}
 }
