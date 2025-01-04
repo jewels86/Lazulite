@@ -136,11 +136,11 @@ namespace Lazulite.Parsing
 
 		public class ExpressionAstNode : IAstNode
 		{
-			public IAstNode? Left { get; }
-			public IAstNode? Right { get; }
-			public IAstNode? Operator { get; }
+			public IAstNode? Left { get; set; }
+			public IAstNode? Right { get; set; }
+			public IAstNode? Operator { get; set; }
 			public bool Binary => Left != null && Right != null;
-			public bool RightAssociative { get; }
+			public bool RightAssociative { get; set; }
 
 			public ExpressionAstNode(IAstNode? left, IAstNode? right, IAstNode? op, bool rightAssociative = false)
 			{

@@ -26,46 +26,76 @@ namespace Lazulite.Parsing
 			return new ChoiceRule<Token>([
 				new TokenRule(IdentifierType, t => new IdentifierAstNode(t.Value)),
 				new ChoiceRule<Token>(literalRules),
-				new SequenceRule<Token>([
-					new TokenRule("left-parenthesis", t => null),
-					ExpressionTokenRule(),
-					new TokenRule("right-parenthesis", t => null)
-				], (nodes) => nodes[1])
 			]);
 		}
 		public static SequenceRule<Token> FunctionCallTokenRule()
 		{
-			return new SequenceRule<Token>([
-				new TokenRule("identifier", t => new IdentifierAstNode(t.Value)),
-				new TokenRule("left-parenthesis", t => null),
-				new OptionalRule<Token>(ExpressionTokenRule()),
-				new RepetitionRule<Token>(new SequenceRule<Token>([
-					new TokenRule("comma", t => null),
-					ExpressionTokenRule()
-				], (nodes) => nodes[1])),
-				new TokenRule("right-parenthesis", t => null)
-			], (nodes) => nodes[1]);
+			
 		}
 		public static IGrammarRule<Token> BinaryExpressionTokenRule()
 		{
-			
+			IGrammarRule<Token> BuildRuleForPrecedence(int precedenceLevel)
+			{
+				if (precedenceLevel >= PrecedenceLevels.Count)
+					return PrimaryExpressionRule();
+
+				var (operators, isRightAssociative) = PrecedenceLevels[precedenceLevel];
+				var subExpressionRule = BuildRuleForPrecedence(precedenceLevel + 1);
+
+				return new SequenceRule<Token>(
+					new List<IGrammarRule<Token>>
+					{
+						subExpressionRule,
+						new RepetitionRule<Token>(
+							new SequenceRule<Token>([
+								new TokenRule(OperatorType, t => operators.Contains(t.Value) ? new OperatorAstNode(t.Value) : null), // Operator
+								subExpressionRule
+							], (nodes) => new ExpressionAstNode(
+								null,
+								(ExpressionAstNode)nodes[1],
+								nodes[0],
+								isRightAssociative
+							))
+						)
+					},
+					(nodes) =>
+					{
+						var left = (ExpressionAstNode)nodes[0];
+						var repetitions = ((RepetitionAstNode)nodes[1]).Children;
+
+						foreach (var operationNode in repetitions)
+						{
+							var binaryNode = (ExpressionAstNode)operationNode;
+							if (isRightAssociative)
+							{
+								binaryNode.Left = left;
+								left = binaryNode;
+							}
+							else
+							{
+								binaryNode.Left = left;
+								left = binaryNode;
+							}
+						}
+
+						return left;
+					}
+				);
+			}
+
+			return BuildRuleForPrecedence(0);
 		}
 		public static ChoiceRule<Token> ExpressionTokenRule()
 		{
-			List<IGrammarRule<Token>> literalRules = [];
-			foreach (var type in LiteralTypes)
-			{
-				literalRules.Add(new TokenRule(type, t => new LiteralAstNode(t.Value, type)));
-			}
 			return new ChoiceRule<Token>([
 				PrimaryExpressionRule(),
 				BinaryExpressionTokenRule(),
-				FunctionCallTokenRule(),
-				new SequenceRule<Token>([
+				//FunctionCallTokenRule(),
+				/*new SequenceRule<Token>([
 					new TokenRule("left-parenthesis", t => null),
 					ExpressionTokenRule(),
 					new TokenRule("right-parenthesis", t => null)
-				], (nodes) => nodes[1])
+				], (nodes) => nodes[1])*/
 			]);
 		}
 	}
