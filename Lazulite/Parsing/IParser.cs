@@ -1,19 +1,17 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
-using Lazulite.Tokenization;
 
 namespace Lazulite.Parsing
 {
-    public delegate bool GrammarRuleDelegate(ParserContext context, out IAstNode? node);
-    public delegate void ParserErrorDelegate(ParserContext context);
+	public delegate void ParserErrorDelegate<T>(ParserContext<T> ctx, int index);
+	public interface IParser<T>
+	{
+		public void AddRule(IGrammarRule<T> rule);
+		public void AddRules(IEnumerable<IGrammarRule<T>> rules);
 
-    public interface IParser
-    {
-        public IAstNode? Parse(ParserContext context);
-    }
+		public IAstNode? Parse(ParserContext<T> ctx);
+	}
 }

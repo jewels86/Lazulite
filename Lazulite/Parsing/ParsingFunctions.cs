@@ -1,116 +1,72 @@
-﻿using Lazulite.Tokenization;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
-using static Lazulite.Parsing.Nodes;
+using static Lazulite.Parsing.GrammarRules;
+using static Lazulite.Parsing.AstNodes;
+using Lazulite.Tokenization;
 
 namespace Lazulite.Parsing
 {
 	public static class ParsingFunctions
 	{
-		public static GrammarRuleDelegate CreateParseLiteralRule(string type)
+		public static List<string> LiteralTypes { get; set; } = [];
+		public static string IdentifierType { get; set; } = "identifier";
+		public static string OperatorType { get; set; } = "operator";
+		public static List<(string[], bool)> PrecedenceLevels { get; set; } = [];
+
+		public static ChoiceRule<Token> PrimaryExpressionRule()
 		{
-			return (ParserContext ctx, out IAstNode? node) =>
-			{
-				node = null;
+			var literalRules = LiteralTypes
+			.Select(type => new TokenRule(type, t => new LiteralAstNode(t.Value, type)))
+			.ToList<IGrammarRule<Token>>();
 
-				if (ctx.CurrentToken().Type == type)
-				{
-					node = new LiteralAstNode(ctx.CurrentToken().Value, type);
-					ctx.Consume();
-					return true;
-				}
-
-				return false;
-			};
+			return new ChoiceRule<Token>([
+				new TokenRule(IdentifierType, t => new IdentifierAstNode(t.Value)),
+				new ChoiceRule<Token>(literalRules),
+				new SequenceRule<Token>([
+					new TokenRule("left-parenthesis", t => null),
+					ExpressionTokenRule(),
+					new TokenRule("right-parenthesis", t => null)
+				], (nodes) => nodes[1])
+			]);
 		}
-		public static GrammarRuleDelegate CreateParseTypeRule(string type)
+		public static SequenceRule<Token> FunctionCallTokenRule()
 		{
-			return (ParserContext ctx, out IAstNode? node) =>
-			{
-				node = null;
-
-				if (ctx.CurrentToken().Type == type)
-				{
-					Console.WriteLine($"Parsing type");
-					node = new TypeAstNode(ctx.CurrentToken().Value);
-					ctx.Consume();
-					return true;
-				}
-
-				return false;
-			};
+			return new SequenceRule<Token>([
+				new TokenRule("identifier", t => new IdentifierAstNode(t.Value)),
+				new TokenRule("left-parenthesis", t => null),
+				new OptionalRule<Token>(ExpressionTokenRule()),
+				new RepetitionRule<Token>(new SequenceRule<Token>([
+					new TokenRule("comma", t => null),
+					ExpressionTokenRule()
+				], (nodes) => nodes[1])),
+				new TokenRule("right-parenthesis", t => null)
+			], (nodes) => nodes[1]);
 		}
-		public static GrammarRuleDelegate CreateParseIdentifierRule(string type)
+		public static IGrammarRule<Token> BinaryExpressionTokenRule()
 		{
-			return (ParserContext ctx, out IAstNode? node) =>
-			{
-				node = null;
-
-				if (ctx.CurrentToken().Type == type)
-				{
-					Console.WriteLine($"Parsing identifier");
-					node = new IdentifierAstNode(ctx.CurrentToken().Value);
-					Console.WriteLine(ctx.Index);
-					ctx.Consume();
-					Console.WriteLine(ctx.Index);
-					return true;
-				}
-
-				return false;
-			};
+			
 		}
-		public static GrammarRuleDelegate CreateParseBinaryExpressionRule(string opType)
+		public static ChoiceRule<Token> ExpressionTokenRule()
 		{
-			return (ParserContext ctx, out IAstNode? node) =>
+			List<IGrammarRule<Token>> literalRules = [];
+			foreach (var type in LiteralTypes)
 			{
-				node = null;
-
-
-
-				return false;
-			};
-		} // !!
-		public static GrammarRuleDelegate CreateParseStaticAssignmentRule(string opType, GrammarRuleDelegate parseType, GrammarRuleDelegate parseIdentifier, GrammarRuleDelegate parseExpression)
-		{
-			return (ParserContext ctx, out IAstNode? node) =>
-			{
-				node = null;
-
-				if (!parseType(ctx, out var typeNode))
-					return false;
-
-				if (!parseIdentifier(ctx, out var identifierNode))
-					return false;
-
-				var token = ctx.CurrentToken();
-				if (token.Type != opType)
-					return false;
-				ctx.Consume();
-
-				if (!parseExpression(ctx, out var expressionNode))
-					return false;
-
-				node = new StaticAssignmentAstNode(typeNode!, identifierNode!, expressionNode!);
-				return true;
-			};
-		}
-		public static GrammarRuleDelegate CreateParseExpressionRule(List<GrammarRuleDelegate> subRules)
-		{
-			return (ParserContext ctx, out IAstNode? node) =>
-			{
-				node = null;
-
-				foreach (var rule in subRules)
-				{
-					if (rule(ctx, out node))
-						return true;
-				}
-
-				return false;
-			};
+				literalRules.Add(new TokenRule(type, t => new LiteralAstNode(t.Value, type)));
+			}
+			return new ChoiceRule<Token>([
+				PrimaryExpressionRule(),
+				BinaryExpressionTokenRule(),
+				FunctionCallTokenRule(),
+				new SequenceRule<Token>([
+					new TokenRule("left-parenthesis", t => null),
+					ExpressionTokenRule(),
+					new TokenRule("right-parenthesis", t => null)
+				], (nodes) => nodes[1])
+			]);
 		}
 	}
 }

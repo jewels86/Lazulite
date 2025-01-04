@@ -1,27 +1,27 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using Lazulite.Tokenization;
 
 namespace Lazulite.Parsing
 {
-	public class ParserContext
+	public class ParserContext<T>
 	{
-		public List<Token> Tokens { get; set;}
-		public int Index { get; set;}
+		private List<T> _list;
+		private int _index;
 
-		public ParserContext(IEnumerable<Token> tokens)
+		public ParserContext(List<T> list)
 		{
-			Tokens = tokens.ToList();
-			Index = 0;
+			_list = list;
+			_index = 0;
 		}
 
-		public Token CurrentToken() => Tokens[Index];
-		public void Consume() => Index += 1;
-		public bool HasNext() => Index < Tokens.Count;
+		public T Current() => _list[_index];
+		public void Consume() => _index++;
+		public int Index => _index;
+		public void Restore(int index) => _index = index;
+
 	}
 }

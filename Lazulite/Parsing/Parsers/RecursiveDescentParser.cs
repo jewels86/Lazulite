@@ -1,37 +1,43 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
-using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
-using Lazulite.Tokenization;
 
-namespace Lazulite.Parsing.Parsers
+namespace Lazulite.Parsing
 {
-    public class RecursiveDescentParser 
-    {
-        private readonly List<GrammarRuleDelegate> _rules = [];
-        private ParserErrorDelegate _errorHandler = (ctx) => Console.WriteLine($"Parsing error: token {ctx.CurrentToken()} not matched at index {ctx.Index}");
+	public class RecursiveDescentParser<T> : IParser<T>
+	{
+		private readonly List<IGrammarRule<T>> _rules;
+		private readonly ParserErrorDelegate<T> _errorHandler;
 
-        public void AddRule(GrammarRuleDelegate rule)
-        {
-            _rules.Add(rule);
-        }
-        public void AddRules(IEnumerable<GrammarRuleDelegate> rules)
-        {
-            _rules.AddRange(rules);
-        }
+		public RecursiveDescentParser(List<IGrammarRule<T>> rules, ParserErrorDelegate<T>? errorHandler)
+		{
+			_rules = rules;
+			_errorHandler = errorHandler ?? ((ParserContext<T> ctx, int index) => Console.WriteLine($"Parsing error at index {index}"));
+		}
 
-        public IAstNode? Parse(ParserContext context) 
-        {
-            foreach (GrammarRuleDelegate rule in _rules)
-            {
-                if (rule(context, out IAstNode? node)) return node!;
-            }
-            _errorHandler(context);
-            return null;
-        }
-    }
+		public void AddRule(IGrammarRule<T> rule)
+		{
+			_rules.Add(rule);
+		}
+		public void AddRules(IEnumerable<IGrammarRule<T>> rules)
+		{
+			_rules.AddRange(rules);
+		}
+
+		public IAstNode? Parse(ParserContext<T> ctx)
+		{
+			foreach (var rule in _rules)
+			{
+				if (rule.Match(ctx, out var node))
+				{
+					return node;
+				}
+			}
+
+			_errorHandler(ctx, ctx.Index);
+			return null;
+		}
+	}
 }

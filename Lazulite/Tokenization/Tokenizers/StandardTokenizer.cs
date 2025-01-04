@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Lazulite.Tokenization.Tokenizers
+namespace Lazulite.Tokenization
 {
 	public class StandardTokenizer : ITokenizer, IStringTokenizer
 	{

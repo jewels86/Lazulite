@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using static Lazulite.Tokenization.TokenizationFunctions;
 
-namespace Lazulite.Tokenization.Tokenizers
+namespace Lazulite.Tokenization
 {
 	public class InputSplittingTokenizer : ITokenizer, IInputSplitting
 	{
