@@ -136,7 +136,46 @@ namespace Lazulite.Parsing
 
 		public class ExpressionAstNode : IAstNode
 		{
+			public IAstNode? Left { get; }
+			public IAstNode? Right { get; }
+			public IAstNode? Operator { get; }
+			public bool Binary => Left != null && Right != null;
+			public bool RightAssociative { get; }
+
+			public ExpressionAstNode(IAstNode? left, IAstNode? right, IAstNode? op, bool rightAssociative = false)
+			{
+				Left = left;
+				Right = right;
+				Operator = op;
+				RightAssociative = rightAssociative;
+			}
+
 			public string NodeType => "Expression";
+
+			public void Traverse(Action<IAstNode> action)
+			{
+				action(this);
+				Left?.Traverse(action);
+				Right?.Traverse(action);
+				Operator?.Traverse(action);
+			}
+
+			public override string ToString()
+			{
+				return $"ExpressionAstNode(Left: {Left}, Right: {Right}, Operator: {Operator})";
+			}
+		}
+
+		public class OperatorAstNode : IAstNode
+		{
+			public string Operator { get; }
+
+			public string NodeType => "Operator";
+
+			public OperatorAstNode(string op)
+			{
+				Operator = op;
+			}
 
 			public void Traverse(Action<IAstNode> action)
 			{
@@ -145,7 +184,7 @@ namespace Lazulite.Parsing
 
 			public override string ToString()
 			{
-				return $"ExpressionAstNode()";
+				return $"OperatorAstNode(Operator: {Operator})";
 			}
 		}
 	}
