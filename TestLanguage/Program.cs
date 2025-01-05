@@ -51,6 +51,7 @@ namespace TestLanguage
 			ParsingFunctions.LiteralTypes = ["int", "float", "char", "bool", "string"];
 			ParsingFunctions.BinaryOperatorType = "operator";
 			ParsingFunctions.InitializeRules();
+			Console.WriteLine(ParsingFunctions.LiteralRule);
 			var assignment = new GrammarRules.SequenceRule<Token>([
 				new GrammarRules.TokenRule("type", t => new AstNodes.TypeAstNode("int")),
 				new GrammarRules.TokenRule("identifier", t => new AstNodes.IdentifierAstNode(t.Value)),

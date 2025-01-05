@@ -109,7 +109,7 @@ namespace Lazulite.Parsing
 
 			public override string ToString()
 			{
-				return $"StaticAssignmentAstNode(Value: {Value}, Identifier: {Identifier}, Type: {Type})";
+				return $"StaticAssignmentAstNode(Identifier: {Identifier}, Type: {Type}, Value: {Value})";
 			}
 		}
 

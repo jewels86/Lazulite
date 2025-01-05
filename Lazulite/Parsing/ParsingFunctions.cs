@@ -21,43 +21,46 @@ namespace Lazulite.Parsing
 		public static string RightParenthesisType { get; set; } = "right-parenthesis";
 
 		public static IGrammarRule<Token> IdentifierRule = new TokenRule(IdentifierType, token => new IdentifierAstNode(token.Value));
-		public static IGrammarRule<Token> LiteralRule = new ChoiceRule<Token>(
-			LiteralTypes.Select(type => new TokenRule(type, token => new LiteralAstNode(token.Value, token.Type))).Select(rule => (IGrammarRule<Token>)rule).ToList()
-		);
+		public static IGrammarRule<Token> LiteralRule = null!;
 		public static SequenceRule<Token> FunctionCallRule = new SequenceRule<Token>([
 			IdentifierRule, //0 
 			new TokenRule(LeftParenthesisType, token => null), //1
 			new OptionalRule<Token>(new SequenceRule<Token>([ //2
 				null,
-			], nodes => nodes[0])),
-			new RepetitionRule<Token>(new SequenceRule<Token>([ //3
-				new TokenRule(CommaType, token => null),
-				null
-			], nodes => nodes[1])),
-			new TokenRule(RightParenthesisType, token => null)
+				new RepetitionRule<Token>(new SequenceRule<Token>([
+					new TokenRule(CommaType, token => null),
+					null
+				], nodes => nodes[1]))
+			], nodes =>
+			{
+				Console.WriteLine($"Repetition {nodes[0]}");
+				List<IAstNode> args = [nodes[0]];
+				if (nodes[1] is RepetitionAstNode repetition) 
+				{
+					args.AddRange(repetition.Children);
+				}
+				return new RepetitionAstNode(args);
+			})),
+			new TokenRule(RightParenthesisType, token => null) //3
 		], nodes =>
 		{
 			Console.WriteLine($"Function {nodes[0]}");
 
-			List<IAstNode> args = [];
-			if (nodes[2] is not null)
-			{
-				args.Add(nodes[2]);
-				args.AddRange(((RepetitionAstNode)nodes[3]).Children);
-			}
+			var args = nodes[2] is RepetitionAstNode repetition ? repetition.Children : new List<IAstNode>();
+			Console.WriteLine("Returning function call");
 			return new FunctionCallAstNode(nodes[0], args);
 		});
 		public static IGrammarRule<Token> OperatorRule = new TokenRule(BinaryOperatorType, token => new OperatorAstNode(token.Value));
 		public static IGrammarRule<Token> UnaryOperatorRule = new TokenRule(UnaryOperatorType, token => new OperatorAstNode(token.Value));
 		public static ChoiceRule<Token> FactorRule = new ChoiceRule<Token>([
-			LiteralRule,
+			null, // to be injected with LiteralRule
 			FunctionCallRule,
+			IdentifierRule,
 			new SequenceRule<Token>([
 				new TokenRule(LeftParenthesisType, token => null),
 				null,
 				new TokenRule(RightParenthesisType, token => null)
 			], nodes => nodes[1]),
-			IdentifierRule
 		]); 
 		public static IGrammarRule<Token> UnaryExpressionRule = new SequenceRule<Token>([
 			UnaryOperatorRule,
@@ -73,16 +76,25 @@ namespace Lazulite.Parsing
 
 		public static void InitializeRules()
 		{
+			LiteralRule = new ChoiceRule<Token>(
+				LiteralTypes.Select(type => new TokenRule(type, token => new LiteralAstNode(token.Value, token.Type))).Select(rule => (IGrammarRule<Token>)rule).ToList()
+			);
+			FactorRule.Choices[0] = LiteralRule;
+
 			ExpressionRule = new ChoiceRule<Token>([
 				UnaryExpressionRule,
 				BinaryExpressionRule,
 				FactorRule
 			]);
 
-			((SequenceRule<Token>)FactorRule.Choices[2]).Rules[1] = ExpressionRule;
-			((SequenceRule<Token>)((OptionalRule<Token>)FunctionCallRule.Rules[2]!).Rule).Rules[0] = ExpressionRule;
-			((SequenceRule<Token>)((RepetitionRule<Token>)FunctionCallRule.Rules[3]!).Rule).Rules[1] = ExpressionRule;
-
+			var factorSequenceRule = (SequenceRule<Token>)FactorRule.Choices[3];
+			factorSequenceRule.Rules[1] = ExpressionRule;
+			var optionalRule = (OptionalRule<Token>)FunctionCallRule.Rules[2]!;
+			var optionalSequenceRule = (SequenceRule<Token>)optionalRule.Rule!;
+			optionalSequenceRule.Rules[0] = ExpressionRule;
+			var repetitionRule = (RepetitionRule<Token>)optionalSequenceRule.Rules[1]!;
+			var repetitionSequenceRule = (SequenceRule<Token>)repetitionRule.Rule!;
+			repetitionSequenceRule.Rules[1] = ExpressionRule;
 		}
 		public static IGrammarRule<Token> ExpressionSequenceRule = new RepetitionRule<Token>(ExpressionRule);
 		public static IGrammarRule<Token> CreateExpressionRule()
