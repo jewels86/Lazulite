@@ -48,9 +48,9 @@ namespace Lazulite.Parsing
 		public static IGrammarRule<Token> OperatorRule = new TokenRule(BinaryOperatorType, token => new OperatorAstNode(token.Value));
 		public static IGrammarRule<Token> UnaryOperatorRule = new TokenRule(UnaryOperatorType, token => new OperatorAstNode(token.Value));
 		public static ChoiceRule<Token> FactorRule = new ChoiceRule<Token>([
-			IdentifierRule,
 			LiteralRule,
 			FunctionCallRule,
+			IdentifierRule,
 			new SequenceRule<Token>([
 				new TokenRule(LeftParenthesisType, token => null),
 				null,
@@ -77,7 +77,7 @@ namespace Lazulite.Parsing
 				FactorRule
 			]);
 
-			((SequenceRule<Token>)FactorRule.Choices[2]).Rules[1] = ExpressionRule;
+			((SequenceRule<Token>)FactorRule.Choices[3]).Rules[1] = ExpressionRule;
 			((SequenceRule<Token>)((OptionalRule<Token>)FunctionCallRule.Rules[2]!).Rule).Rules[0] = ExpressionRule;
 			((SequenceRule<Token>)((RepetitionRule<Token>)FunctionCallRule.Rules[3]!).Rule).Rules[1] = ExpressionRule;
 
@@ -92,4 +92,3 @@ namespace Lazulite.Parsing
 		}
 	}
 }
-

@@ -58,6 +58,7 @@ namespace TestLanguage
 				ParsingFunctions.ExpressionRule,
 			], (nodes) => new AstNodes.StaticAssignmentAstNode(nodes[1], nodes[3], nodes[0]));
 			parser.AddRules([assignment]);
+			parser.SetErrorHandler((ctx, index) => Console.WriteLine($"Parsing error at index ({index})"));
 			var node = parser.Parse(new ParserContext<Token>(tokens.ToList()));
 
 			node?.Traverse(node => Console.WriteLine(node));

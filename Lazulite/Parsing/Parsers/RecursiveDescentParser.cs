@@ -9,7 +9,7 @@ namespace Lazulite.Parsing
 	public class RecursiveDescentParser<T> : IParser<T>
 	{
 		private readonly List<IGrammarRule<T>> _rules;
-		private readonly ParserErrorDelegate<T> _errorHandler;
+		private ParserErrorDelegate<T> _errorHandler;
 
 		public RecursiveDescentParser(List<IGrammarRule<T>> rules, ParserErrorDelegate<T>? errorHandler)
 		{
@@ -24,6 +24,11 @@ namespace Lazulite.Parsing
 		public void AddRules(IEnumerable<IGrammarRule<T>> rules)
 		{
 			_rules.AddRange(rules);
+		}
+
+		public void SetErrorHandler(ParserErrorDelegate<T> errorHandler)
+		{
+			_errorHandler = errorHandler;
 		}
 
 		public IAstNode? Parse(ParserContext<T> ctx)
