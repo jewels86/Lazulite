@@ -10,19 +10,30 @@ using Lazulite.Tokenization;
 
 namespace Lazulite.Parsing
 {
-	public static class ParsingFunctions
+	public class ParsingRuleset
 	{
-		public static List<string> LiteralTypes { get; set; } = [];
-		public static string IdentifierType { get; set; } = "identifier";
-		public static string BinaryOperatorType { get; set; } = "operator";
-		public static string UnaryOperatorType { get; set; } = "unary-operator";
-		public static string CommaType { get; set; } = "comma";
-		public static string LeftParenthesisType { get; set; } = "left-parenthesis";
-		public static string RightParenthesisType { get; set; } = "right-parenthesis";
+		public List<string> LiteralTypes { get; set; } = [];
+		public string IdentifierType { get; set; }
+		public string BinaryOperatorType { get; set; }
+		public string UnaryOperatorType { get; set; }
+		public string CommaType { get; set; }
+		public string LeftParenthesisType { get; set; }
+		public string RightParenthesisType { get; set; }
 
-		public static IGrammarRule<Token> IdentifierRule = new TokenRule(IdentifierType, token => new IdentifierAstNode(token.Value));
-		public static IGrammarRule<Token> LiteralRule = null!;
-		public static SequenceRule<Token> FunctionCallRule = new SequenceRule<Token>([
+		public ParsingRuleset(Dictionary<string, string?> types, List<string>? literalTypes = null) 
+		{
+			LiteralTypes = literalTypes ?? [];
+			IdentifierType = types["identifier"] ?? "identifier";
+			BinaryOperatorType = types["operator"] ?? "operator";
+			UnaryOperatorType = types["unary-operator"] ?? "unary-operator";
+			CommaType = types["comma"] ?? "comma";
+			LeftParenthesisType = types["left-parenthesis"] ?? "left-parenthesis";
+			RightParenthesisType = types["right-parenthesis"] ?? "right-parenthesis";
+		}
+
+		public IGrammarRule<Token> IdentifierRule { get; set; } = new TokenRule(IdentifierType, token => new IdentifierAstNode(token.Value));
+		public IGrammarRule<Token> LiteralRule = null!;
+		public SequenceRule<Token> FunctionCallRule = new SequenceRule<Token>([
 			IdentifierRule, //0 
 			new TokenRule(LeftParenthesisType, token => null), //1
 			new OptionalRule<Token>(new SequenceRule<Token>([ //2
