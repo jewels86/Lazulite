@@ -99,6 +99,7 @@ namespace Lazulite.Parsing
 				FactorRule
 			]);
 
+
 			var factorSequenceRule = (SequenceRule<Token>)FactorRule.Choices[3];
 			factorSequenceRule.Rules[1] = ExpressionRule;
 

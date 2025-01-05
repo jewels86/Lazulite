@@ -10,7 +10,7 @@ namespace Lazulite.Tokenization
 {
 	public class TokenizationRuleset
 	{
-		public string EOL { get; set; }
+		public string? Terminator { get; set; }
 		public string SingleLineComment { get; set; }
 		public string? BlockComment { get; set; }
 		public List<KeyValuePair<string, string>> Types { get; set; } = new();
@@ -19,9 +19,9 @@ namespace Lazulite.Tokenization
 		public Regex? Identifier { get; set; }
 		public Dictionary<string, string> Operators { get; set; } = new();
 
-		public TokenizationRuleset(string endOfLine, string singleLineComment)
+		public TokenizationRuleset(string singleLineComment, string? terminator)
 		{
-			EOL = endOfLine;
+			Terminator = terminator;
 			SingleLineComment = singleLineComment;
 		}
 
@@ -67,14 +67,15 @@ namespace Lazulite.Tokenization
 			}
 		}
 
-		public TokenRuleDelegate EndOfLineRule()
+		public TokenRuleDelegate? TerminatorRule()
 		{
+			if (Terminator is null) return null;
 			return (string input, int index, out Token? token) =>
 			{
 				token = null;
-				if (input.Substring(index).StartsWith(EOL))
+				if (input.Substring(index).StartsWith(Terminator))
 				{
-					token = new Token(index, EOL, "end-of-line");
+					token = new Token(index, Terminator, "end-of-line");
 					return true;
 				}
 				return false;
@@ -213,9 +214,9 @@ namespace Lazulite.Tokenization
 		{
 			yield return (IEnumerable<PartialToken> parts, PartialToken part, int index, out Token? token) =>
 			{
-				if (part.Value == EOL)
+				if (part.Value == Terminator)
 				{
-					token = new Token(part.StartIndex, part.Value, "end-of-line");
+					token = new Token(part.StartIndex, part.Value, "terminator");
 					return true;
 				}
 				token = null;
@@ -304,7 +305,7 @@ namespace Lazulite.Tokenization
 		}
 		public IEnumerable<TokenRuleDelegate> Unpack()
 		{
-			yield return EndOfLineRule();
+			if (Terminator is not null) yield return TerminatorRule()!;
 			yield return SingleLineCommentRule();
 			if (BlockComment != null) yield return BlockCommentRule()!;
 			foreach (var rule in TypeRules()) yield return rule;
