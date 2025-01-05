@@ -20,6 +20,16 @@ namespace Lazulite.Parsing
 		public string LeftParenthesisType { get; set; }
 		public string RightParenthesisType { get; set; }
 
+		public TokenRule IdentifierRule { get; private set; } = null!;
+		public ChoiceRule<Token> LiteralRule { get; private set; } = null!;
+		public ChoiceRule<Token> FunctionCallRule { get; private set; } = null!;
+		public TokenRule OperatorRule { get; private set; } = null!;
+		public TokenRule UnaryOperatorRule { get; private set; } = null!;
+		public ChoiceRule<Token> FactorRule { get; private set; } = null!;
+		public SequenceRule<Token> UnaryExpressionRule { get; private set; } = null!;
+		public SequenceRule<Token> BinaryExpressionRule { get; private set; } = null!;
+		public ChoiceRule<Token> ExpressionRule { get; private set; } = null!;
+
 		public ParsingRuleset(Dictionary<string, string?> types, List<string>? literalTypes = null) 
 		{
 			LiteralTypes = literalTypes ?? [];
@@ -29,69 +39,60 @@ namespace Lazulite.Parsing
 			CommaType = types["comma"] ?? "comma";
 			LeftParenthesisType = types["left-parenthesis"] ?? "left-parenthesis";
 			RightParenthesisType = types["right-parenthesis"] ?? "right-parenthesis";
+
+			ConstructRules();
 		}
 
-		public IGrammarRule<Token> IdentifierRule { get; set; } = new TokenRule(IdentifierType, token => new IdentifierAstNode(token.Value));
-		public IGrammarRule<Token> LiteralRule = null!;
-		public SequenceRule<Token> FunctionCallRule = new SequenceRule<Token>([
-			IdentifierRule, //0 
-			new TokenRule(LeftParenthesisType, token => null), //1
-			new OptionalRule<Token>(new SequenceRule<Token>([ //2
-				null,
-				new RepetitionRule<Token>(new SequenceRule<Token>([
-					new TokenRule(CommaType, token => null),
-					null
-				], nodes => nodes[1]))
-			], nodes =>
-			{
-				Console.WriteLine($"Repetition {nodes[0]}");
-				List<IAstNode> args = [nodes[0]];
-				if (nodes[1] is RepetitionAstNode repetition) 
-				{
-					args.AddRange(repetition.Children);
-				}
-				return new RepetitionAstNode(args);
-			})),
-			new TokenRule(RightParenthesisType, token => null) //3
-		], nodes =>
+		public void ConstructRules()
 		{
-			Console.WriteLine($"Function {nodes[0]}");
-
-			var args = nodes[2] is RepetitionAstNode repetition ? repetition.Children : new List<IAstNode>();
-			Console.WriteLine("Returning function call");
-			return new FunctionCallAstNode(nodes[0], args);
-		});
-		public static IGrammarRule<Token> OperatorRule = new TokenRule(BinaryOperatorType, token => new OperatorAstNode(token.Value));
-		public static IGrammarRule<Token> UnaryOperatorRule = new TokenRule(UnaryOperatorType, token => new OperatorAstNode(token.Value));
-		public static ChoiceRule<Token> FactorRule = new ChoiceRule<Token>([
-			null, // to be injected with LiteralRule
-			FunctionCallRule,
-			IdentifierRule,
-			new SequenceRule<Token>([
-				new TokenRule(LeftParenthesisType, token => null),
-				null,
-				new TokenRule(RightParenthesisType, token => null)
-			], nodes => nodes[1]),
-		]); 
-		public static IGrammarRule<Token> UnaryExpressionRule = new SequenceRule<Token>([
-			UnaryOperatorRule,
-			FactorRule
-		], nodes => new ExpressionAstNode(nodes[1], null, nodes[0]));
-		public static IGrammarRule<Token> BinaryExpressionRule = new SequenceRule<Token>([
-			FactorRule,
-			OperatorRule,
-			FactorRule
-		], nodes => new ExpressionAstNode(nodes[0], nodes[2], nodes[1]));
-
-		public static IGrammarRule<Token> ExpressionRule = null!;
-
-		public static void InitializeRules()
-		{
+			IdentifierRule = new TokenRule(IdentifierType, token => new IdentifierAstNode(token.Value));
 			LiteralRule = new ChoiceRule<Token>(
 				LiteralTypes.Select(type => new TokenRule(type, token => new LiteralAstNode(token.Value, token.Type))).Select(rule => (IGrammarRule<Token>)rule).ToList()
 			);
-			FactorRule.Choices[0] = LiteralRule;
-
+			FunctionCallRule = new ChoiceRule<Token>([
+				new SequenceRule<Token>([
+					IdentifierRule,
+					new TokenRule(LeftParenthesisType, token => null),
+					new TokenRule(RightParenthesisType, token => new RepetitionAstNode([]))
+				], nodes => new FunctionCallAstNode(nodes[0], ((RepetitionAstNode)nodes[2]).Children)),
+				new SequenceRule<Token>([
+					IdentifierRule,
+					new TokenRule(LeftParenthesisType, token => null),
+					null, // to be injected with ExpressionRule
+					new TokenRule(RightParenthesisType, token => null)
+				], nodes => new FunctionCallAstNode(nodes[0], [nodes[2]])),
+				new SequenceRule<Token>([
+					IdentifierRule,
+					new TokenRule(LeftParenthesisType, token => null),
+					null, // to be injected with ExpressionRule
+					new RepetitionRule<Token>(new SequenceRule<Token>([
+						new TokenRule(CommaType, token => null),
+						null // to be injected with ExpressionRule
+					], nodes => nodes[1])),
+					new TokenRule(RightParenthesisType, token => null)
+				], nodes => new FunctionCallAstNode(nodes[0], ((RepetitionAstNode)nodes[3]).Children.Append(nodes[2]).ToList()))
+			]);
+			OperatorRule = new TokenRule(BinaryOperatorType, token => new OperatorAstNode(token.Value));
+			UnaryOperatorRule = new TokenRule(UnaryOperatorType, token => new OperatorAstNode(token.Value));
+			FactorRule = new ChoiceRule<Token>([
+				FunctionCallRule,
+				LiteralRule,
+				IdentifierRule,
+				new SequenceRule<Token>([
+					new TokenRule(LeftParenthesisType, token => null),
+					null, // to be injected with ExpressionRule
+					new TokenRule(RightParenthesisType, token => null)
+				], nodes => nodes[1]),
+			]);
+			UnaryExpressionRule = new SequenceRule<Token>([
+				UnaryOperatorRule,
+				FactorRule
+			], nodes => new ExpressionAstNode(nodes[1], null, nodes[0]));
+			BinaryExpressionRule = new SequenceRule<Token>([
+				FactorRule,
+				OperatorRule,
+				FactorRule
+			], nodes => new ExpressionAstNode(nodes[0], nodes[2], nodes[1]));
 			ExpressionRule = new ChoiceRule<Token>([
 				UnaryExpressionRule,
 				BinaryExpressionRule,
@@ -100,20 +101,14 @@ namespace Lazulite.Parsing
 
 			var factorSequenceRule = (SequenceRule<Token>)FactorRule.Choices[3];
 			factorSequenceRule.Rules[1] = ExpressionRule;
-			var optionalRule = (OptionalRule<Token>)FunctionCallRule.Rules[2]!;
-			var optionalSequenceRule = (SequenceRule<Token>)optionalRule.Rule!;
-			optionalSequenceRule.Rules[0] = ExpressionRule;
-			var repetitionRule = (RepetitionRule<Token>)optionalSequenceRule.Rules[1]!;
-			var repetitionSequenceRule = (SequenceRule<Token>)repetitionRule.Rule!;
-			repetitionSequenceRule.Rules[1] = ExpressionRule;
-		}
-		public static IGrammarRule<Token> ExpressionSequenceRule = new RepetitionRule<Token>(ExpressionRule);
-		public static IGrammarRule<Token> CreateExpressionRule()
-		{
-			return new SequenceRule<Token>([ExpressionRule], nodes =>
-			{
-				return nodes[0];
-			});
+
+			var functionCallSequenceRule1 = (SequenceRule<Token>)FunctionCallRule.Choices[1];
+			functionCallSequenceRule1.Rules[2] = ExpressionRule;
+			var functionCallSequenceRule2 = (SequenceRule<Token>)FunctionCallRule.Choices[2];
+			functionCallSequenceRule2.Rules[2] = ExpressionRule;
+			var functionCallRepetitionRule = (RepetitionRule<Token>)((SequenceRule<Token>)FunctionCallRule.Choices[2]).Rules[3]!;
+			var functionCallSequenceRule = (SequenceRule<Token>)functionCallRepetitionRule.Rule;
+			functionCallSequenceRule.Rules[1] = ExpressionRule;
 		}
 	}
 }

@@ -35,7 +35,6 @@ namespace Lazulite.Parsing
 		{
 			foreach (var rule in _rules)
 			{
-				Console.WriteLine($"Trying rule {rule}");
 				if (rule.Match(ctx, out var node))
 				{
 					return node;
