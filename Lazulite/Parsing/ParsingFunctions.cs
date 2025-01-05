@@ -37,6 +37,8 @@ namespace Lazulite.Parsing
 			new TokenRule(RightParenthesisType, token => null)
 		], nodes =>
 		{
+			Console.WriteLine($"Function {nodes[0]}");
+
 			List<IAstNode> args = [];
 			if (nodes[2] is not null)
 			{
@@ -50,12 +52,12 @@ namespace Lazulite.Parsing
 		public static ChoiceRule<Token> FactorRule = new ChoiceRule<Token>([
 			LiteralRule,
 			FunctionCallRule,
-			IdentifierRule,
 			new SequenceRule<Token>([
 				new TokenRule(LeftParenthesisType, token => null),
 				null,
 				new TokenRule(RightParenthesisType, token => null)
-			], nodes => nodes[1])
+			], nodes => nodes[1]),
+			IdentifierRule
 		]); 
 		public static IGrammarRule<Token> UnaryExpressionRule = new SequenceRule<Token>([
 			UnaryOperatorRule,
@@ -77,7 +79,7 @@ namespace Lazulite.Parsing
 				FactorRule
 			]);
 
-			((SequenceRule<Token>)FactorRule.Choices[3]).Rules[1] = ExpressionRule;
+			((SequenceRule<Token>)FactorRule.Choices[2]).Rules[1] = ExpressionRule;
 			((SequenceRule<Token>)((OptionalRule<Token>)FunctionCallRule.Rules[2]!).Rule).Rules[0] = ExpressionRule;
 			((SequenceRule<Token>)((RepetitionRule<Token>)FunctionCallRule.Rules[3]!).Rule).Rules[1] = ExpressionRule;
 
