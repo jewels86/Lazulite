@@ -49,23 +49,14 @@ namespace TestLanguage
 			RecursiveDescentParser<Token> parser = new RecursiveDescentParser<Token>([], null);
 			ParsingFunctions.IdentifierType = "identifier";
 			ParsingFunctions.LiteralTypes = ["int", "float", "char", "bool", "string"];
-			ParsingFunctions.OperatorType = "operator";
-			ParsingFunctions.PrecedenceLevels = [
-				(["*", "/", "%"], false),
-				(["+", "-"], false),
-				(["<", ">", "<=", ">="], false),
-				(["==", "!="], false),
-				(["&&"], false),
-				(["||"], false),
-				(["=", "+=", "-=", "*=", "/=", "%="], true)
-			];
-
+			ParsingFunctions.BinaryOperatorType = "operator";
+			ParsingFunctions.InitializeRules();
 			var assignment = new GrammarRules.SequenceRule<Token>([
 				new GrammarRules.TokenRule("type", t => new AstNodes.TypeAstNode("int")),
 				new GrammarRules.TokenRule("identifier", t => new AstNodes.IdentifierAstNode(t.Value)),
 				new GrammarRules.TokenRule("assignment-operator", t => null),
-				ParsingFunctions.ExpressionTokenRule(),
-			], (nodes) => new AstNodes.StaticAssignmentAstNode(nodes[1], nodes[2], nodes[0]));
+				ParsingFunctions.ExpressionRule,
+			], (nodes) => new AstNodes.StaticAssignmentAstNode(nodes[1], nodes[3], nodes[0]));
 			parser.AddRules([assignment]);
 			var node = parser.Parse(new ParserContext<Token>(tokens.ToList()));
 

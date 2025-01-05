@@ -11,10 +11,12 @@ namespace Lazulite.Parsing
 	{
 		public class SequenceRule<T> : IGrammarRule<T>
 		{
-			private readonly List<IGrammarRule<T>> _rules;
+			private readonly List<IGrammarRule<T>?> _rules;
 			private readonly Func<List<IAstNode>, IAstNode> _transform;
 
-			public SequenceRule(List<IGrammarRule<T>> rules, Func<List<IAstNode>, IAstNode> transform)
+			public List<IGrammarRule<T>?> Rules => _rules;
+
+			public SequenceRule(List<IGrammarRule<T>?> rules, Func<List<IAstNode>, IAstNode> transform)
 			{
 				_rules = rules;
 				_transform = transform;
@@ -25,9 +27,9 @@ namespace Lazulite.Parsing
 				var startIndex = ctx.Index;
 				var matchedNodes = new List<IAstNode>();
 
-				foreach (var rule in _rules)
+				foreach (var rule in _rules.Where(r => r is not null))
 				{
-					if (!rule.Match(ctx, out var subNode))
+					if (!rule!.Match(ctx, out var subNode))
 					{
 						ctx.Restore(startIndex);
 						node = null;
@@ -69,6 +71,7 @@ namespace Lazulite.Parsing
 		public class OptionalRule<T> : IGrammarRule<T>
 		{
 			private readonly IGrammarRule<T> _rule;
+			public IGrammarRule<T> Rule => _rule;
 
 			public OptionalRule(IGrammarRule<T> rule)
 			{
@@ -90,6 +93,7 @@ namespace Lazulite.Parsing
 		public class RepetitionRule<T> : IGrammarRule<T>
 		{
 			private readonly IGrammarRule<T> _rule;
+			public IGrammarRule<T> Rule => _rule;
 
 			public RepetitionRule(IGrammarRule<T> rule)
 			{
@@ -111,6 +115,8 @@ namespace Lazulite.Parsing
 		public class ChoiceRule<T> : IGrammarRule<T>
 		{
 			private readonly List<IGrammarRule<T>> _choices;
+
+			public List<IGrammarRule<T>> Choices => _choices;
 
 			public ChoiceRule(List<IGrammarRule<T>> choices)
 			{

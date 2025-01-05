@@ -83,7 +83,7 @@ namespace Lazulite.Parsing
 		public class StaticAssignmentAstNode : IAstNode
 		{
 			public IdentifierAstNode Identifier { get; }
-			public ExpressionAstNode Value { get; }
+			public IAstNode Value { get; }
 			public TypeAstNode Type { get; }
 
 			public string NodeType => "Static Assignment";
@@ -95,7 +95,7 @@ namespace Lazulite.Parsing
 					throw new ArgumentException($"Value must be an expression and type must be a type, got {value} and {type}");
 				}
 				Identifier = (IdentifierAstNode)identifier;
-				Value = (ExpressionAstNode)value;
+				Value = value;
 				Type = (TypeAstNode)type;
 			}
 
@@ -104,11 +104,12 @@ namespace Lazulite.Parsing
 				action(this);
 				Value.Traverse(action);
 				Type.Traverse(action);
+				Identifier.Traverse(action);
 			}
 
 			public override string ToString()
 			{
-				return $"StaticAssignmentAstNode(Value: {Value}, Type: {Type})";
+				return $"StaticAssignmentAstNode(Value: {Value}, Identifier: {Identifier}, Type: {Type})";
 			}
 		}
 
@@ -185,6 +186,39 @@ namespace Lazulite.Parsing
 			public override string ToString()
 			{
 				return $"OperatorAstNode(Operator: {Operator})";
+			}
+		}
+
+		public class FunctionCallAstNode : IAstNode
+		{
+			public IdentifierAstNode Identifier { get; }
+			public List<IAstNode> Arguments { get; }
+
+			public string NodeType => "Function Call";
+
+			public FunctionCallAstNode(IAstNode identifier, List<IAstNode> arguments)
+			{
+				if (identifier is not IdentifierAstNode)
+				{
+					throw new ArgumentException($"Identifier must be an identifier, got {identifier}");
+				}
+				Identifier = (IdentifierAstNode)identifier;
+				Arguments = arguments;
+			}
+
+			public void Traverse(Action<IAstNode> action)
+			{
+				action(this);
+				Identifier.Traverse(action);
+				foreach (var argument in Arguments)
+				{
+					argument.Traverse(action);
+				}
+			}
+
+			public override string ToString()
+			{
+				return $"FunctionCallAstNode(Identifier: {Identifier}, Arguments: [{string.Join(", ", Arguments)}])";
 			}
 		}
 	}
