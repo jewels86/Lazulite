@@ -42,3 +42,4 @@ int main(int argc, char** argv) {
 - Custom VM support
 - Common IR for language integration support
 - Interpreter support
+- Lazulite Parsing Notation support
