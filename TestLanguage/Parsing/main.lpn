@@ -1,5 +1,6 @@
 @mode "token"
 @namespace "main"
+@recursion "inject", "auto"
 @import "SomeVarPackage"
 @unpack "SomeVarPackage"
 

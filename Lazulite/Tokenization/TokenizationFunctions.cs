@@ -297,6 +297,10 @@ namespace Lazulite.Tokenization
 				return filtered;
 			};
 		}
+		public static PostProcessorDelegate CreatePostProcessorFilterForWhitespaces()
+		{
+			return CreatePostProcessorFilterFromTypes(["space", "newline", "tab"], false);
+		}
 		#endregion
 
 		#region Split Input Token Rules

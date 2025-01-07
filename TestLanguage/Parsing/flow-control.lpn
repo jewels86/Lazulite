@@ -6,11 +6,12 @@ condition = [expression comparision-operator expression]
 			| "("condition")"
 			| [condition logical-operator condition]
 			| [negation-operator condition]
-      | identifier
-      | boolean
+			| identifier
+			| boolean
+			| expression
 
 if-statement = ["if" "(" condition ")" block (
-    ["else", block] => ElseStatement(n1)
+	["else", block] => ElseStatement(n1)
 )] => IfStatementAstNode(n2, n4, n5)
 while-statement = ["while" "(" condition ")" block] => WhileStatementAstNode(n2)
 for-statement = ["for" "(" definition ";" condition ";" statement ")" block] => ForStatementAstNode(n2, n4, n6)
