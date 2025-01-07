@@ -1,5 +1,7 @@
-@default "token"
-@import "flow-control.lpn"
+@mode "token"
+@namespace "main"
+@import "SomeVarPackage"
+@unpack "SomeVarPackage"
 
 declaration = [type identifier] => DeclarationAstNode(n0, n1)
 definition = [declaration "=" expression] = StaticDefinitionAstNode(n0, n2)
