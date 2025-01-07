@@ -1,8 +1,14 @@
 @default "token"
+@recursion "inject", "auto"
 
 condition = [expression comparision-operator expression]
-			| (condition)
+			| "("condition")"
 			| [condition logical-operator condition]
 			| [negation-operator condition]
+      | identifier
+      | boolean
 
-if-statment = ["if" "("]
+if-statement = ["if" "(" condition ")" block (
+    ["else", block] => ElseStatement(n1)
+)] => IfStatementAstNode(n2, n4, n5)
+while-statement = ["while" "(" condition ")" block] => WhileStatementAstNode(n2)
