@@ -2,8 +2,8 @@
 @import "flow-control.lpn"
 
 declaration = [type identifier] => DeclarationAstNode(n0, n1)
-
-assignment = [declaration "=" expression] = StaticAssignmentAstNode(n0, n1, n3)
+definition = [declaration "=" expression] = StaticDefinitionAstNode(n0, n2)
+assignment = [identifier "=" expression] = AssignmentAstNode(n0, n2)
 function-declaration = [
 	declaration, "(",
 	([
