@@ -1,2 +1,8 @@
 @default "token"
 
+condition = [expression comparision-operator expression]
+			| (condition)
+			| [condition logical-operator condition]
+			| [negation-operator condition]
+
+if-statment = ["if" "("]
