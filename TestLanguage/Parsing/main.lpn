@@ -1,3 +1,14 @@
-@type "token"
+@default "token"
 
-assignment => [type identifier assignment-operator expression] => StaticAssignmentNode(nodes[0], nodes[1], nodes[3])
+declaration = [type identifier] => DeclarationAstNode(n0, n1)
+
+assignment = [declaration "=" expression] = StaticAssignmentAstNode(n0, n1, n3)
+function-declaration = [
+	declaration, "(",
+	([
+		declaration, {[",", declaration] => n1}
+	] => 
+	{
+		return RepititionNode(n0 + n1.Children)
+	})
+] => FunctionAstNode(n0, n2)
