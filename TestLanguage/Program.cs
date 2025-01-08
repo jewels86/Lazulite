@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Lazulite.Tokenization;
 using Lazulite.Parsing;
+using Lazulite.Parsing.Lpn;
 
 namespace TestLanguage
 {
@@ -46,28 +47,7 @@ namespace TestLanguage
 				Console.WriteLine(token);
 			}
 
-			RecursiveDescentParser<Token> parser = new RecursiveDescentParser<Token>([], null);
-			ParsingRuleset parsingRuleset = new(new Dictionary<string, string?> {
-				{ "identifier", "identifier" },
-				{ "operator", "operator" },
-				{ "unary-operator", "unary-operator" },
-				{ "comma", "comma" },
-				{ "left-parenthesis", "left-parenthesis" },
-				{ "right-parenthesis", "right-parenthesis" },
-			}, ["int", "float", "char", "bool", "string"]);
-
-			var assignment = new GrammarRules.SequenceRule<Token>([
-				new GrammarRules.TokenRule("type", t => new AstNodes.TypeAstNode("int")),
-				new GrammarRules.TokenRule("identifier", t => new AstNodes.IdentifierAstNode(t.Value)),
-				new GrammarRules.TokenRule("assignment-operator", t => null),
-				parsingRuleset.ExpressionRule,
-			], (nodes) => new AstNodes.StaticAssignmentAstNode(nodes[1], nodes[3], nodes[0]));
-
-			parser.AddRules([assignment]);
-			parser.SetErrorHandler((ctx, index) => Console.WriteLine($"Parsing error at index ({index})"));
-			var node = parser.Parse(new ParserContext<Token>(tokens.ToList()));
-
-			node?.Traverse(node => Console.WriteLine(node));
+			LpnProcessor<Token> processor = new();
 		}
 	}
 }

@@ -221,5 +221,31 @@ namespace Lazulite.Parsing
 				return $"FunctionCallAstNode(Identifier: {Identifier}, Arguments: [{string.Join(", ", Arguments)}])";
 			}
 		}
+
+		public class ProgramAstNode : IAstNode
+		{
+			public List<IAstNode> Statements { get; set }
+
+			public string NodeType => "Program";
+
+			public ProgramAstNode(List<IAstNode> statements)
+			{
+				Statements = statements;
+			}
+
+			public void Traverse(Action<IAstNode> action, bool include = false)
+			{
+				if (include) action(this);
+				foreach (var statement in Statements)
+				{
+					statement.Traverse(action);
+				}
+			}
+
+			public override string ToString()
+			{
+				return $"ProgramAstNode(Statements: [{string.Join(", ", Statements)}])";
+			}
+		}
 	}
 }

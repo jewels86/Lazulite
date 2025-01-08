@@ -68,6 +68,31 @@ namespace Lazulite.Parsing
 			}
 		}
 
+		public class TokenValueRule : IGrammarRule<Token>
+		{
+			private readonly string _tokenValue;
+			private readonly Func<Token, IAstNode?> _action;
+
+			public TokenValueRule(string tokenValue, Func<Token, IAstNode?> action)
+			{
+				_tokenValue = tokenValue;
+				_action = action;
+			}
+
+			public bool Match(ParserContext<Token> ctx, out IAstNode? node)
+			{
+				var token = ctx.Current();
+				if (token.Value == _tokenValue)
+				{
+					node = _action(token);
+					ctx.Consume();
+					return true;
+				}
+				node = null;
+				return false;
+			}
+		}
+
 		public class OptionalRule<T> : IGrammarRule<T>
 		{
 			private readonly IGrammarRule<T> _rule;
