@@ -233,9 +233,8 @@ namespace Lazulite.Parsing
 				Statements = statements;
 			}
 
-			public void Traverse(Action<IAstNode> action, bool include = false)
+			public void Traverse(Action<IAstNode> action)
 			{
-				if (include) action(this);
 				foreach (var statement in Statements)
 				{
 					statement.Traverse(action);

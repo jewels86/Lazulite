@@ -31,5 +31,25 @@ namespace Lazulite.Parsing.Lpn
 				}
 			}
 		}
+		public class DeclarationAstNode : IAstNode 
+		{
+			public IAstNode Identifier { get; }
+			public IAstNode Rule { get; }
+			public IAstNode? Transformer { get; }
+
+			public DeclarationAstNode(IAstNode identifier, IAstNode rule, IAstNode? transformer)
+			{
+				Identifier = identifier;
+				Rule = rule;
+				Transformer = transformer;
+			}
+
+			public string NodeType => "declaration";
+
+			public void Traverse(Action<IAstNode> action)
+			{
+				action(this);
+			}
+		}
 	}
 }

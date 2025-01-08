@@ -32,7 +32,7 @@ namespace Lazulite.Parsing.Lpn
 
 			return tokenizer.Tokenize(input).ToList();
 		}
-		public ProgramAstNode Parse(List<Token> tokens)
+		private ProgramAstNode Parse(List<Token> tokens)
 		{
 			ProgramAstNode program = new([]);
 			RecursiveDescentParser<Token> parser = new([], null);
@@ -60,13 +60,40 @@ namespace Lazulite.Parsing.Lpn
 				}))
 			], nodes => new MetadataAstNode(((IdentifierAstNode)nodes[1]).Name, ((RepetitionAstNode)nodes[2]).Children));
 
+			var sequenceRule = new SequenceRule<Token>([
+				new TokenValueRule("[", t => null),
+				new RepetitionRule<Token>(null!), // to be injected with rule
+				new TokenValueRule("]", t => null),
+			], nodes => nodes[1]);
+			var optionalRule = new SequenceRule<Token>([
+				new TokenValueRule("(", t => null),
+				null, // to be injected with rule
+				new TokenValueRule(")", t => null),
+			], nodes => nodes[1]);
+			var repetitionRule = new SequenceRule<Token>([
+				new TokenValueRule("{", t => null),
+				null, // to be injected with rule
+				new TokenValueRule("}", t => null),
+			], nodes => nodes[1]);
+
+			var rule = new ChoiceRule<Token>([sequenceRule, optionalRule, repetitionRule]);
+
 			var declarationRule = new SequenceRule<Token>([
 				new TokenRule("identifier", t => new IdentifierAstNode(t.Value)),
 				new TokenValueRule("=", t => null),
-			])
+				rule,
+				new OptionalRule<Token>(new SequenceRule<Token>([
+					new TokenValueRule("=>", t => null),
+					null // block rule
+				], nodes => nodes[1]))
+			], nodes => 
+			{
+				if (nodes[3] is not null) return new DeclarationAstNode(nodes[0], nodes[2], nodes[3]);
+				else return new DeclarationAstNode(nodes[0], nodes[2], null);
+			});
 
 			var programRule = new RepetitionRule<Token>(new ChoiceRule<Token>([
-				metadataRule
+				metadataRule, declarationRule
 			]));
 
 			parser.AddRules([programRule, metadataRule]);
