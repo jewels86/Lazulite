@@ -36,6 +36,7 @@ namespace Lazulite.Parsing.Lpn
 		{
 			ProgramAstNode program = new([]);
 			RecursiveDescentParser<Token> parser = new([], null);
+			ParsingRuleset ruleset = new([]);
 
 			var metadataOperand = new ChoiceRule<Token>([
 				new TokenRule("identifier", t => new IdentifierAstNode(t.Value)),
@@ -91,6 +92,15 @@ namespace Lazulite.Parsing.Lpn
 				if (nodes[3] is not null) return new DeclarationAstNode(nodes[0], nodes[2], nodes[3]);
 				else return new DeclarationAstNode(nodes[0], nodes[2], null);
 			});
+
+			var scriptDefinitionRule = new SequenceRule<Token>([
+				new TokenRule("type", t => new TypeAstNode(t.Value)),
+				new TokenRule("identifier", t => new IdentifierAstNode(t.Value)),
+				new TokenValueRule("=", t => null),
+				ruleset.ExpressionRule
+			], nodes => new ScriptDefinitionAstNode(nodes[0], nodes[1], nodes[3]));
+
+			var scriptAssignmentRule = new SequenceRule<Token>()
 
 			var statementRule = new ChoiceRule<Token>([metadataRule, declarationRule]);
 			var programRule = new RepetitionRule<Token>(statementRule);
