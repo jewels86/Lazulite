@@ -92,9 +92,8 @@ namespace Lazulite.Parsing.Lpn
 				else return new DeclarationAstNode(nodes[0], nodes[2], null);
 			});
 
-			var programRule = new RepetitionRule<Token>(new ChoiceRule<Token>([
-				metadataRule, declarationRule
-			]));
+			var statementRule = new ChoiceRule<Token>([metadataRule, declarationRule]);
+			var programRule = new RepetitionRule<Token>(statementRule);
 
 			parser.AddRules([programRule, metadataRule]);
 
