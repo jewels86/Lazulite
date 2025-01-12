@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
@@ -73,6 +74,27 @@ namespace Lazulite.Parsing.Lpn
 				Type.Traverse(action);
 				Identifier.Traverse(action);
 				Expression.Traverse(action);
+			}
+		}
+
+		public class ScriptAssignmentNode : IAstNode
+		{
+			public IAstNode Identifier { get; }
+			public IAstNode Expression { get; }
+
+			public ScriptAssignmentNode(IAstNode identifier, IAstNode expression) 
+			{
+				Identifier = identifier;
+				Expression = expression;
+			}
+
+			public string NodeType => "script-assignment";
+
+			public void Traverse(Action<IAstNode> action)
+			{
+				action(this);
+				Identifier.Traverse(action);
+				Identifier.Traverse(action);
 			}
 		}
 	}
