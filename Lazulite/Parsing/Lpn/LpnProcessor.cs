@@ -85,6 +85,10 @@ namespace Lazulite.Parsing.Lpn
 
 			var rule = new ChoiceRule<Token>([sequenceRule, optionalRule, repetitionRule]);
 
+			sequenceRule[1][0] = rule;
+			optionalRule[1] = rule;
+			repetitionRule[1] = rule;
+
 			var declarationRule = new SequenceRule<Token>([
 				new TokenRule("identifier", t => new IdentifierAstNode(t.Value)),
 				new TokenValueRule("=", t => null),
