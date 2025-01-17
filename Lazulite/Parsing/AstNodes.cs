@@ -30,6 +30,12 @@ namespace Lazulite.Parsing
 			{
 				return $"LiteralAstNode(Value: {Value}, Type: {Type})";
 			}
+
+			public IAstNode this[int index] 
+			{ 
+				get => throw new Exception("Cannot get value of literal node");
+				set => throw new Exception("Cannot set value of literal node");
+			}
 		}
 
 		public class IdentifierAstNode : IAstNode
@@ -51,6 +57,12 @@ namespace Lazulite.Parsing
 			public override string ToString()
 			{
 				return $"IdentifierAstNode(Name: {Name})";
+			}
+
+			public IAstNode this[int index]
+			{
+				get => throw new Exception("Cannot get value of identifier node");
+				set => throw new Exception("Cannot set value of identifier node");
 			}
 		}
 
@@ -78,38 +90,104 @@ namespace Lazulite.Parsing
 			{
 				return $"RepetitionAstNode(Children: [{string.Join(", ", Children)}])";
 			}
+
+			public IAstNode this[int index]
+			{
+				get => Children[index];
+				set => Children[index] = value;
+			}
 		}
 
 		public class StaticAssignmentAstNode : IAstNode
 		{
-			public IdentifierAstNode Identifier { get; }
-			public IAstNode Value { get; }
-			public TypeAstNode Type { get; }
+			public IdentifierAstNode Identifier { get; set; }
+			public IAstNode Value { get; set; }
 
 			public string NodeType => "Static Assignment";
 
-			public StaticAssignmentAstNode(IAstNode identifier, IAstNode value, IAstNode type)
+			public StaticAssignmentAstNode(IAstNode identifier, IAstNode value)
 			{
-				if (identifier is not IdentifierAstNode && value is not ExpressionAstNode && type is not TypeAstNode)
+				if (identifier is not IdentifierAstNode && value is not ExpressionAstNode)
 				{
-					throw new ArgumentException($"Value must be an expression and type must be a type, got {value} and {type}");
+					throw new ArgumentException($"Value must be an expression, got {value}");
 				}
 				Identifier = (IdentifierAstNode)identifier;
 				Value = value;
-				Type = (TypeAstNode)type;
 			}
 
 			public void Traverse(Action<IAstNode> action)
 			{
 				action(this);
 				Value.Traverse(action);
-				Type.Traverse(action);
 				Identifier.Traverse(action);
 			}
 
 			public override string ToString()
 			{
-				return $"StaticAssignmentAstNode(Identifier: {Identifier}, Type: {Type}, Value: {Value})";
+				return $"StaticAssignmentAstNode(Identifier: {Identifier}, Value: {Value})";
+			}
+
+			public IAstNode this[int index]
+			{
+				get
+				{
+					if (index == 0) return Identifier;
+					else if (index == 1) return Value;
+					else throw new IndexOutOfRangeException();
+				}
+				set
+				{
+					if (index == 0) Identifier = (IdentifierAstNode)value;
+					else if (index == 1) Value = value;
+					else throw new IndexOutOfRangeException();
+				}
+			}
+		}
+
+		public class StaticDeclarationAstNode : IAstNode
+		{
+
+			public IAstNode Type { get; set; }
+			public IAstNode Assignment { get; set; }
+
+			public string NodeType => "Static Declaration";
+
+			public StaticDeclarationAstNode(IAstNode type, IAstNode assignment)
+			{
+				if (type is not TypeAstNode && assignment is not StaticAssignmentAstNode)
+				{
+					throw new ArgumentException($"Type must be a type, got {type}");
+				}
+				Type = type;
+				Assignment = assignment;
+			}
+
+			public void Traverse(Action<IAstNode> action)
+			{
+				action(this);
+				Type.Traverse(action);
+				Assignment.Traverse(action);
+			}
+
+			public override string ToString()
+			{
+				return $"StaticDeclarationAstNode(Type: {Type}, Assignment: {Assignment})";
+			}
+
+			public IAstNode this[int index]
+			{
+				get
+				{
+					if (index == 0) return Type;
+					else if (index == 1) return Assignment;
+					else throw new IndexOutOfRangeException();
+				}
+				set
+				{
+					if (index == 0) Type = value;
+					else if (index == 1) Assignment = value;
+					else throw new IndexOutOfRangeException();
+				}
 			}
 		}
 
@@ -132,6 +210,12 @@ namespace Lazulite.Parsing
 			public override string ToString()
 			{
 				return $"TypeAstNode(Type: {Type})";
+			}
+
+			public IAstNode this[int index]
+			{
+				get => throw new Exception("Cannot get value of type node");
+				set => throw new Exception("Cannot set value of type node");
 			}
 		}
 
@@ -165,6 +249,24 @@ namespace Lazulite.Parsing
 			{
 				return $"ExpressionAstNode(Left: {Left}, Right: {Right}, Operator: {Operator})";
 			}
+			
+			public IAstNode this[int index]
+			{
+				get
+				{
+					if (index == 0 && Left is not null) return Left;
+					else if (index == 1 && Right is not null) return Right;
+					else if (index == 2 && Operator is not null) return Operator;
+					else throw new IndexOutOfRangeException();
+				}
+				set
+				{
+					if (index == 0) Left = value;
+					else if (index == 1) Right = value;
+					else if (index == 2) Operator = value;
+					else throw new IndexOutOfRangeException();
+				}
+			}
 		}
 
 		public class OperatorAstNode : IAstNode
@@ -187,11 +289,17 @@ namespace Lazulite.Parsing
 			{
 				return $"OperatorAstNode(Operator: {Operator})";
 			}
+
+			public IAstNode this[int index]
+			{
+				get => throw new Exception("Cannot get value of operator node");
+				set => throw new Exception("Cannot set value of operator node");
+			}
 		}
 
 		public class FunctionCallAstNode : IAstNode
 		{
-			public IdentifierAstNode Identifier { get; }
+			public IdentifierAstNode Identifier { get; set; }
 			public List<IAstNode> Arguments { get; }
 
 			public string NodeType => "Function Call";
@@ -220,11 +328,27 @@ namespace Lazulite.Parsing
 			{
 				return $"FunctionCallAstNode(Identifier: {Identifier}, Arguments: [{string.Join(", ", Arguments)}])";
 			}
+
+			public IAstNode this[int index]
+			{
+				get
+				{
+					if (index == 0) return Identifier;
+					else if (index > 0 && index <= Arguments.Count) return Arguments[index - 1];
+					else throw new IndexOutOfRangeException();
+				}
+				set
+				{
+					if (index == 0) Identifier = (IdentifierAstNode)value;
+					else if (index > 0 && index <= Arguments.Count) Arguments[index - 1] = value;
+					else throw new IndexOutOfRangeException();
+				}
+			}
 		}
 
 		public class ProgramAstNode : IAstNode
 		{
-			public List<IAstNode> Statements { get; set }
+			public List<IAstNode> Statements { get; set; }
 
 			public string NodeType => "Program";
 
@@ -244,6 +368,12 @@ namespace Lazulite.Parsing
 			public override string ToString()
 			{
 				return $"ProgramAstNode(Statements: [{string.Join(", ", Statements)}])";
+			}
+
+			public IAstNode this[int index]
+			{
+				get => Statements[index];
+				set => Statements[index] = value;
 			}
 		}
 	}

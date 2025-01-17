@@ -11,5 +11,7 @@ namespace Lazulite.Parsing
 		public string NodeType { get; }
 
 		public void Traverse(Action<IAstNode> action);
+
+		public IAstNode this[int index] { get; set; }
 	}
 }

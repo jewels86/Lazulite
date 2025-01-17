@@ -93,14 +93,11 @@ namespace Lazulite.Parsing.Lpn
 				else return new DeclarationAstNode(nodes[0], nodes[2], null);
 			});
 
-			var scriptDefinitionRule = new SequenceRule<Token>([
-				new TokenRule("type", t => new TypeAstNode(t.Value)),
+			var scriptAssignmentRule = new SequenceRule<Token>([
 				new TokenRule("identifier", t => new IdentifierAstNode(t.Value)),
 				new TokenValueRule("=", t => null),
 				ruleset.ExpressionRule
-			], nodes => new ScriptDefinitionAstNode(nodes[0], nodes[1], nodes[3]));
-
-			var scriptAssignmentRule = new SequenceRule<Token>()
+			], nodes => new StaticAssignmentAstNode(nodes[0], nodes[2]));
 
 			var statementRule = new ChoiceRule<Token>([metadataRule, declarationRule]);
 			var programRule = new RepetitionRule<Token>(statementRule);
