@@ -41,6 +41,19 @@ namespace Lazulite.Parsing
 				node = _transform(matchedNodes);
 				return true;
 			}
+
+			public IGrammarRule<T> this[int index]
+			{
+				get
+				{
+					if (index < 0 || index >= _rules.Count)
+					{
+						throw new IndexOutOfRangeException();
+					}
+					return _rules[index]!;
+				}
+				set => _rules[index] = value;
+			}
 		}
 
 		public class TokenRule : IGrammarRule<Token>
@@ -65,6 +78,12 @@ namespace Lazulite.Parsing
 				}
 				node = null;
 				return false;
+			}
+
+			public IGrammarRule<Token> this[int index]
+			{
+				get => throw new Exception("Cannot get value of token rule");
+				set => throw new Exception("Cannot set value of token rule");
 			}
 		}
 
@@ -91,11 +110,17 @@ namespace Lazulite.Parsing
 				node = null;
 				return false;
 			}
+
+			public IGrammarRule<Token> this[int index]
+			{
+				get => throw new Exception("Cannot get value of token rule");
+				set => throw new Exception("Cannot set value of token rule");
+			}
 		}
 
 		public class OptionalRule<T> : IGrammarRule<T>
 		{
-			private readonly IGrammarRule<T> _rule;
+			private IGrammarRule<T> _rule;
 			public IGrammarRule<T> Rule => _rule;
 
 			public OptionalRule(IGrammarRule<T> rule)
@@ -113,11 +138,21 @@ namespace Lazulite.Parsing
 				node = null;
 				return true;
 			}
+
+			public IGrammarRule<T> this[int index]
+			{
+				get 
+				{
+					if (index != 0) throw new IndexOutOfRangeException();
+					return _rule;
+				}
+				set => _rule = value;
+			}
 		}
 
 		public class RepetitionRule<T> : IGrammarRule<T>
 		{
-			private readonly IGrammarRule<T> _rule;
+			private IGrammarRule<T> _rule;
 			public IGrammarRule<T> Rule => _rule;
 
 			public RepetitionRule(IGrammarRule<T> rule)
@@ -134,6 +169,20 @@ namespace Lazulite.Parsing
 				}
 				node = new AstNodes.RepetitionAstNode(matchedNodes);
 				return matchedNodes.Count > 0;
+			}
+
+			public IGrammarRule<T> this[int index]
+			{
+				get
+				{
+					if (index == 0) return _rule;
+					return _rule[index];
+				}
+				set
+				{
+					if (index == 0) _rule = value;
+					else _rule[index] = value;
+				}
 			}
 		}
 
@@ -159,6 +208,12 @@ namespace Lazulite.Parsing
 				}
 				node = null;
 				return false;
+			}
+
+			public IGrammarRule<T> this[int index]
+			{
+				get => _choices[index];
+				set => _choices[index] = value;
 			}
 		}
 	}

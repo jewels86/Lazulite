@@ -32,6 +32,12 @@ namespace Lazulite.Parsing.Lpn
 
 			return tokenizer.Tokenize(input).ToList();
 		}
+		public void Process(string input)
+		{
+			List<Token> tokens = Tokenize(input);
+			ProgramAstNode program = Parse(tokens);
+		}
+
 		private ProgramAstNode Parse(List<Token> tokens)
 		{
 			ProgramAstNode program = new([]);
@@ -98,6 +104,10 @@ namespace Lazulite.Parsing.Lpn
 				new TokenValueRule("=", t => null),
 				ruleset.ExpressionRule
 			], nodes => new StaticAssignmentAstNode(nodes[0], nodes[2]));
+			var scriptDefinitionRule = new SequenceRule<Token>([
+				new TokenRule("type", t => new TypeAstNode(t.Value)),
+				scriptAssignmentRule
+			], nodes => new ScriptDefinitionAstNode(nodes[0], nodes[0][0], nodes[0][1]));
 
 			var statementRule = new ChoiceRule<Token>([metadataRule, declarationRule]);
 			var programRule = new RepetitionRule<Token>(statementRule);
@@ -109,21 +119,6 @@ namespace Lazulite.Parsing.Lpn
 			program.Traverse(Console.WriteLine);
 
 			return program;
-		}
-
-		public List<IGrammarRule<T>> Process(string[] paths, LpnContext<T> context)
-		{
-			List<LpnFile> files = [];
-
-			foreach (string path in paths)
-			{
-				string content = File.ReadAllText(path);
-				List<Token> tokens = Tokenize(content);
-				IAstNode ast = Parse(tokens);
-				files.Add(new LpnFile(path, tokens, ast));
-			}
-
-			return [];
 		}
 	}
 }

@@ -11,5 +11,7 @@ namespace Lazulite.Parsing
 	public interface IGrammarRule<T>
 	{
 		public bool Match(ParserContext<T> ctx, out IAstNode? node);
+
+		public IGrammarRule<T> this[int index] { get; set; }
 	}
 }
