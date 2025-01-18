@@ -6,20 +6,38 @@ using System.Threading.Tasks;
 
 namespace Lazulite.IR
 {
-	public class IRInstruction<TInstruction, TOperand> where TInstruction : Enum where TOperand : Enum
+	public class IRInstruction<T> where T : Enum
 	{
-		public TInstruction Instruction { get; set; }
-		public List<TOperand> Operands { get; set; }
+		public T Instruction { get; set; }
+		public List<IIROperand> Operands { get; set; } = new List<IIROperand>();
 
-		public IRInstruction(TInstruction instruction, List<TOperand> operands)
+		public IRInstruction(T instruction, IIROperand[] operands)
 		{
 			Instruction = instruction;
-			Operands = operands;
+			Operands.AddRange(operands);
 		}
 
-		public override string ToString()
+		public void AddOperand(IIROperand operand)
 		{
-			return $"IRInstruction({Instruction}, {string.Join(", ", Operands)})";
+			Operands.Add(operand);
+		}
+		public void AddOperands(IIROperand[] operands)
+		{
+			Operands.AddRange(operands);
+		}
+		public void InsertOperand(int index, IIROperand operand)
+		{
+			Operands.Insert(index, operand);
+		}
+		public void InsertOperands(int index, IIROperand[] operands)
+		{
+			Operands.InsertRange(index, operands);
+		}
+
+		public IIROperand this[int index]
+		{
+			get => Operands[index];
+			set => Operands[index] = value;
 		}
 	}
 }

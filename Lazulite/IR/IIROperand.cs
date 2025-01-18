@@ -4,11 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Lazulite.IR.Types.Dynamic
+namespace Lazulite.IR
 {
-	public class IRDynamicType
+	public interface IIROperand
 	{
-		public string Name { get; set; }
-		
+		public string OperandType { get; }
 	}
 }
