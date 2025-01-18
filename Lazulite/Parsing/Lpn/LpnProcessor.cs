@@ -13,6 +13,8 @@ namespace Lazulite.Parsing.Lpn
 {
 	public class LpnProcessor<T>
 	{
+		public LpnContext<T> Context { get; } = new();
+
 		public List<Token> Tokenize(string input)
 		{
 			StandardTokenizer tokenizer = new();
@@ -36,6 +38,13 @@ namespace Lazulite.Parsing.Lpn
 		{
 			List<Token> tokens = Tokenize(input);
 			ProgramAstNode program = Parse(tokens);
+		}
+		public List<IGrammarRule<T>> ProcessFile(string path)
+		{
+			string content = File.ReadAllText(path);
+			List<Token> tokens = Tokenize(content);
+			ProgramAstNode program = Parse(tokens);
+			
 		}
 
 		private ProgramAstNode Parse(List<Token> tokens)

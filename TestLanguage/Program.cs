@@ -47,7 +47,10 @@ namespace TestLanguage
 				Console.WriteLine(token);
 			}
 
+			RecursiveDescentParser<Token> parser = new([], null);
 			LpnProcessor<Token> processor = new();
+
+			
 		}
 	}
 }
