@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Lazulite.Parsing
 {
-	public class RecursiveDescentParser<T> : IParser<T>
+	public class RecursiveDescentParser<T> : IParser<T>, IModularParser<T>
 	{
 		private readonly List<IGrammarRule<T>> _rules;
 		private ParserErrorDelegate<T> _errorHandler;

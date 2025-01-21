@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Lazulite.Tokenization;
 using Lazulite.Parsing;
+using Lazulite.IR;
 using static Lazulite.Parsing.AstNodes;
 using static Lazulite.Parsing.GrammarRules;
 using static Lazulite.Parsing.Lpn.Nodes;
@@ -44,6 +45,8 @@ namespace Lazulite.Parsing.Lpn
 			string content = File.ReadAllText(path);
 			List<Token> tokens = Tokenize(content);
 			ProgramAstNode program = Parse(tokens);
+			
+			IRGenerator<LpnContext<T>> generator = new(new());
 			
 		}
 

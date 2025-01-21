@@ -2,10 +2,10 @@
 @recursion "inject", "auto"
 @namespace "main"
 
-condition = [expression comparision-operator expression]
+condition = [expression comparision-operator expression] => ConditionAstNode(n1, n2, n3)
 			| "("condition")"
-			| [condition logical-operator condition]
-			| [negation-operator condition]
+			| [condition logical-operator condition] => ConditionAstNode(n1, n2, n3)
+			| [negation-operator condition] => ConditionAstNode(null, n1, n2)
 			| identifier
 			| boolean
 			| expression

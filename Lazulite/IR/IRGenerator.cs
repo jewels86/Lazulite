@@ -4,10 +4,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Lazulite.Parsing;
 
 namespace Lazulite.IR
 {
-	public delegate List<IRInstruction> IRCreator<T>(string code, T context);
+	public delegate List<IRInstruction> IRCreator<T>(IAstNode ast, T context);
 	public delegate void IRModifier<T>(out List<IRInstruction> instructions, T context);
 
 	public class IRGenerator<T>
@@ -35,10 +36,19 @@ namespace Lazulite.IR
 			}
 			Modifiers[codeType].Add(modifier);
 		}
-	
-		public void Generate(string type, string code)
-		{
 
+		public List<IRInstruction> Generate(string type, IAstNode ast)
+		{
+			if (Creators.TryGetValue(type, out var creator))
+			{
+				var instructions = creator(ast, Context);
+				if (Modifiers.TryGetValue(type, out var modifiers))
+				{
+					foreach (var modifier in modifiers) modifier(out instructions, Context);
+				}
+				return instructions;
+			}
+			else throw new Exception($"No creator found for type {type}");
 		}
 	}
 }

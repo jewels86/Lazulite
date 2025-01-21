@@ -31,6 +31,12 @@ namespace Lazulite.Parsing.Lpn
 					operand.Traverse(action);
 				}
 			}
+
+			public IAstNode this[int index]
+			{
+				get => Operands[index];
+				set => Operands[index] = value;
+			}
 		}
 		public class DeclarationAstNode : IAstNode
 		{
