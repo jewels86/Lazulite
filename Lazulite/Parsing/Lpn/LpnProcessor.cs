@@ -45,9 +45,20 @@ namespace Lazulite.Parsing.Lpn
 			string content = File.ReadAllText(path);
 			List<Token> tokens = Tokenize(content);
 			ProgramAstNode program = Parse(tokens);
-			
-			IRGenerator<LpnContext<T>> generator = new(new());
-			
+
+			program.Traverse(node =>
+			{
+				if (node is MetadataAstNode metadata) Context.AddMetadata(metadata.Key, [.. HandleLiterals(metadata.Operands)]);
+				else if (node is DeclarationAstNode dec)
+				{
+					IGrammarRule<T> rule = null!;
+
+					dec.Rule.Traverse(node =>
+					{
+
+					});
+				}
+			});
 		}
 
 		private ProgramAstNode Parse(List<Token> tokens)
@@ -109,7 +120,7 @@ namespace Lazulite.Parsing.Lpn
 					new TokenValueRule("=>", t => null),
 					null // block rule
 				], nodes => nodes[1]))
-			], nodes => 
+			], nodes =>
 			{
 				if (nodes[3] is not null) return new DeclarationAstNode(nodes[0], nodes[2], nodes[3]);
 				else return new DeclarationAstNode(nodes[0], nodes[2], null);
@@ -135,6 +146,14 @@ namespace Lazulite.Parsing.Lpn
 			program.Traverse(Console.WriteLine);
 
 			return program;
+		}
+		private List<string> HandleLiterals(List<IAstNode> nodes)
+		{
+			return nodes.Select(node =>
+			{
+				if (node is not LiteralAstNode) throw new ArgumentException($"Expected literal, got {node}");
+				return ((LiteralAstNode)node).Value;
+			}).ToList();
 		}
 	}
 }

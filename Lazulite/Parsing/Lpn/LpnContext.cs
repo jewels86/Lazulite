@@ -11,6 +11,12 @@ namespace Lazulite.Parsing.Lpn
 	{
 		public Dictionary<string, IGrammarRule<T>> Rules { get; private set; } = [];
 		public Dictionary<string, List<string>> Metadata { get; private set; } = [];
+
+		public void AddMetadata(string key, string[] values)
+		{
+			if (!Metadata.ContainsKey(key)) Metadata[key] = [];
+			Metadata[key].AddRange(values);
+		}
 	}
 
 	public class LpnRule<T>
