@@ -53,10 +53,7 @@ namespace Lazulite.Parsing.Lpn
 				{
 					IGrammarRule<T> rule = null!;
 
-					dec.Rule.Traverse(node =>
-					{
-
-					});
+					if (rule is 
 				}
 			});
 		}
@@ -105,8 +102,12 @@ namespace Lazulite.Parsing.Lpn
 				null, // to be injected with rule
 				new TokenValueRule("}", t => null),
 			], nodes => nodes[1]);
+			
+			var stringLiteralRule = new SequenceRule<Token>([
+			    new TokenValueRule(
+			]);
 
-			var rule = new ChoiceRule<Token>([sequenceRule, optionalRule, repetitionRule]);
+			var rule = new ChoiceRule<Token>([sequenceRule, optionalRule, repetitionRule, ]);
 
 			sequenceRule[1][0] = rule;
 			optionalRule[1] = rule;
