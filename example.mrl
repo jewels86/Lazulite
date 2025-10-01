@@ -1,96 +1,141 @@
 tensor_t: itype = {
-    shape: scalar_t[]
-    ndims: static readonly scalar_t
+    shape: readonly int[],
+    ndims: constant int
 }
 
-vector: tensor_t = {
-    shape: scalar_t[]
-    ndims: static readonly scalar_t = 1
-    
-    specific operator new this(vec: scalar_t[]) -> vector: {
-        return vector { shape = [vec.len()], vec = vec };
-    }
-    
-    vec: scalar_t[]
-
-    mag() -> scalar_t = sqrt(this.dot(this))
-    normalize() -> vector = this / this.mag()
-    
-    operator this[i: int_t] -> scalar_t: {
-        return this.vec[i];
-    }
-    
-    operator this*(b: scalar_t) -> vector: {
-        return new vector(this.vec.map(x -> x * b));
-    }
-    operator this/(b: scalar_t) -> vector: {
-        return new vector(this.vec.map(x -> x / b));
-    }
+vector_t: itype tensor_t = {
+    ndims: constant int = 1,
+    length: int,
+    magnitude: scalar_t,
+    normalized: vector_t,
+    dot(other: alike vector_t): scalar_t,
 }
 
-vector3: vector = {
-    shape: specific static readonly scalar_t[] = [3],
+vector3: complete itype vector_t = {
+    shape: constant int[] = [3],
+    length: constant int = 3,
     
-    operator new this(x: scalar_t, y: scalar_t, z: scalar_t) -> vector3: {
-        return vector3 { vec = [x, y, z] };
+    x: required scalar_t,
+    y: required scalar_t,
+    z: required scalar_t,
+    
+    operator new this(x: scalar_t, y: scalar_t, z: scalar_t) -> vector3 = {
+        this.x = x;
+        this.y = y;
+        this.z = z;
     }
     
-    x: dynamic scalar_t = this.vec[0]
-    y: dynamic scalar_t = this.vec[1]
-    z: dynamic scalar_t = this.vec[2]
+    magnitude: dynamic scalar_t = get { return sqrt(x^2 + y^2 + z^2); }
+    dot(other: vector3): scalar_t = { return x * other.x + y * other.y + z * other.z; }
+    normalized: dynamic vector3 = get { return this / magnitude; }
+    
+    operator +(other: vector3): vector3 = { return vector3(x + other.x, y + other.y, z + other.z); }
+    operator -(other: vector3): vector3 = { return vector3(x - other.x, y - other.y, z - other.z); }
+    operator *(scalar: scalar_t): vector3 = { return vector3(x * scalar, y * scalar, z * scalar); }
+    operator /(scalar: scalar_t): vector3 = { return vector3(x / scalar, y / scalar, z / scalar); }
+ }
+ 
+ vector4: complete itype vector_t alike vector3 {
+    shape: constant int[] = [4],
+    length: constant int = 4,
+    
+    x: required scalar_t,
+    y: required scalar_t,
+    z: required scalar_t,
+    w: required scalar_t,
+    
+    operator new this(x: scalar_t, y: scalar_t, z: scalar_t, w: scalar_t) -> vector4 = {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        this.w = w;
+    }
+    
+    magnitude: dynamic scalar_t = get { return sqrt(x^2 + y^2 + z^2 + w^2); }
+    dot(other: vector4): scalar_t = { return x * other.x + y * other.y + z * other.z + w * other.w; }
+    normalized: dynamic vector4 = get { return this / magnitude; }
+    
+    operator +(other: vector4): vector4 = { return vector4(x + other.x, y + other.y, z + other.z, w + other.w); }
+    operator -(other: vector4): vector4 = { return vector4(x - other.x, y - other.y, z - other.z, w - other.w); }
+    operator *(scalar: scalar_t): vector4 = { return vector4(x * scalar, y * scalar, z * scalar, w * scalar); }
+    operator /(scalar: scalar_t): vector4 = { return vector4(x / scalar, y / scalar, z / scalar, w / scalar); }
+ }
+ 
+ body_t: itype = {
+    position: required vector3,
+    velocity: required vector3,
+    mass: required scalar_t,
+    
+    kinetic_energy(): scalar_t = { return 0.5 * mass * velocity.magnitude^2; }
+    momentum(): vector3 = { return vector3(velocity.x * mass, velocity.y * mass, velocity.z * mass);
+ }
+ 
+ classical_body: complete itype body_t = {
+    position: required vector3,
+    velocity: required vector3,
+    mass: required scalar_t,
+    
+    name: nullable string = null,
+    color: nullable string = null,
+    
+    operator new this(position: vector3, velocity: vector3, mass: scalar_t) -> classical_body = {
+        this.position = position;
+        this.velocity = velocity;
+        this.mass = mass;
+    }
+    
+    kinetic_energy(): scalar_t = { return 0.5 * mass * velocity.magnitude^2; }
+    momentum(): vector3 = { return vector3(velocity.x * mass, velocity.y * mass, velocity.z * mass);
+ }
+ 
+ state: complete itype = {
+    bodies: required body_t[],
+    time: required scalar_t,
+    
+    operator new this(bodies: body_t[], time: scalar_t) -> state = {
+        this.bodies = bodies;
+        this.time = time;
+    }
+    
+    momentum() -> vector3 = { return bodies.foreach(b => b.momentum()).sum(); }
+    kinetic_energy() -> scalar_t = { return bodies.foreach(b => b.kinetic_energy()).sum(); }
+ }
 
-    cross(b: vector3) -> vector3 = {
-        return new vector3(
-            this.y() * b.z() - this.z() * b.y(),
-            this.z() * b.x() - this.x() * b.z(),
-            this.x() * b.y() - this.y() * b.x()
-        );
-    }
+physics_backend: itype = {
+    acceleration(b: body_t, s: state) -> vector3,
 }
-
-vector4: vector3 = {
-    shape: specific static readonly scalar_t[] = [4],
+ 
+ integration_backend: itype = {
+    step(s: state, dt: scalar_t, pb: physics_backend) -> state,
+ }
+ 
+ classical_backend: complete itype physics_backend = {
+    G: constant scalar_t = 6.67430e-11,
+    softening: constant scalar_t = 1e-9,
     
-    operator new this(x: scalar_t, y: scalar_t, z: scalar_t, w: scalar_t) -> vector4: {
-        return vector4 { vec: [x, y, z, w] };
-    }
-    
-    w: dynamic scalar_t = this.vec[3]
-}
-
-body_t: itype = {
-    position: vector3,
-    velocity: vector3,
-    mass: scalar_t
-}
-body: body_t = {
-    position: vector3,
-    velocity: vector3,
-    mass: scalar_t,
-    
-    operator new this(pos: vector3, vel: vector3, m: scalar_t) -> body: {
-        return body { position: pos, velocity: vel, mass: m };
-    }
-}
-
-classical_backend: physics_backend_t = {
-    force(a: body_t, b: body_t) -> vector3 = {
-        # Implicit Typing
-        G = 6.67430e-11; # Gravitational constant- scalar_t
-        r_vec = b.position - a.position; # vector3
-        r = r_vec.mag(); # scalar_t
-        if (r == 0) {
-            return new vector3(0, 0, 0); # Avoid division by zero
-        }
-        force_magnitude = G * (a.mass * b.mass) / (r * r); # scalar_t
-        force_direction = r_vec.normalize(); # vector3
-        return force_direction * force_magnitude; # vector3
+    gravity(a: body, b: body) -> vector3 = {
+        let delta = b.position - a.position;
+        let mag = G * a.mass * b.mass / (delta.magnitude^2 + softening^2);
+        return delta.normalized() * (mag / delta.magnitude);
     }
     
-    force(a: body_t, bodies: body_t[]) -> vector3 = {
-        return bodies.filter(b => b != a).map(b => this.force(a, b)).sum();
+    acceleration(b: body_t, s: state) -> vector3 = {
+        let acc = vector3(0.0, 0.0, 0.0);
+        for other in s.bodies.where(o => o != b) 
+            acc += gravity(b, other);
+        return acc;
     }
-    
-    exports = { force: this.force(a: body_t, bodies: body_t[]) -> vector3 }
-}
-
+ }
+ 
+ 
+ euler_backend: complete itype integration_backend = {
+    step(s: state, dt: scalar_t, pb: physics_backend) -> state = {
+        let new_bodies = s.bodies.map(b => {
+            let acc = pb.acceleration(b, s);
+            let new_velocity = b.velocity + acc * dt;
+            let new_position = b.position + new_velocity * dt;
+            return classical_body(new_position, new_velocity, b.mass);
+        });
+        return state(new_bodies, s.time + dt);
+    }
+ }
