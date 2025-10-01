@@ -8,6 +8,15 @@
 
     <ItemGroup>
       <PackageReference Include="Antlr4.Runtime" Version="4.6.6" />
+      <PackageReference Include="Wasm" Version="0.1.7" />
+      <PackageReference Include="Wasmtime" Version="34.0.2" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Remove="MRL.g4" />
+      <Resource Include="MRLLexer.g4">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Resource>
     </ItemGroup>
 
 </Project>

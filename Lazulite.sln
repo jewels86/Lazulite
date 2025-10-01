@@ -8,6 +8,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.gitignore = .gitignore
 		LICENSE = LICENSE
 		README.md = README.md
+		example.mrl = example.mrl
+		MRL.md = MRL.md
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lazulite", "Lazulite\Lazulite.csproj", "{721F7CD8-F21A-41DD-9443-275B8616A604}"

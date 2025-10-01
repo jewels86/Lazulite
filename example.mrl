@@ -1,0 +1,96 @@
+tensor_t: itype = {
+    shape: scalar_t[]
+    ndims: static readonly scalar_t
+}
+
+vector: tensor_t = {
+    shape: scalar_t[]
+    ndims: static readonly scalar_t = 1
+    
+    specific operator new this(vec: scalar_t[]) -> vector: {
+        return vector { shape = [vec.len()], vec = vec };
+    }
+    
+    vec: scalar_t[]
+
+    mag() -> scalar_t = sqrt(this.dot(this))
+    normalize() -> vector = this / this.mag()
+    
+    operator this[i: int_t] -> scalar_t: {
+        return this.vec[i];
+    }
+    
+    operator this*(b: scalar_t) -> vector: {
+        return new vector(this.vec.map(x -> x * b));
+    }
+    operator this/(b: scalar_t) -> vector: {
+        return new vector(this.vec.map(x -> x / b));
+    }
+}
+
+vector3: vector = {
+    shape: specific static readonly scalar_t[] = [3],
+    
+    operator new this(x: scalar_t, y: scalar_t, z: scalar_t) -> vector3: {
+        return vector3 { vec = [x, y, z] };
+    }
+    
+    x: dynamic scalar_t = this.vec[0]
+    y: dynamic scalar_t = this.vec[1]
+    z: dynamic scalar_t = this.vec[2]
+
+    cross(b: vector3) -> vector3 = {
+        return new vector3(
+            this.y() * b.z() - this.z() * b.y(),
+            this.z() * b.x() - this.x() * b.z(),
+            this.x() * b.y() - this.y() * b.x()
+        );
+    }
+}
+
+vector4: vector3 = {
+    shape: specific static readonly scalar_t[] = [4],
+    
+    operator new this(x: scalar_t, y: scalar_t, z: scalar_t, w: scalar_t) -> vector4: {
+        return vector4 { vec: [x, y, z, w] };
+    }
+    
+    w: dynamic scalar_t = this.vec[3]
+}
+
+body_t: itype = {
+    position: vector3,
+    velocity: vector3,
+    mass: scalar_t
+}
+body: body_t = {
+    position: vector3,
+    velocity: vector3,
+    mass: scalar_t,
+    
+    operator new this(pos: vector3, vel: vector3, m: scalar_t) -> body: {
+        return body { position: pos, velocity: vel, mass: m };
+    }
+}
+
+classical_backend: physics_backend_t = {
+    force(a: body_t, b: body_t) -> vector3 = {
+        # Implicit Typing
+        G = 6.67430e-11; # Gravitational constant- scalar_t
+        r_vec = b.position - a.position; # vector3
+        r = r_vec.mag(); # scalar_t
+        if (r == 0) {
+            return new vector3(0, 0, 0); # Avoid division by zero
+        }
+        force_magnitude = G * (a.mass * b.mass) / (r * r); # scalar_t
+        force_direction = r_vec.normalize(); # vector3
+        return force_direction * force_magnitude; # vector3
+    }
+    
+    force(a: body_t, bodies: body_t[]) -> vector3 = {
+        return bodies.filter(b => b != a).map(b => this.force(a, b)).sum();
+    }
+    
+    exports = { force: this.force(a: body_t, bodies: body_t[]) -> vector3 }
+}
+
