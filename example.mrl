@@ -4,11 +4,11 @@ tensor_t: itype = {
 }
 
 vector_t: itype tensor_t = {
-    ndims: constant int = 1,
+    ndims: iconstant int = 1,
     length: int,
     magnitude: scalar_t,
     normalized: vector_t,
-    dot(other: alike vector_t): scalar_t,
+    dot(other: same vector_t): scalar_t,
 }
 
 vector3: complete itype vector_t = {
@@ -113,10 +113,10 @@ physics_backend: itype = {
     G: constant scalar_t = 6.67430e-11,
     softening: constant scalar_t = 1e-9,
     
-    gravity(a: body, b: body) -> vector3 = {
+    gravity(a: body_t, b: body_t) -> vector3 = {
         let delta = b.position - a.position;
         let mag = G * a.mass * b.mass / (delta.magnitude^2 + softening^2);
-        return delta.normalized() * (mag / delta.magnitude);
+        return delta.normalized * (mag / delta.magnitude);
     }
     
     acceleration(b: body_t, s: state) -> vector3 = {
