@@ -8,7 +8,7 @@ vector_t: itype tensor_t = { # vector is a tensor, so it implements tensor_t, bu
     length: int, # int is a concrete type
     magnitude: scalar_t, # scalar_t is any type implementing the scalar_t interface- float, double, int, etc
     normalized: same vector_t, # same means the same concrete type as the instance it's called on
-    dot(other: same vector_t): scalar_t,
+    dot(other: same vector_t) -> scalar_t,
 }
 
 vector3: complete itype vector_t = { # vector3 is a complete implementation of vector_t
