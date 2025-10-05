@@ -1,4 +1,4 @@
-﻿lexer grammar MRLLexer;
+lexer grammar MRLLexer;
 
 ITYPE: 'itype';
 COMPLETE: 'complete';
