@@ -1,4 +1,4 @@
-﻿parser grammar MRLParser;
+parser grammar MRLParser;
 
 options { tokenVocab = MRLLexer; }
 
@@ -8,7 +8,7 @@ program
     
 declaration
     : typeDeclaration
-    | functionDeclaration
+    | methodDeclaration
     | variableDeclaration;
     
 typeDeclaration
@@ -41,8 +41,8 @@ block
     : LBRACE statement* RBRACE;
     
 partialStatement 
-    : RETURN expression;
-    : 
+    : RETURN expression
+    | variableDeclaration;
 
 statement 
     : partialStatement SEMICOLON;
@@ -52,12 +52,42 @@ operator
     | PLUS PLUS | MINUS MINUS | SLASH SLASH;
     
 unaryOperation 
-    : IDENIFIER operator;
+    : IDENTIFIER operator;
     
 binaryOperation 
     : IDENTIFIER operator IDENTIFIER;
     
-expression 
-    : unaryOperation
+parameter
+    : (IDENTIFIER EQUAL)? expression;
+
+parameterList
+    : parameter (COMMA parameter)*;
+    
+functionCall
+    : IDENTIFIER RPAREN parameterList? LPAREN;
+    
+expression
+    : (primaryExpression DOT primaryExpression)+;
+    
+primaryExpression 
+    : literal
+    | IDENTIFIER
+    | functionCall
     | binaryOperation
-    | LPAREN expression RPAREN
+    | unaryOperation
+    | LPAREN expression RPAREN;
+    
+variableDeclaration
+   :  LET IDENTIFIER (COLON modifier* type)? EQUAL expression;
+   
+declaredParameter
+    : IDENTIFIER COLON modifier* type;
+ 
+declaredParameterList
+    : declaredParameter (COMMA declaredParameter);   
+
+methodDeclaration 
+    : IDENTIFIER RPAREN declaredParameterList? LPAREN INPLACE? ARROW modifier* type EQUAL block; 
+    
+literal
+    : STRING | NUMBER;
