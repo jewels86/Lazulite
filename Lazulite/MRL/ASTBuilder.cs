@@ -12,7 +12,7 @@ public static class ASTBuilder
         MRLParser parser = new(commonTokenStream);
         var parseTree = parser.program();
         
+        MRLVisitor visitor = new();
+        var ast = visitor.Visit(parseTree);
     }
-    
-    
 }

@@ -8,7 +8,7 @@ program
 declaration
     : typeDeclaration
     | methodDeclaration
-    | variableDeclaration;
+    | variableDeclaration SEMICOLON;
     
 typeDeclaration
     : IDENTIFIER COLON (COMPLETE)? ITYPE interfaceList? (ALIKE identifierList)? EQUAL LBRACE memberDeclaration* RBRACE;
@@ -20,7 +20,8 @@ identifierList
 
 memberDeclaration
     : fieldDeclaration
-    | methodDeclaration;
+    | methodDeclaration
+    | operatorDeclaration;
     
 fieldDeclaration
     : IDENTIFIER COLON modifier* type (EQUAL initializer)? (COMMA)?;
@@ -66,16 +67,22 @@ functionCall
     : IDENTIFIER LPAREN parameterList? RPAREN;
     
 expression
-    : (primaryExpression DOT primaryExpression)+;
-    
-primaryExpression 
+    : callExpression
+    | LPAREN expression RPAREN;
+
+callExpression
+    : memberExpression
+    | functionCall;
+
+memberExpression
+    : primaryExpression (DOT primaryExpression)*;
+
+primaryExpression
     : literal
-    | IDENTIFIER
-    | functionCall
     | binaryOperation
     | unaryOperation
-    | LPAREN expression RPAREN;
-    
+    | IDENTIFIER;
+
 variableDeclaration
    :  LET IDENTIFIER (COLON modifier* type)? EQUAL expression;
    
@@ -90,3 +97,7 @@ methodDeclaration
     
 literal
     : STRING | NUMBER;
+    
+operatorDeclaration 
+    : OPERATOR methodDeclaration 
+    | OPERATOR NEW LPAREN declaredParameterList? RPAREN INPLACE? ARROW modifier* type EQUAL block; 

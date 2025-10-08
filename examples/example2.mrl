@@ -1,0 +1,19 @@
+﻿body: complete itype = {
+    mass: required scalar_t,
+    position: required vector3,
+    velocity: required vector3,
+    
+    operator new(mass: scalar_t, position: vector3, velocity: vector3) = {
+        self.mass = mass;
+        self.position = position;
+        self.velocity = velocity;
+    }
+}
+
+magnitude2(v: vector3) -> scalar_t = v.x^2 + v.y^2 + v.z^2;
+magnitude(v: vector3) -> scalar_t = sqrt(magnitude2(v));
+
+f_grav(a: body, b: body) -> vector3 = {
+    let delta = b.position - a.position;
+    return -((G * a.mass * b.mass) / (magnitude2(delta) * magnitude(delta)) * delta;
+}
