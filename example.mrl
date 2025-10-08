@@ -25,17 +25,19 @@ vector3: complete itype vector_t = { # vector3 is a complete implementation of v
         this.z = z;
     }
     
-    magnitude: dynamic scalar_t = get { return sqrt(x^2 + y^2 + z^2); } # dynamic means it's computed on access, not stored
-    
-    dot(other: vector3): scalar_t = { 
-        return x * other.x + y * other.y + z * other.z; 
+    magnitude: dynamic scalar_t = get { # dynamic means it's computed on access, not stored
+        return sqrt(x^2 + y^2 + z^2);
     }
     
-    normalized: dynamic vector3 = get { 
-        return this / magnitude; 
+    dot(other: vector3) -> scalar_t = {
+        return x * other.x + y * other.y + z * other.z;
     }
     
-    operator this +(other: vector3) -> vector3 = { 
+    normalized: dynamic vector3 = get {
+        return this / magnitude;
+    }
+    
+    operator this +(other: vector3) -> vector3 = {
         return this with { # with creates a new instance of the same type as this with the specified fields modified
             x = this.x + other.x,
             y = this.y + other.y,
@@ -43,7 +45,7 @@ vector3: complete itype vector_t = { # vector3 is a complete implementation of v
         };
     }
     
-    operator this -(other: vector3) -> vector3 = { 
+    operator this -(other: vector3) -> vector3 = {
         return this with {
             x = this.x - other.x,
             y = this.y - other.y,
@@ -51,7 +53,7 @@ vector3: complete itype vector_t = { # vector3 is a complete implementation of v
         };
     }
     
-    operator this *(scalar: scalar_t) -> vector3 = { 
+    operator this *(scalar: scalar_t) -> vector3 = {
         return this with {
             x = this.x * scalar,
             y = this.y * scalar,
@@ -59,7 +61,7 @@ vector3: complete itype vector_t = { # vector3 is a complete implementation of v
         };
     }
     
-    operator this /(scalar: scalar_t) -> vector3 = { 
+    operator this /(scalar: scalar_t) -> vector3 = {
         return this with {
             x = this.x / scalar,
             y = this.y / scalar,
@@ -68,8 +70,8 @@ vector3: complete itype vector_t = { # vector3 is a complete implementation of v
     }
 }
  
-vector4: complete itype vector_t alike vector3 { # vector4 is like vector3 but with an extra w component, thus it can go wherever vector3 can go
-    shape: constant int[] = [4], 
+vector4: complete itype vector_t alike vector3 = { # vector4 is like vector3 but with an extra w component, thus it can go wherever vector3 can go
+    shape: constant int[] = [4],
     length: constant int = 4,
     
     x: required scalar_t,
@@ -78,26 +80,26 @@ vector4: complete itype vector_t alike vector3 { # vector4 is like vector3 but w
     w: required scalar_t,
     
     operator new this(x: scalar_t, y: scalar_t, z: scalar_t, w: scalar_t) -> vector4 = {
-        this.x := x;
-        this.y := y;
-        this.z := z;
-        this.w := w;
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        this.w = w;
     }
     
-    magnitude: dynamic scalar_t = get { 
+    magnitude: dynamic scalar_t = get {
         return sqrt(x^2 + y^2 + z^2 + w^2); # we provide a different implementation than vector3- however we've still inherited vector3's implementation if called as a vector3 unless we add 'override'
     }
     
-    dot(other: vector4): scalar_t = { 
-        return x * other.x + y * other.y + z * other.z + w * other.w; 
+    dot(other: vector4) -> scalar_t = {
+        return x * other.x + y * other.y + z * other.z + w * other.w;
     } # notice that we didn't provide a dot(other: vector3) implementation- we just inherit vector3's implementation if called as a vector3
     
-    normalized: dynamic vector4 = get { 
-        return this / magnitude; 
+    normalized: dynamic vector4 = get {
+        return this / magnitude;
     }
     
     # explicit overload for vector4 + vector4 to preserve w component from both vectors
-    operator this +(other: vector4) -> vector4 = { 
+    operator this +(other: vector4) -> vector4 = {
         return this with {
             x = this.x + other.x,
             y = this.y + other.y,
@@ -106,7 +108,7 @@ vector4: complete itype vector_t alike vector3 { # vector4 is like vector3 but w
         };
     }
     
-    operator this -(other: vector4) -> vector4 = { 
+    operator this -(other: vector4) -> vector4 = {
         return this with {
             x = this.x - other.x,
             y = this.y - other.y,
@@ -115,7 +117,7 @@ vector4: complete itype vector_t alike vector3 { # vector4 is like vector3 but w
         };
     }
     
-    operator this *(scalar: scalar_t) -> vector4 = { 
+    operator this *(scalar: scalar_t) -> vector4 = {
         return this with {
             x = this.x * scalar,
             y = this.y * scalar,
@@ -124,7 +126,7 @@ vector4: complete itype vector_t alike vector3 { # vector4 is like vector3 but w
         };
     }
     
-    operator this /(scalar: scalar_t) -> vector4 = { 
+    operator this /(scalar: scalar_t) -> vector4 = {
         return this with {
             x = this.x / scalar,
             y = this.y / scalar,
@@ -133,8 +135,8 @@ vector4: complete itype vector_t alike vector3 { # vector4 is like vector3 but w
         };
     }
     
-    # if +, -, *, / are called with vector3, the vector3 implementations will be used the other's w component will be ignored
-    # our's will stay intact though because of the use of 'this with' 
+    # if +, -, *, / are called with vector3, the vector3 implementations will be used and the other's w component will be ignored
+    # ours will stay intact though because of the use of 'this with'
 }
  
 body_t: itype = {
@@ -142,11 +144,11 @@ body_t: itype = {
     velocity: required vector3,
     mass: required scalar_t,
     
-    kinetic_energy(): scalar_t = { 
-        return 0.5 * mass * velocity.magnitude^2; 
-    } 
+    kinetic_energy() -> scalar_t = {
+        return 0.5 * mass * velocity.magnitude^2; # this will probably return a float or double depending on the concrete type of mass and velocity.magnitude
+    }
     
-    momentum(): vector3 = { 
+    momentum() -> vector3 = {
         return velocity * mass;
     }
 }
@@ -156,7 +158,7 @@ classical_body: complete itype body_t = {
     velocity: required vector3,
     mass: required scalar_t,
     
-    name: nullable string = null, # nullable means it can be null or a string- if not provided, it defaults to null
+    name: nullable string = null,
     color: nullable string = null,
     
     operator new this(position: vector3, velocity: vector3, mass: scalar_t) -> classical_body = {
@@ -165,11 +167,11 @@ classical_body: complete itype body_t = {
         this.mass = mass;
     }
     
-    kinetic_energy(): scalar_t = { 
-        return 0.5 * mass * velocity.magnitude^2; # this will probably return a float or double depending on the concrete type of mass and velocity.magnitude
+    kinetic_energy() -> scalar_t = {
+        return 0.5 * mass * velocity.magnitude^2;
     }
     
-    momentum(): vector3 = { 
+    momentum() -> vector3 = {
         return velocity * mass;
     }
 }
@@ -183,12 +185,20 @@ state: complete itype = {
         this.time = time;
     }
     
-    momentum() -> vector3 = { 
-        return bodies.foreach(b => b.momentum()).sum(); 
+    momentum() -> vector3 = {
+        let total = new vector3(0.0, 0.0, 0.0);
+        for b in bodies {
+            total += b.momentum();
+        }
+        return total;
     }
     
-    kinetic_energy() -> scalar_t = { 
-        return bodies.foreach(b => b.kinetic_energy()).sum(); 
+    kinetic_energy() -> scalar_t = {
+        let total = 0.0;
+        for b in bodies {
+            total += b.kinetic_energy();
+        }
+        return total;
     }
 }
 
@@ -202,7 +212,7 @@ integration_backend: itype = {
  
 classical_backend: complete itype physics_backend = {
     G: constant scalar_t = 6.67430e-11, # we know this at compile time
-    softening: constant scalar_t = 1e-9, # this is be turned into a concrete type at compile time; probably float or double depending on what they can hold
+    softening: constant scalar_t = 1e-9, # this will be turned into a concrete type at compile time; probably float or double depending on what they can hold
     
     gravity(a: body_t, b: body_t) -> vector3 = {
         let delta = b.position - a.position; # this may not be specific- we don't know the types of a.position and b.position
@@ -213,22 +223,25 @@ classical_backend: complete itype physics_backend = {
     
     acceleration(b: body_t, s: state) -> specific vector3 = {
         let acc = new vector3(0.0, 0.0, 0.0); # we know acc will be a specific vector3
-        for other in s.bodies.where(o => o != b) {
-            acc += gravity(b, other); # we don't have to worry about the modification operator here because acc is specific
+        for other in s.bodies {
+            if other != b {
+                acc += gravity(b, other); # we don't have to worry about the modification operator here because acc is specific
+            }
         }
         return acc;
     }
 }
  
 euler_backend: complete itype integration_backend = {
-    step(s: state, dt: scalar_t, pb: physics_backend)  -> preserves s = { # preserves means we'll a new instance like s in all fields except those we explicitly change
+    step(s: state, dt: scalar_t, pb: physics_backend) -> state = {
+        let new_bodies = s.bodies.clone(); # clone will do b => b with; which is a new instance of the same type as b with all fields copied
+        for b in new_bodies {
+            let acc = pb.acceleration(b, s);
+            b.velocity := b.velocity + acc * dt; # := is used for modifying existing fields- we want to keep the concrete type because b.velocity is not specific
+            b.position := b.position + b.velocity * dt;
+        }
         return s with {
-            bodies = s.bodies.clone().map(b => { # clone will do b => b with; which is a new instance of the same type as b with all fields copied
-                let acc = pb.acceleration(b, s);
-                b.velocity := b.velocity + acc * dt; # := is used for modifying existing fields- we want to keep the concrete type because b.velocity is not specific
-                b.position := b.position + b.velocity * dt;
-                return b; # the compiler will mark this lambda as preserving because we used := to modify b's fields and returned b
-            }),
+            bodies = new_bodies,
             time = s.time + dt,
         };
     }

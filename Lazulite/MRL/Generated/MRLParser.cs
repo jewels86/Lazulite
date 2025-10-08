@@ -148,6 +148,12 @@ public partial class MRLParser : Parser {
 			IMRLParserListener typedListener = listener as IMRLParserListener;
 			if (typedListener != null) typedListener.ExitProgram(this);
 		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			IMRLParserVisitor<TResult> typedVisitor = visitor as IMRLParserVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitProgram(this);
+			else return visitor.VisitChildren(this);
+		}
 	}
 
 	[RuleVersion(0)]
@@ -211,6 +217,12 @@ public partial class MRLParser : Parser {
 		public override void ExitRule(IParseTreeListener listener) {
 			IMRLParserListener typedListener = listener as IMRLParserListener;
 			if (typedListener != null) typedListener.ExitDeclaration(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			IMRLParserVisitor<TResult> typedVisitor = visitor as IMRLParserVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitDeclaration(this);
+			else return visitor.VisitChildren(this);
 		}
 	}
 
@@ -291,6 +303,12 @@ public partial class MRLParser : Parser {
 		public override void ExitRule(IParseTreeListener listener) {
 			IMRLParserListener typedListener = listener as IMRLParserListener;
 			if (typedListener != null) typedListener.ExitTypeDeclaration(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			IMRLParserVisitor<TResult> typedVisitor = visitor as IMRLParserVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitTypeDeclaration(this);
+			else return visitor.VisitChildren(this);
 		}
 	}
 
@@ -397,6 +415,12 @@ public partial class MRLParser : Parser {
 			IMRLParserListener typedListener = listener as IMRLParserListener;
 			if (typedListener != null) typedListener.ExitInterfaceList(this);
 		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			IMRLParserVisitor<TResult> typedVisitor = visitor as IMRLParserVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitInterfaceList(this);
+			else return visitor.VisitChildren(this);
+		}
 	}
 
 	[RuleVersion(0)]
@@ -462,6 +486,12 @@ public partial class MRLParser : Parser {
 			IMRLParserListener typedListener = listener as IMRLParserListener;
 			if (typedListener != null) typedListener.ExitIdentifierList(this);
 		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			IMRLParserVisitor<TResult> typedVisitor = visitor as IMRLParserVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitIdentifierList(this);
+			else return visitor.VisitChildren(this);
+		}
 	}
 
 	[RuleVersion(0)]
@@ -524,6 +554,12 @@ public partial class MRLParser : Parser {
 		public override void ExitRule(IParseTreeListener listener) {
 			IMRLParserListener typedListener = listener as IMRLParserListener;
 			if (typedListener != null) typedListener.ExitMemberDeclaration(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			IMRLParserVisitor<TResult> typedVisitor = visitor as IMRLParserVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitMemberDeclaration(this);
+			else return visitor.VisitChildren(this);
 		}
 	}
 
@@ -593,6 +629,12 @@ public partial class MRLParser : Parser {
 		public override void ExitRule(IParseTreeListener listener) {
 			IMRLParserListener typedListener = listener as IMRLParserListener;
 			if (typedListener != null) typedListener.ExitFieldDeclaration(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			IMRLParserVisitor<TResult> typedVisitor = visitor as IMRLParserVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitFieldDeclaration(this);
+			else return visitor.VisitChildren(this);
 		}
 	}
 
@@ -684,6 +726,12 @@ public partial class MRLParser : Parser {
 			IMRLParserListener typedListener = listener as IMRLParserListener;
 			if (typedListener != null) typedListener.ExitModifier(this);
 		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			IMRLParserVisitor<TResult> typedVisitor = visitor as IMRLParserVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitModifier(this);
+			else return visitor.VisitChildren(this);
+		}
 	}
 
 	[RuleVersion(0)]
@@ -740,6 +788,12 @@ public partial class MRLParser : Parser {
 		public override void ExitRule(IParseTreeListener listener) {
 			IMRLParserListener typedListener = listener as IMRLParserListener;
 			if (typedListener != null) typedListener.ExitType(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			IMRLParserVisitor<TResult> typedVisitor = visitor as IMRLParserVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitType(this);
+			else return visitor.VisitChildren(this);
 		}
 	}
 
@@ -808,6 +862,12 @@ public partial class MRLParser : Parser {
 		public override void ExitRule(IParseTreeListener listener) {
 			IMRLParserListener typedListener = listener as IMRLParserListener;
 			if (typedListener != null) typedListener.ExitInitializer(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			IMRLParserVisitor<TResult> typedVisitor = visitor as IMRLParserVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitInitializer(this);
+			else return visitor.VisitChildren(this);
 		}
 	}
 
@@ -897,6 +957,12 @@ public partial class MRLParser : Parser {
 			IMRLParserListener typedListener = listener as IMRLParserListener;
 			if (typedListener != null) typedListener.ExitBlock(this);
 		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			IMRLParserVisitor<TResult> typedVisitor = visitor as IMRLParserVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitBlock(this);
+			else return visitor.VisitChildren(this);
+		}
 	}
 
 	[RuleVersion(0)]
@@ -961,6 +1027,12 @@ public partial class MRLParser : Parser {
 			IMRLParserListener typedListener = listener as IMRLParserListener;
 			if (typedListener != null) typedListener.ExitPartialStatement(this);
 		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			IMRLParserVisitor<TResult> typedVisitor = visitor as IMRLParserVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitPartialStatement(this);
+			else return visitor.VisitChildren(this);
+		}
 	}
 
 	[RuleVersion(0)]
@@ -1022,6 +1094,12 @@ public partial class MRLParser : Parser {
 			IMRLParserListener typedListener = listener as IMRLParserListener;
 			if (typedListener != null) typedListener.ExitStatement(this);
 		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			IMRLParserVisitor<TResult> typedVisitor = visitor as IMRLParserVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitStatement(this);
+			else return visitor.VisitChildren(this);
+		}
 	}
 
 	[RuleVersion(0)]
@@ -1078,6 +1156,12 @@ public partial class MRLParser : Parser {
 		public override void ExitRule(IParseTreeListener listener) {
 			IMRLParserListener typedListener = listener as IMRLParserListener;
 			if (typedListener != null) typedListener.ExitOperator(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			IMRLParserVisitor<TResult> typedVisitor = visitor as IMRLParserVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitOperator(this);
+			else return visitor.VisitChildren(this);
 		}
 	}
 
@@ -1191,6 +1275,12 @@ public partial class MRLParser : Parser {
 			IMRLParserListener typedListener = listener as IMRLParserListener;
 			if (typedListener != null) typedListener.ExitUnaryOperation(this);
 		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			IMRLParserVisitor<TResult> typedVisitor = visitor as IMRLParserVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitUnaryOperation(this);
+			else return visitor.VisitChildren(this);
+		}
 	}
 
 	[RuleVersion(0)]
@@ -1240,6 +1330,12 @@ public partial class MRLParser : Parser {
 			IMRLParserListener typedListener = listener as IMRLParserListener;
 			if (typedListener != null) typedListener.ExitBinaryOperation(this);
 		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			IMRLParserVisitor<TResult> typedVisitor = visitor as IMRLParserVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitBinaryOperation(this);
+			else return visitor.VisitChildren(this);
+		}
 	}
 
 	[RuleVersion(0)]
@@ -1288,6 +1384,12 @@ public partial class MRLParser : Parser {
 		public override void ExitRule(IParseTreeListener listener) {
 			IMRLParserListener typedListener = listener as IMRLParserListener;
 			if (typedListener != null) typedListener.ExitParameter(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			IMRLParserVisitor<TResult> typedVisitor = visitor as IMRLParserVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitParameter(this);
+			else return visitor.VisitChildren(this);
 		}
 	}
 
@@ -1351,6 +1453,12 @@ public partial class MRLParser : Parser {
 			IMRLParserListener typedListener = listener as IMRLParserListener;
 			if (typedListener != null) typedListener.ExitParameterList(this);
 		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			IMRLParserVisitor<TResult> typedVisitor = visitor as IMRLParserVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitParameterList(this);
+			else return visitor.VisitChildren(this);
+		}
 	}
 
 	[RuleVersion(0)]
@@ -1394,8 +1502,8 @@ public partial class MRLParser : Parser {
 
 	public partial class FunctionCallContext : ParserRuleContext {
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode IDENTIFIER() { return GetToken(MRLParser.IDENTIFIER, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode RPAREN() { return GetToken(MRLParser.RPAREN, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode LPAREN() { return GetToken(MRLParser.LPAREN, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode RPAREN() { return GetToken(MRLParser.RPAREN, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ParameterListContext parameterList() {
 			return GetRuleContext<ParameterListContext>(0);
 		}
@@ -1414,31 +1522,38 @@ public partial class MRLParser : Parser {
 			IMRLParserListener typedListener = listener as IMRLParserListener;
 			if (typedListener != null) typedListener.ExitFunctionCall(this);
 		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			IMRLParserVisitor<TResult> typedVisitor = visitor as IMRLParserVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitFunctionCall(this);
+			else return visitor.VisitChildren(this);
+		}
 	}
 
 	[RuleVersion(0)]
 	public FunctionCallContext functionCall() {
 		FunctionCallContext _localctx = new FunctionCallContext(Context, State);
 		EnterRule(_localctx, 36, RULE_functionCall);
+		int _la;
 		try {
 			EnterOuterAlt(_localctx, 1);
 			{
 			State = 196;
 			Match(IDENTIFIER);
 			State = 197;
-			Match(RPAREN);
+			Match(LPAREN);
 			State = 199;
 			ErrorHandler.Sync(this);
-			switch ( Interpreter.AdaptivePredict(TokenStream,20,Context) ) {
-			case 1:
+			_la = TokenStream.LA(1);
+			if (((((_la - 47)) & ~0x3f) == 0 && ((1L << (_la - 47)) & 7516192769L) != 0)) {
 				{
 				State = 198;
 				parameterList();
 				}
-				break;
 			}
+
 			State = 201;
-			Match(LPAREN);
+			Match(RPAREN);
 			}
 		}
 		catch (RecognitionException re) {
@@ -1477,6 +1592,12 @@ public partial class MRLParser : Parser {
 		public override void ExitRule(IParseTreeListener listener) {
 			IMRLParserListener typedListener = listener as IMRLParserListener;
 			if (typedListener != null) typedListener.ExitExpression(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			IMRLParserVisitor<TResult> typedVisitor = visitor as IMRLParserVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitExpression(this);
+			else return visitor.VisitChildren(this);
 		}
 	}
 
@@ -1558,6 +1679,12 @@ public partial class MRLParser : Parser {
 		public override void ExitRule(IParseTreeListener listener) {
 			IMRLParserListener typedListener = listener as IMRLParserListener;
 			if (typedListener != null) typedListener.ExitPrimaryExpression(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			IMRLParserVisitor<TResult> typedVisitor = visitor as IMRLParserVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitPrimaryExpression(this);
+			else return visitor.VisitChildren(this);
 		}
 	}
 
@@ -1660,6 +1787,12 @@ public partial class MRLParser : Parser {
 			IMRLParserListener typedListener = listener as IMRLParserListener;
 			if (typedListener != null) typedListener.ExitVariableDeclaration(this);
 		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			IMRLParserVisitor<TResult> typedVisitor = visitor as IMRLParserVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitVariableDeclaration(this);
+			else return visitor.VisitChildren(this);
+		}
 	}
 
 	[RuleVersion(0)]
@@ -1744,6 +1877,12 @@ public partial class MRLParser : Parser {
 			IMRLParserListener typedListener = listener as IMRLParserListener;
 			if (typedListener != null) typedListener.ExitDeclaredParameter(this);
 		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			IMRLParserVisitor<TResult> typedVisitor = visitor as IMRLParserVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitDeclaredParameter(this);
+			else return visitor.VisitChildren(this);
+		}
 	}
 
 	[RuleVersion(0)]
@@ -1810,6 +1949,12 @@ public partial class MRLParser : Parser {
 			IMRLParserListener typedListener = listener as IMRLParserListener;
 			if (typedListener != null) typedListener.ExitDeclaredParameterList(this);
 		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			IMRLParserVisitor<TResult> typedVisitor = visitor as IMRLParserVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitDeclaredParameterList(this);
+			else return visitor.VisitChildren(this);
+		}
 	}
 
 	[RuleVersion(0)]
@@ -1842,8 +1987,8 @@ public partial class MRLParser : Parser {
 
 	public partial class MethodDeclarationContext : ParserRuleContext {
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode IDENTIFIER() { return GetToken(MRLParser.IDENTIFIER, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode RPAREN() { return GetToken(MRLParser.RPAREN, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode LPAREN() { return GetToken(MRLParser.LPAREN, 0); }
+		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode RPAREN() { return GetToken(MRLParser.RPAREN, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode ARROW() { return GetToken(MRLParser.ARROW, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public TypeContext type() {
 			return GetRuleContext<TypeContext>(0);
@@ -1877,6 +2022,12 @@ public partial class MRLParser : Parser {
 			IMRLParserListener typedListener = listener as IMRLParserListener;
 			if (typedListener != null) typedListener.ExitMethodDeclaration(this);
 		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			IMRLParserVisitor<TResult> typedVisitor = visitor as IMRLParserVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitMethodDeclaration(this);
+			else return visitor.VisitChildren(this);
+		}
 	}
 
 	[RuleVersion(0)]
@@ -1890,7 +2041,7 @@ public partial class MRLParser : Parser {
 			State = 251;
 			Match(IDENTIFIER);
 			State = 252;
-			Match(RPAREN);
+			Match(LPAREN);
 			State = 254;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
@@ -1902,7 +2053,7 @@ public partial class MRLParser : Parser {
 			}
 
 			State = 256;
-			Match(LPAREN);
+			Match(RPAREN);
 			State = 258;
 			ErrorHandler.Sync(this);
 			_la = TokenStream.LA(1);
@@ -1965,6 +2116,12 @@ public partial class MRLParser : Parser {
 		public override void ExitRule(IParseTreeListener listener) {
 			IMRLParserListener typedListener = listener as IMRLParserListener;
 			if (typedListener != null) typedListener.ExitLiteral(this);
+		}
+		[System.Diagnostics.DebuggerNonUserCode]
+		public override TResult Accept<TResult>(IParseTreeVisitor<TResult> visitor) {
+			IMRLParserVisitor<TResult> typedVisitor = visitor as IMRLParserVisitor<TResult>;
+			if (typedVisitor != null) return typedVisitor.VisitLiteral(this);
+			else return visitor.VisitChildren(this);
 		}
 	}
 
@@ -2065,8 +2222,8 @@ public partial class MRLParser : Parser {
 		1,0,0,0,186,187,3,38,19,0,187,33,1,0,0,0,188,193,3,32,16,0,189,190,5,38,
 		0,0,190,192,3,32,16,0,191,189,1,0,0,0,192,195,1,0,0,0,193,191,1,0,0,0,
 		193,194,1,0,0,0,194,35,1,0,0,0,195,193,1,0,0,0,196,197,5,77,0,0,197,199,
-		5,48,0,0,198,200,3,34,17,0,199,198,1,0,0,0,199,200,1,0,0,0,200,201,1,0,
-		0,0,201,202,5,47,0,0,202,37,1,0,0,0,203,204,3,40,20,0,204,205,5,39,0,0,
+		5,47,0,0,198,200,3,34,17,0,199,198,1,0,0,0,199,200,1,0,0,0,200,201,1,0,
+		0,0,201,202,5,48,0,0,202,37,1,0,0,0,203,204,3,40,20,0,204,205,5,39,0,0,
 		205,206,3,40,20,0,206,208,1,0,0,0,207,203,1,0,0,0,208,209,1,0,0,0,209,
 		207,1,0,0,0,209,210,1,0,0,0,210,39,1,0,0,0,211,221,3,50,25,0,212,221,5,
 		77,0,0,213,221,3,36,18,0,214,221,3,30,15,0,215,221,3,28,14,0,216,217,5,
@@ -2080,8 +2237,8 @@ public partial class MRLParser : Parser {
 		7,0,240,239,1,0,0,0,241,244,1,0,0,0,242,240,1,0,0,0,242,243,1,0,0,0,243,
 		245,1,0,0,0,244,242,1,0,0,0,245,246,3,16,8,0,246,45,1,0,0,0,247,248,3,
 		44,22,0,248,249,5,38,0,0,249,250,3,44,22,0,250,47,1,0,0,0,251,252,5,77,
-		0,0,252,254,5,48,0,0,253,255,3,46,23,0,254,253,1,0,0,0,254,255,1,0,0,0,
-		255,256,1,0,0,0,256,258,5,47,0,0,257,259,5,12,0,0,258,257,1,0,0,0,258,
+		0,0,252,254,5,47,0,0,253,255,3,46,23,0,254,253,1,0,0,0,254,255,1,0,0,0,
+		255,256,1,0,0,0,256,258,5,48,0,0,257,259,5,12,0,0,258,257,1,0,0,0,258,
 		259,1,0,0,0,259,260,1,0,0,0,260,264,5,41,0,0,261,263,3,14,7,0,262,261,
 		1,0,0,0,263,266,1,0,0,0,264,262,1,0,0,0,264,265,1,0,0,0,265,267,1,0,0,
 		0,266,264,1,0,0,0,267,268,3,16,8,0,268,269,5,43,0,0,269,270,3,20,10,0,

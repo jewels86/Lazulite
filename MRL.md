@@ -132,6 +132,139 @@ operator new this(x: scalar_t, y: scalar_t, z: scalar_t) -> vector3 = {
 
 ---
 
+## Import System
+
+### Basic Import
+
+Imports bring an entire MRL file into the current workspace:
+
+```
+import "vectors.mrl";
+import "physics.mrl";
+```
+
+All types, functions, and declarations from the imported file become available in the current file.
+
+**Note**: Namespacing and selective imports may be added in future versions.
+
+---
+
+## Error Handling
+
+### Assert
+
+Runtime assertion that halts execution if condition is false:
+
+```
+assert condition, "error message";
+```
+
+**Behavior:**
+- Evaluates condition at runtime
+- If false, throws runtime error with provided message
+- If true, execution continues normally
+
+**Example:**
+```
+acceleration(b: body_t, s: state) -> vector3 = {
+    assert b.mass > 0, "Body mass must be positive";
+    assert s.bodies.length > 0, "State must contain at least one body";
+    
+    let acc = new vector3(0.0, 0.0, 0.0);
+    for other in s.bodies.where(o => o != b) {
+        acc += gravity(b, other);
+    }
+    return acc;
+}
+```
+
+**Future consideration**: Try-catch blocks may be added for more sophisticated error handling.
+
+---
+
+## Control Flow
+
+### While Loops
+
+Standard while loop with condition:
+
+```
+while condition {
+    # statements
+}
+```
+
+**Example:**
+```
+find_equilibrium(system: state, tolerance: scalar_t) -> state = {
+    let current = system;
+    let delta = tolerance + 1.0;
+    
+    while delta > tolerance {
+        let next = simulate_step(current, 0.01);
+        delta = (next.kinetic_energy() - current.kinetic_energy()).abs();
+        current := next;
+    }
+    
+    return current;
+}
+```
+
+### For Loops
+
+For loops are syntactic sugar for `.foreach()`:
+
+```
+for item in collection {
+    # statements
+}
+```
+
+**Desugars to:**
+```
+collection.foreach(item => {
+    # statements
+});
+```
+
+**Example:**
+```
+total_momentum(bodies: body_t[]) -> vector3 = {
+    let total = new vector3(0.0, 0.0, 0.0);
+    for body in bodies {
+        total += body.momentum();
+    }
+    return total;
+}
+```
+
+**Note**: The `in` keyword is specifically for for-loops and is not a general operator.
+
+---
+
+## Control Flow Keywords
+
+| Keyword | Purpose |
+|---------|---------|
+| `break` | Exit current loop |
+| `continue` | Skip to next loop iteration |
+| `return` | Return value from function |
+
+**Example with break/continue:**
+```
+find_first_heavy_body(bodies: body_t[], threshold: scalar_t) -> nullable body_t = {
+    for body in bodies {
+        if body.mass < 0 {
+            continue;  # Skip invalid bodies
+        }
+        if body.mass > threshold {
+            return body;  # Found it
+        }
+    }
+    return null;  # Not found
+}
+```
+
 ## Preservation and Modification
 
 ### Assignment vs Modification

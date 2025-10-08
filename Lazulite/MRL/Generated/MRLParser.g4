@@ -3,8 +3,7 @@ parser grammar MRLParser;
 options { tokenVocab = MRLLexer; }
 
 program
-    : declaration* EOF
-    ;
+    : declaration* EOF;
     
 declaration
     : typeDeclaration
@@ -64,7 +63,7 @@ parameterList
     : parameter (COMMA parameter)*;
     
 functionCall
-    : IDENTIFIER RPAREN parameterList? LPAREN;
+    : IDENTIFIER LPAREN parameterList? RPAREN;
     
 expression
     : (primaryExpression DOT primaryExpression)+;
@@ -87,7 +86,7 @@ declaredParameterList
     : declaredParameter (COMMA declaredParameter);   
 
 methodDeclaration 
-    : IDENTIFIER RPAREN declaredParameterList? LPAREN INPLACE? ARROW modifier* type EQUAL block; 
+    : IDENTIFIER LPAREN declaredParameterList? RPAREN INPLACE? ARROW modifier* type EQUAL block; 
     
 literal
     : STRING | NUMBER;
