@@ -90,14 +90,14 @@ declaredParameterList
     : declaredParameter nextDeclaredParameter*;
 
 methodDeclaration 
-    : IDENTIFIER LPAREN declaredParameterList? RPAREN INPLACE? ARROW modifier* type EQUAL block; 
+    : IDENTIFIER LPAREN declaredParameterList? RPAREN INPLACE? ARROW (modifier* type | PRESERVES IDENTIFIER) EQUAL block; 
     
 literal
     : STRING | NUMBER;
     
 operatorDeclaration 
-    : OPERATOR IDENTIFIER operator LPAREN declaredParameterList? RPAREN INPLACE? ARROW modifier* type EQUAL block
+    : OPERATOR IDENTIFIER operator LPAREN declaredParameterList? RPAREN INPLACE? ARROW (modifier* type | PRESERVES IDENTIFIER) EQUAL block
     | OPERATOR NEW LPAREN declaredParameterList? RPAREN INPLACE? EQUAL block; 
     
 withExpression
-    :(primaryExpression) WITH LBRACE ((IDENTIFIER EQUAL expression) (IDENTIFIER EQUAL expression COMMA)*);
+    : primaryExpression WITH LBRACE (IDENTIFIER EQUAL expression) (COMMA IDENTIFIER EQUAL expression)* RBRACE;
