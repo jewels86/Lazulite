@@ -4,9 +4,17 @@
     velocity: required vector3,
     
     operator new(mass: scalar_t, position: vector3, velocity: vector3) = {
-        self.mass = mass;
-        self.position = position;
-        self.velocity = velocity;
+        this.mass = mass;
+        this.position = position;
+        this.velocity = velocity;
+    }
+    
+    operator this +(b: body) -> preserves this = {
+        return this with {
+            mass = this.mass + b.mass,
+            position = this.position + b.position,
+            velocity = this.velocity + b.position,
+        }
     }
 }
 
@@ -15,5 +23,5 @@ magnitude(v: vector3) -> scalar_t = sqrt(magnitude2(v));
 
 f_grav(a: body, b: body) -> vector3 = {
     let delta = b.position - a.position;
-    return -((G * a.mass * b.mass) / (magnitude2(delta) * magnitude(delta)) * delta;
+    return -((G * a.mass * b.mass) / (magnitude2(delta) * magnitude(delta)) * delta);
 }

@@ -38,24 +38,20 @@ initializer
     | GET block (SET block)?;
     
 block 
-    : LBRACE statement* RBRACE;
+    : expression
+    | LBRACE statement* RBRACE;
     
 partialStatement 
     : RETURN expression
-    | variableDeclaration;
-
+    | variableDeclaration
+    | memberExpression EQUAL expression;
+    
 statement 
     : partialStatement SEMICOLON;
     
 operator
     : PLUS | MINUS | STAR | SLASH | PERCENT | CARET
     | PLUS PLUS | MINUS MINUS | SLASH SLASH;
-    
-unaryOperation 
-    : IDENTIFIER operator;
-    
-binaryOperation 
-    : IDENTIFIER operator IDENTIFIER;
     
 parameter
     : (IDENTIFIER EQUAL)? expression;
@@ -66,31 +62,32 @@ parameterList
 functionCall
     : IDENTIFIER LPAREN parameterList? RPAREN;
     
+memberExpression 
+    : (primaryExpression|functionCall) (DOT (primaryExpression|functionCall))*;
+    
 expression
-    : callExpression
-    | LPAREN expression RPAREN;
-
-callExpression
-    : memberExpression
-    | functionCall;
-
-memberExpression
-    : primaryExpression (DOT primaryExpression)*;
+    : functionCall
+    | memberExpression
+    | expression operator expression
+    | operator expression
+    | LPAREN expression RPAREN
+    | withExpression;
 
 primaryExpression
-    : literal
-    | binaryOperation
-    | unaryOperation
-    | IDENTIFIER;
+    : IDENTIFIER
+    | literal;
 
 variableDeclaration
    :  LET IDENTIFIER (COLON modifier* type)? EQUAL expression;
    
 declaredParameter
     : IDENTIFIER COLON modifier* type;
+    
+nextDeclaredParameter
+    : COMMA declaredParameter;
  
 declaredParameterList
-    : declaredParameter (COMMA declaredParameter);   
+    : declaredParameter nextDeclaredParameter*;
 
 methodDeclaration 
     : IDENTIFIER LPAREN declaredParameterList? RPAREN INPLACE? ARROW modifier* type EQUAL block; 
@@ -99,5 +96,8 @@ literal
     : STRING | NUMBER;
     
 operatorDeclaration 
-    : OPERATOR methodDeclaration 
-    | OPERATOR NEW LPAREN declaredParameterList? RPAREN INPLACE? ARROW modifier* type EQUAL block; 
+    : OPERATOR IDENTIFIER operator LPAREN declaredParameterList? RPAREN INPLACE? ARROW modifier* type EQUAL block
+    | OPERATOR NEW LPAREN declaredParameterList? RPAREN INPLACE? EQUAL block; 
+    
+withExpression
+    :(primaryExpression) WITH LBRACE ((IDENTIFIER EQUAL expression) (IDENTIFIER EQUAL expression COMMA)*);
