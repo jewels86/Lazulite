@@ -8,7 +8,7 @@ vector_t: itype tensor_t = { # vector is a tensor, so it implements tensor_t, bu
     length: int, # int is a concrete type
     magnitude: scalar_t, # scalar_t is any type implementing the scalar_t interface- float, double, int, etc
     normalized: same vector_t, # same means the same concrete type as the instance it's called on
-    dot(other: same vector_t) -> scalar_t,
+    dot(other: same vector_t) -> scalar_t
 }
 
 vector3: complete itype vector_t = { # vector3 is a complete implementation of vector_t
@@ -19,7 +19,7 @@ vector3: complete itype vector_t = { # vector3 is a complete implementation of v
     y: required scalar_t,
     z: required scalar_t,
     
-    operator new this(x: scalar_t, y: scalar_t, z: scalar_t) -> vector3 = { # in operators, this goes wherever it would be used in the statement
+    operator new(x: scalar_t, y: scalar_t, z: scalar_t) = { # in operators, this goes wherever it would be used in the statement
         this.x = x; # we use = here because x, y, and z haven't been initialized yet
         this.y = y;
         this.z = z;
@@ -41,7 +41,7 @@ vector3: complete itype vector_t = { # vector3 is a complete implementation of v
         return this with { # with creates a new instance of the same type as this with the specified fields modified
             x = this.x + other.x,
             y = this.y + other.y,
-            z = this.z + other.z,
+            z = this.z + other.z
         };
     }
     
@@ -79,7 +79,7 @@ vector4: complete itype vector_t alike vector3 = { # vector4 is like vector3 but
     z: required scalar_t,
     w: required scalar_t,
     
-    operator new this(x: scalar_t, y: scalar_t, z: scalar_t, w: scalar_t) -> vector4 = {
+    operator new(x: scalar_t, y: scalar_t, z: scalar_t, w: scalar_t) = {
         this.x = x;
         this.y = y;
         this.z = z;
@@ -161,7 +161,7 @@ classical_body: complete itype body_t = {
     name: nullable string = null,
     color: nullable string = null,
     
-    operator new this(position: vector3, velocity: vector3, mass: scalar_t) -> classical_body = {
+    operator new(position: vector3, velocity: vector3, mass: scalar_t) = {
         this.position = position;
         this.velocity = velocity;
         this.mass = mass;
@@ -180,14 +180,14 @@ state: complete itype = {
     bodies: required body_t[],
     time: required scalar_t,
     
-    operator new this(bodies: body_t[], time: scalar_t) -> state = {
+    operator new(bodies: body_t[], time: scalar_t) = {
         this.bodies = bodies;
         this.time = time;
     }
     
     momentum() -> vector3 = {
         let total = new vector3(0.0, 0.0, 0.0);
-        for b in bodies {
+        for each b in bodies {
             total += b.momentum();
         }
         return total;
@@ -195,7 +195,7 @@ state: complete itype = {
     
     kinetic_energy() -> scalar_t = {
         let total = 0.0;
-        for b in bodies {
+        for each b in bodies {
             total += b.kinetic_energy();
         }
         return total;
@@ -223,7 +223,7 @@ classical_backend: complete itype physics_backend = {
     
     acceleration(b: body_t, s: state) -> specific vector3 = {
         let acc = new vector3(0.0, 0.0, 0.0); # we know acc will be a specific vector3
-        for other in s.bodies {
+        for each  other in s.bodies {
             if other != b {
                 acc += gravity(b, other); # we don't have to worry about the modification operator here because acc is specific
             }
@@ -235,7 +235,7 @@ classical_backend: complete itype physics_backend = {
 euler_backend: complete itype integration_backend = {
     step(s: state, dt: scalar_t, pb: physics_backend) -> state = {
         let new_bodies = s.bodies.clone(); # clone will do b => b with; which is a new instance of the same type as b with all fields copied
-        for b in new_bodies {
+        for each b in new_bodies {
             let acc = pb.acceleration(b, s);
             b.velocity := b.velocity + acc * dt; # := is used for modifying existing fields- we want to keep the concrete type because b.velocity is not specific
             b.position := b.position + b.velocity * dt;

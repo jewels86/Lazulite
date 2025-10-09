@@ -20,14 +20,15 @@ identifierList
 
 memberDeclaration
     : fieldDeclaration
-    | methodDeclaration
-    | operatorDeclaration;
+    | methodSignature COMMA?
+    | methodDeclaration COMMA?
+    | operatorDeclaration COMMA?;
     
 fieldDeclaration
     : IDENTIFIER COLON modifier* type (EQUAL initializer)? (COMMA)?;
     
 modifier 
-    : STATIC | ISTATIC | READONLY | CONSTANT | ICONSTANT | DYNAMIC | REQUIRED | NULLABLE | SPECIFIC;
+    : STATIC | ISTATIC | READONLY | CONSTANT | ICONSTANT | DYNAMIC | REQUIRED | NULLABLE | SPECIFIC | SAME;
     
 type
     : IDENTIFIER (LBRACK RBRACK)*;
@@ -38,20 +39,24 @@ initializer
     | GET block (SET block)?;
     
 block 
-    : expression
+    : expression SEMICOLON
     | LBRACE statement* RBRACE;
     
 partialStatement 
     : RETURN expression
     | variableDeclaration
-    | memberExpression EQUAL expression;
+    | callExpression assignmentOperator expression;
     
 statement 
-    : partialStatement SEMICOLON;
+    : partialStatement SEMICOLON
+    | foreachStatement;
     
 operator
     : PLUS | MINUS | STAR | SLASH | PERCENT | CARET
-    | PLUS PLUS | MINUS MINUS | SLASH SLASH;
+    | PLUS PLUS | MINUS MINUS | SLASH SLASH | NEW;
+    
+assignmentOperator 
+    : EQUAL | PLUSEQUAL | MINUSEQUAL | STAREQUAL | SLASHEQUAL;
     
 parameter
     : (IDENTIFIER EQUAL)? expression;
@@ -61,21 +66,33 @@ parameterList
     
 functionCall
     : IDENTIFIER LPAREN parameterList? RPAREN;
-    
-memberExpression 
-    : (primaryExpression|functionCall) (DOT (primaryExpression|functionCall))*;
-    
+
 expression
-    : functionCall
-    | memberExpression
-    | expression operator expression
-    | operator expression
-    | LPAREN expression RPAREN
-    | withExpression;
+    : assignmentExpression;
+
+assignmentExpression
+    : binaryExpression;
+
+binaryExpression
+    : unaryExpression (operator unaryExpression)*;
+
+unaryExpression
+    : operator unaryExpression
+    | callExpression;
+
+callExpression
+    : primaryExpression
+    | withExpression
+    | functionCall
+    | memberExpression;
+
+memberExpression 
+    : (primaryExpression | functionCall) (DOT (IDENTIFIER | functionCall))+;
 
 primaryExpression
     : IDENTIFIER
-    | literal;
+    | literal
+    | LPAREN expression RPAREN;
 
 variableDeclaration
    :  LET IDENTIFIER (COLON modifier* type)? EQUAL expression;
@@ -89,15 +106,27 @@ nextDeclaredParameter
 declaredParameterList
     : declaredParameter nextDeclaredParameter*;
 
+methodSignature 
+    : IDENTIFIER LPAREN declaredParameterList? RPAREN INPLACE? ARROW (modifier* type | PRESERVES IDENTIFIER);
+
 methodDeclaration 
-    : IDENTIFIER LPAREN declaredParameterList? RPAREN INPLACE? ARROW (modifier* type | PRESERVES IDENTIFIER) EQUAL block; 
+    : methodSignature EQUAL block;
     
 literal
-    : STRING | NUMBER;
+    : STRING | NUMBER | NULL | LBRACK (expression (COMMA expression)*)? RBRACK;
     
 operatorDeclaration 
     : OPERATOR IDENTIFIER operator LPAREN declaredParameterList? RPAREN INPLACE? ARROW (modifier* type | PRESERVES IDENTIFIER) EQUAL block
     | OPERATOR NEW LPAREN declaredParameterList? RPAREN INPLACE? EQUAL block; 
     
+comparisonOperator
+    : EQUAL EQUAL | LESSTHAN | GREATERTHAN | LESSTHAN EQUAL | GREATERTHAN EQUAL;
+    
+comparison
+    : expression comparisonOperator expression;
+    
 withExpression
-    : primaryExpression WITH LBRACE (IDENTIFIER EQUAL expression) (COMMA IDENTIFIER EQUAL expression)* RBRACE;
+    : primaryExpression WITH LBRACE (IDENTIFIER EQUAL expression) (COMMA (IDENTIFIER EQUAL expression)?)* RBRACE;
+    
+foreachStatement 
+    : FOR EACH IDENTIFIER IN expression (WHERE comparison)? block;

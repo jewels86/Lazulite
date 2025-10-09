@@ -36,6 +36,8 @@ IN: 'in';
 WHILE: 'while';
 BREAK: 'break';
 CONTINUE: 'continue';
+WHERE: 'where';
+EACH: 'each';
 
 COLON: ':';
 COMMA: ',';

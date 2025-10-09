@@ -18,8 +18,8 @@
     }
 }
 
-magnitude2(v: vector3) -> scalar_t = { return v.x^2 + v.y^2 + v.z^2; }
-magnitude(v: vector3) -> scalar_t = { return sqrt(magnitude2(v)); }
+magnitude2(v: vector3) -> scalar_t = v.x^2 + v.y^2 + v.z^2;
+magnitude(v: vector3) -> scalar_t = sqrt(magnitude2(v));
 
 f_grav(a: body, b: body) -> vector3 = {
     let delta = b.position - a.position;
