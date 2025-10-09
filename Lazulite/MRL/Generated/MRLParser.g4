@@ -49,6 +49,7 @@ partialStatement
     
 statement 
     : partialStatement SEMICOLON
+    | ifStatement
     | foreachStatement;
     
 operator
@@ -56,7 +57,7 @@ operator
     | PLUS PLUS | MINUS MINUS | SLASH SLASH | NEW;
     
 assignmentOperator 
-    : EQUAL | PLUSEQUAL | MINUSEQUAL | STAREQUAL | SLASHEQUAL;
+    : EQUAL | PLUS EQUAL | MINUS EQUAL | STAR EQUAL | SLASH EQUAL | MODIFY;
     
 parameter
     : (IDENTIFIER EQUAL)? expression;
@@ -120,7 +121,7 @@ operatorDeclaration
     | OPERATOR NEW LPAREN declaredParameterList? RPAREN INPLACE? EQUAL block; 
     
 comparisonOperator
-    : EQUAL EQUAL | LESSTHAN | GREATERTHAN | LESSTHAN EQUAL | GREATERTHAN EQUAL;
+    : EQUAL EQUAL | LESSTHAN | GREATERTHAN | LESSTHAN EQUAL | GREATERTHAN EQUAL | NOTEQUAL;
     
 comparison
     : expression comparisonOperator expression;
@@ -130,3 +131,6 @@ withExpression
     
 foreachStatement 
     : FOR EACH IDENTIFIER IN expression (WHERE comparison)? block;
+    
+ifStatement
+    : IF comparison block (ELSE (IF comparison)? block)?;
