@@ -1,5 +1,6 @@
 ﻿using Antlr4.Runtime;
 using Antlr4.Runtime.Tree;
+using Wasm.Interpret;
 
 namespace Lazulite.MRL;
 
@@ -56,6 +57,58 @@ public class MRLVisitor : MRLParserBaseVisitor<ASTNode>
         return context.literal() != null ? Visit(context.literal()) : Visit(context.expression());
     }
 
+    public override ASTNode VisitCallExpression(MRLParser.CallExpressionContext context)
+    {
+        int line = context.Start.Line;
+        int column = context.Start.Column;
+        
+        if (context.primaryExpression() != null) return Visit(context.primaryExpression());
+        if (context.withExpression() != null) return Visit(context.withExpression());
+
+        ASTNode baseExpression = Visit(context.callExpression());
+        if (context.DOT() != null) 
+            return new MemberAccessNode(context.Start.Line, context.Start.Column, baseExpression, context.IDENTIFIER().GetText());
+        
+        ParameterListNode args = context.parameterList() != null
+            ? (ParameterListNode)Visit(context.parameterList())
+            : new(context.Start.Line, context.Start.Column, []);;
+        
+        return new FunctionCallNode(line, column, baseExpression, args);
+    }
+
+    public override ASTNode VisitParameter(MRLParser.ParameterContext context)
+    {
+        int line = context.Start.Line;
+        int column = context.Start.Column;
+        
+        string? name = context.IDENTIFIER()?.GetText();
+        ASTNode expression = Visit(context.expression());
+        
+        return new ParameterNode(line, column, name, expression);
+    }
+
+    public override ASTNode VisitUnaryExpression(MRLParser.UnaryExpressionContext context)
+    {
+        int line = context.Start.Line;
+        int column = context.Start.Line;
+
+        return context.callExpression() != null 
+            ? Visit(context.callExpression()) 
+            : new UnaryExpressionNode(line, column, Visit(context.unaryExpression()), context.@operator().GetText());
+    }
+
+    public override ASTNode VisitBinaryExpression(MRLParser.BinaryExpressionContext context)
+    {
+        int line = context.Start.Line;
+        int column = context.Start.Line;
+
+        if (context.RPAREN().Length != 0)
+        {
+            List<PartialBinaryExpression> parts = [];
+            context.
+        }
+    }
+
     #endregion
 }
 
@@ -88,7 +141,18 @@ public record IdentifierNode(int Line, int Column, string Name) : ASTNode(Line, 
 public record IdentifierListNode(int Line, int Column, List<IdentifierNode> Identifiers) : ASTNode(Line, Column);
 public record ModifierNode(int Line, int Column, List<Modifier> Modifiers) : ASTNode(Line, Column);
 
-public record PrimaryExpression(int Line, int Column, ASTNode Expression) : ASTNode(Line, Column);
+public record MemberAccessNode(int Line, int Column, ASTNode Base, string Member) : ASTNode(Line, Column);
+
+public record FunctionCallNode(int Line, int Column, ASTNode Base, ParameterListNode Parameters)
+    : ASTNode(Line, Column);
+
+public record ParameterNode(int Line, int Column, string? Name, ASTNode expression) : ASTNode(Line, Column);
+public record ParameterListNode(int Line, int Column, List<ParameterNode> Parameters) : ASTNode(Line, Column);
+
+public record UnaryExpressionNode(int Line, int Column, ASTNode Operand, string Operator) : ASTNode(Line, Column);
+
+public record PartialBinaryExpression(int Line, int Column, string Operator, ASTNode Right) : ASTNode(Line, Column);
+public record BinaryExpressionNode(int Line, int Column, ASTNode Left, PartialBinaryExpression Right) : ASTNode(Line, Column);
  
 public enum Modifier
 {

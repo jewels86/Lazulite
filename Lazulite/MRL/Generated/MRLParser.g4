@@ -62,9 +62,6 @@ parameter
 
 parameterList
     : parameter (COMMA parameter)*;
-    
-functionCall
-    : IDENTIFIER LPAREN parameterList? RPAREN;
 
 expression
     : assignmentExpression
@@ -84,11 +81,8 @@ unaryExpression
 callExpression
     : primaryExpression
     | withExpression
-    | functionCall
-    | memberExpression;
-
-memberExpression 
-    : (primaryExpression | functionCall) (DOT (IDENTIFIER | functionCall))+;
+    | callExpression DOT IDENTIFIER
+    | callExpression LPAREN parameterList? RPAREN;
 
 primaryExpression
     : IDENTIFIER

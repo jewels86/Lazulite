@@ -228,18 +228,6 @@ public partial class MRLParserBaseListener : IMRLParserListener {
 	/// <param name="context">The parse tree.</param>
 	public virtual void ExitParameterList([NotNull] MRLParser.ParameterListContext context) { }
 	/// <summary>
-	/// Enter a parse tree produced by <see cref="MRLParser.functionCall"/>.
-	/// <para>The default implementation does nothing.</para>
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	public virtual void EnterFunctionCall([NotNull] MRLParser.FunctionCallContext context) { }
-	/// <summary>
-	/// Exit a parse tree produced by <see cref="MRLParser.functionCall"/>.
-	/// <para>The default implementation does nothing.</para>
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	public virtual void ExitFunctionCall([NotNull] MRLParser.FunctionCallContext context) { }
-	/// <summary>
 	/// Enter a parse tree produced by <see cref="MRLParser.expression"/>.
 	/// <para>The default implementation does nothing.</para>
 	/// </summary>
@@ -299,18 +287,6 @@ public partial class MRLParserBaseListener : IMRLParserListener {
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	public virtual void ExitCallExpression([NotNull] MRLParser.CallExpressionContext context) { }
-	/// <summary>
-	/// Enter a parse tree produced by <see cref="MRLParser.memberExpression"/>.
-	/// <para>The default implementation does nothing.</para>
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	public virtual void EnterMemberExpression([NotNull] MRLParser.MemberExpressionContext context) { }
-	/// <summary>
-	/// Exit a parse tree produced by <see cref="MRLParser.memberExpression"/>.
-	/// <para>The default implementation does nothing.</para>
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	public virtual void ExitMemberExpression([NotNull] MRLParser.MemberExpressionContext context) { }
 	/// <summary>
 	/// Enter a parse tree produced by <see cref="MRLParser.primaryExpression"/>.
 	/// <para>The default implementation does nothing.</para>

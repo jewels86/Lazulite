@@ -128,12 +128,6 @@ public interface IMRLParserVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitParameterList([NotNull] MRLParser.ParameterListContext context);
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="MRLParser.functionCall"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitFunctionCall([NotNull] MRLParser.FunctionCallContext context);
-	/// <summary>
 	/// Visit a parse tree produced by <see cref="MRLParser.expression"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
@@ -163,12 +157,6 @@ public interface IMRLParserVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	Result VisitCallExpression([NotNull] MRLParser.CallExpressionContext context);
-	/// <summary>
-	/// Visit a parse tree produced by <see cref="MRLParser.memberExpression"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitMemberExpression([NotNull] MRLParser.MemberExpressionContext context);
 	/// <summary>
 	/// Visit a parse tree produced by <see cref="MRLParser.primaryExpression"/>.
 	/// </summary>

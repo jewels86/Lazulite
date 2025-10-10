@@ -191,16 +191,6 @@ public interface IMRLParserListener : IParseTreeListener {
 	/// <param name="context">The parse tree.</param>
 	void ExitParameterList([NotNull] MRLParser.ParameterListContext context);
 	/// <summary>
-	/// Enter a parse tree produced by <see cref="MRLParser.functionCall"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	void EnterFunctionCall([NotNull] MRLParser.FunctionCallContext context);
-	/// <summary>
-	/// Exit a parse tree produced by <see cref="MRLParser.functionCall"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	void ExitFunctionCall([NotNull] MRLParser.FunctionCallContext context);
-	/// <summary>
 	/// Enter a parse tree produced by <see cref="MRLParser.expression"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
@@ -250,16 +240,6 @@ public interface IMRLParserListener : IParseTreeListener {
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	void ExitCallExpression([NotNull] MRLParser.CallExpressionContext context);
-	/// <summary>
-	/// Enter a parse tree produced by <see cref="MRLParser.memberExpression"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	void EnterMemberExpression([NotNull] MRLParser.MemberExpressionContext context);
-	/// <summary>
-	/// Exit a parse tree produced by <see cref="MRLParser.memberExpression"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	void ExitMemberExpression([NotNull] MRLParser.MemberExpressionContext context);
 	/// <summary>
 	/// Enter a parse tree produced by <see cref="MRLParser.primaryExpression"/>.
 	/// </summary>
