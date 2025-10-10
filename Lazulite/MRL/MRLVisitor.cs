@@ -90,23 +90,139 @@ public class MRLVisitor : MRLParserBaseVisitor<ASTNode>
     public override ASTNode VisitUnaryExpression(MRLParser.UnaryExpressionContext context)
     {
         int line = context.Start.Line;
-        int column = context.Start.Line;
+        int column = context.Start.Column;
 
-        return context.callExpression() != null 
-            ? Visit(context.callExpression()) 
-            : new UnaryExpressionNode(line, column, Visit(context.unaryExpression()), context.@operator().GetText());
+        if (context.callExpression() != null)
+            return Visit(context.callExpression());
+    
+        string op = context.children[0].GetText();
+        return new UnaryExpressionNode(
+            line,
+            column,
+            Visit(context.unaryExpression()),
+            op
+        );
+    }
+    
+    public override ASTNode VisitAdditiveExpression(MRLParser.AdditiveExpressionContext context)
+    {
+        var expressions = context.multiplicativeExpression()
+            .Select(Visit)
+            .ToList();
+    
+        if (expressions.Count == 1)
+            return expressions[0];
+    
+        ASTNode result = expressions[0];
+        for (int i = 0; i < expressions.Count - 1; i++)
+        {
+            string op = context.children[i * 2 + 1].GetText();
+            result = new BinaryExpressionNode(
+                context.Start.Line,
+                context.Start.Column,
+                result,
+                op,
+                expressions[i + 1]
+            );
+        }
+    
+        return result;
     }
 
-    public override ASTNode VisitBinaryExpression(MRLParser.BinaryExpressionContext context)
+    public override ASTNode VisitMultiplicativeExpression(MRLParser.MultiplicativeExpressionContext context)
     {
-        int line = context.Start.Line;
-        int column = context.Start.Line;
-
-        if (context.RPAREN().Length != 0)
+        // (expr)(expr)
+        if (context.LPAREN().Length > 0)
         {
-            List<PartialBinaryExpression> parts = [];
-            context.
+            var expressions = context.exponentiationExpression()
+                .Select(Visit)
+                .Cast<ASTNode>()
+                .ToList();
+
+            ASTNode result = expressions[0];
+            for (int i = 1; i < expressions.Count; i++)
+            {
+                result = new BinaryExpressionNode(
+                    context.Start.Line,
+                    context.Start.Column,
+                    result,
+                    "*",
+                    expressions[i]
+                );
+            }
+
+            return result;
         }
+        
+        var exprs = context.exponentiationExpression()
+            .Select(Visit)
+            .ToList();
+    
+        if (exprs.Count == 1)
+            return exprs[0];
+    
+        ASTNode result2 = exprs[0];
+        for (int i = 0; i < exprs.Count - 1; i++)
+        {
+            string op = context.children[i * 2 + 1].GetText();
+            result2 = new BinaryExpressionNode(
+                context.Start.Line,
+                context.Start.Column,
+                result2,
+                op,
+                exprs[i + 1]
+            );
+        }
+    
+        return result2;
+    }
+    
+    public override ASTNode VisitExponentiationExpression(MRLParser.ExponentiationExpressionContext context)
+    {
+        var expressions = context.unaryExpression()
+            .Select(Visit)
+            .ToList();
+    
+        if (expressions.Count == 1)
+            return expressions[0];
+    
+        ASTNode result = expressions[^1];
+        for (int i = expressions.Count - 2; i >= 0; i--)
+        {
+            result = new BinaryExpressionNode(
+                context.Start.Line,
+                context.Start.Column,
+                expressions[i],
+                "^",
+                result
+            );
+        }
+    
+        return result;
+    }
+    
+    public override ASTNode VisitLogicalOrExpression(MRLParser.LogicalOrExpressionContext context)
+    {
+        var expressions = context.logicalAndExpression()
+            .Select(Visit)
+            .ToList();
+    
+        if (expressions.Count == 1)
+            return expressions[0];
+    
+        ASTNode result = expressions[0];
+        for (int i = 0; i < expressions.Count - 1; i++)
+        {
+            result = new BinaryExpressionNode(
+                context.Start.Line,
+                context.Start.Column,
+                result,
+                "||",
+                expressions[i + 1]
+            );
+        }
+    
+        return result;
     }
 
     #endregion
@@ -151,8 +267,8 @@ public record ParameterListNode(int Line, int Column, List<ParameterNode> Parame
 
 public record UnaryExpressionNode(int Line, int Column, ASTNode Operand, string Operator) : ASTNode(Line, Column);
 
-public record PartialBinaryExpression(int Line, int Column, string Operator, ASTNode Right) : ASTNode(Line, Column);
-public record BinaryExpressionNode(int Line, int Column, ASTNode Left, PartialBinaryExpression Right) : ASTNode(Line, Column);
+public record BinaryExpressionNode(int Line, int Column, ASTNode Left, string Operator, ASTNode Right) 
+    : ASTNode(Line, Column);
  
 public enum Modifier
 {

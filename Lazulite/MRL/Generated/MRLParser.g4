@@ -57,6 +57,9 @@ operator
 assignmentOperator 
     : EQUAL | PLUS EQUAL | MINUS EQUAL | STAR EQUAL | SLASH EQUAL | MODIFY;
     
+comparisonOperator
+    : EQUAL EQUAL | LESSTHAN | GREATERTHAN | LESSTHAN EQUAL | GREATERTHAN EQUAL | NOTEQUAL;
+    
 parameter
     : (IDENTIFIER EQUAL)? expression;
 
@@ -64,30 +67,47 @@ parameterList
     : parameter (COMMA parameter)*;
 
 expression
-    : assignmentExpression
-    | lambdaExpression;
+  : assignmentExpression;
 
 assignmentExpression
-    : binaryExpression;
+  : logicalOrExpression (EQUAL logicalOrExpression)?;
 
-binaryExpression
-    : unaryExpression (operator unaryExpression)*
-    | LPAREN unaryExpression RPAREN (LPAREN unaryExpression RPAREN)*;
+logicalOrExpression
+  : logicalAndExpression (OR logicalAndExpression)*;
+
+logicalAndExpression
+  : equalityExpression (AND equalityExpression)*;
+
+equalityExpression
+  : relationalExpression ((EQUALEQUAL | NOTEQUAL) relationalExpression)*;
+
+relationalExpression
+  : additiveExpression ((LESSTHAN | LESSTHAN EQUAL | GREATERTHAN | GREATERTHAN EQUAL) additiveExpression)*;
+
+additiveExpression
+  : multiplicativeExpression ((PLUS | MINUS) multiplicativeExpression)*;
+
+multiplicativeExpression
+  : exponentiationExpression ((STAR | SLASH | PERCENT) exponentiationExpression)*
+  | LPAREN exponentiationExpression RPAREN (LPAREN exponentiationExpression RPAREN)*;
+
+exponentiationExpression
+  : unaryExpression (CARET unaryExpression)*;
 
 unaryExpression
-    : operator unaryExpression
-    | callExpression;
+  : (PLUS | MINUS | BANG | NEW) unaryExpression
+  | callExpression;
 
 callExpression
-    : primaryExpression
-    | withExpression
-    | callExpression DOT IDENTIFIER
-    | callExpression LPAREN parameterList? RPAREN;
+  : primaryExpression
+  | withExpression
+  | callExpression DOT IDENTIFIER
+  | callExpression LPAREN parameterList? RPAREN;
 
 primaryExpression
-    : IDENTIFIER
-    | literal
-    | LPAREN expression RPAREN;
+  : IDENTIFIER
+  | literal
+  | LPAREN expression RPAREN;
 
 variableDeclaration
    :  LET IDENTIFIER (COLON modifier* type)? (EQUAL expression)?;

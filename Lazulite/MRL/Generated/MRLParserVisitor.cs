@@ -140,11 +140,47 @@ public interface IMRLParserVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitAssignmentExpression([NotNull] MRLParser.AssignmentExpressionContext context);
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="MRLParser.binaryExpression"/>.
+	/// Visit a parse tree produced by <see cref="MRLParser.logicalOrExpression"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	Result VisitBinaryExpression([NotNull] MRLParser.BinaryExpressionContext context);
+	Result VisitLogicalOrExpression([NotNull] MRLParser.LogicalOrExpressionContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="MRLParser.logicalAndExpression"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitLogicalAndExpression([NotNull] MRLParser.LogicalAndExpressionContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="MRLParser.equalityExpression"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitEqualityExpression([NotNull] MRLParser.EqualityExpressionContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="MRLParser.relationalExpression"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitRelationalExpression([NotNull] MRLParser.RelationalExpressionContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="MRLParser.additiveExpression"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitAdditiveExpression([NotNull] MRLParser.AdditiveExpressionContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="MRLParser.multiplicativeExpression"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitMultiplicativeExpression([NotNull] MRLParser.MultiplicativeExpressionContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="MRLParser.exponentiationExpression"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitExponentiationExpression([NotNull] MRLParser.ExponentiationExpressionContext context);
 	/// <summary>
 	/// Visit a parse tree produced by <see cref="MRLParser.unaryExpression"/>.
 	/// </summary>
