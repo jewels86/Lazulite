@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-// Generated from ./MRLParser.g4 by ANTLR 4.13.2
+// Generated from C:/Users/jewel/RiderProjects/Lazulite/Lazulite/MRL/Generated/MRLParser.g4 by ANTLR 4.13.2
 
 // Unreachable code detected
 #pragma warning disable 0162
@@ -71,18 +71,6 @@ public partial class MRLParserBaseListener : IMRLParserListener {
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	public virtual void ExitTypeDeclaration([NotNull] MRLParser.TypeDeclarationContext context) { }
-	/// <summary>
-	/// Enter a parse tree produced by <see cref="MRLParser.interfaceList"/>.
-	/// <para>The default implementation does nothing.</para>
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	public virtual void EnterInterfaceList([NotNull] MRLParser.InterfaceListContext context) { }
-	/// <summary>
-	/// Exit a parse tree produced by <see cref="MRLParser.interfaceList"/>.
-	/// <para>The default implementation does nothing.</para>
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	public virtual void ExitInterfaceList([NotNull] MRLParser.InterfaceListContext context) { }
 	/// <summary>
 	/// Enter a parse tree produced by <see cref="MRLParser.identifierList"/>.
 	/// <para>The default implementation does nothing.</para>
@@ -204,29 +192,17 @@ public partial class MRLParserBaseListener : IMRLParserListener {
 	/// <param name="context">The parse tree.</param>
 	public virtual void ExitOperator([NotNull] MRLParser.OperatorContext context) { }
 	/// <summary>
-	/// Enter a parse tree produced by <see cref="MRLParser.unaryOperation"/>.
+	/// Enter a parse tree produced by <see cref="MRLParser.assignmentOperator"/>.
 	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void EnterUnaryOperation([NotNull] MRLParser.UnaryOperationContext context) { }
+	public virtual void EnterAssignmentOperator([NotNull] MRLParser.AssignmentOperatorContext context) { }
 	/// <summary>
-	/// Exit a parse tree produced by <see cref="MRLParser.unaryOperation"/>.
+	/// Exit a parse tree produced by <see cref="MRLParser.assignmentOperator"/>.
 	/// <para>The default implementation does nothing.</para>
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
-	public virtual void ExitUnaryOperation([NotNull] MRLParser.UnaryOperationContext context) { }
-	/// <summary>
-	/// Enter a parse tree produced by <see cref="MRLParser.binaryOperation"/>.
-	/// <para>The default implementation does nothing.</para>
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	public virtual void EnterBinaryOperation([NotNull] MRLParser.BinaryOperationContext context) { }
-	/// <summary>
-	/// Exit a parse tree produced by <see cref="MRLParser.binaryOperation"/>.
-	/// <para>The default implementation does nothing.</para>
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	public virtual void ExitBinaryOperation([NotNull] MRLParser.BinaryOperationContext context) { }
+	public virtual void ExitAssignmentOperator([NotNull] MRLParser.AssignmentOperatorContext context) { }
 	/// <summary>
 	/// Enter a parse tree produced by <see cref="MRLParser.parameter"/>.
 	/// <para>The default implementation does nothing.</para>
@@ -276,6 +252,66 @@ public partial class MRLParserBaseListener : IMRLParserListener {
 	/// <param name="context">The parse tree.</param>
 	public virtual void ExitExpression([NotNull] MRLParser.ExpressionContext context) { }
 	/// <summary>
+	/// Enter a parse tree produced by <see cref="MRLParser.assignmentExpression"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterAssignmentExpression([NotNull] MRLParser.AssignmentExpressionContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="MRLParser.assignmentExpression"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitAssignmentExpression([NotNull] MRLParser.AssignmentExpressionContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="MRLParser.binaryExpression"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterBinaryExpression([NotNull] MRLParser.BinaryExpressionContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="MRLParser.binaryExpression"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitBinaryExpression([NotNull] MRLParser.BinaryExpressionContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="MRLParser.unaryExpression"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterUnaryExpression([NotNull] MRLParser.UnaryExpressionContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="MRLParser.unaryExpression"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitUnaryExpression([NotNull] MRLParser.UnaryExpressionContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="MRLParser.callExpression"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterCallExpression([NotNull] MRLParser.CallExpressionContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="MRLParser.callExpression"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitCallExpression([NotNull] MRLParser.CallExpressionContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="MRLParser.memberExpression"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterMemberExpression([NotNull] MRLParser.MemberExpressionContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="MRLParser.memberExpression"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitMemberExpression([NotNull] MRLParser.MemberExpressionContext context) { }
+	/// <summary>
 	/// Enter a parse tree produced by <see cref="MRLParser.primaryExpression"/>.
 	/// <para>The default implementation does nothing.</para>
 	/// </summary>
@@ -312,6 +348,18 @@ public partial class MRLParserBaseListener : IMRLParserListener {
 	/// <param name="context">The parse tree.</param>
 	public virtual void ExitDeclaredParameter([NotNull] MRLParser.DeclaredParameterContext context) { }
 	/// <summary>
+	/// Enter a parse tree produced by <see cref="MRLParser.nextDeclaredParameter"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterNextDeclaredParameter([NotNull] MRLParser.NextDeclaredParameterContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="MRLParser.nextDeclaredParameter"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitNextDeclaredParameter([NotNull] MRLParser.NextDeclaredParameterContext context) { }
+	/// <summary>
 	/// Enter a parse tree produced by <see cref="MRLParser.declaredParameterList"/>.
 	/// <para>The default implementation does nothing.</para>
 	/// </summary>
@@ -323,6 +371,18 @@ public partial class MRLParserBaseListener : IMRLParserListener {
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	public virtual void ExitDeclaredParameterList([NotNull] MRLParser.DeclaredParameterListContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="MRLParser.methodSignature"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterMethodSignature([NotNull] MRLParser.MethodSignatureContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="MRLParser.methodSignature"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitMethodSignature([NotNull] MRLParser.MethodSignatureContext context) { }
 	/// <summary>
 	/// Enter a parse tree produced by <see cref="MRLParser.methodDeclaration"/>.
 	/// <para>The default implementation does nothing.</para>
@@ -347,6 +407,90 @@ public partial class MRLParserBaseListener : IMRLParserListener {
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	public virtual void ExitLiteral([NotNull] MRLParser.LiteralContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="MRLParser.operatorDeclaration"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterOperatorDeclaration([NotNull] MRLParser.OperatorDeclarationContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="MRLParser.operatorDeclaration"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitOperatorDeclaration([NotNull] MRLParser.OperatorDeclarationContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="MRLParser.comparisonOperator"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterComparisonOperator([NotNull] MRLParser.ComparisonOperatorContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="MRLParser.comparisonOperator"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitComparisonOperator([NotNull] MRLParser.ComparisonOperatorContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="MRLParser.comparison"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterComparison([NotNull] MRLParser.ComparisonContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="MRLParser.comparison"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitComparison([NotNull] MRLParser.ComparisonContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="MRLParser.withExpression"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterWithExpression([NotNull] MRLParser.WithExpressionContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="MRLParser.withExpression"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitWithExpression([NotNull] MRLParser.WithExpressionContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="MRLParser.foreachStatement"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterForeachStatement([NotNull] MRLParser.ForeachStatementContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="MRLParser.foreachStatement"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitForeachStatement([NotNull] MRLParser.ForeachStatementContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="MRLParser.ifStatement"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterIfStatement([NotNull] MRLParser.IfStatementContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="MRLParser.ifStatement"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitIfStatement([NotNull] MRLParser.IfStatementContext context) { }
+	/// <summary>
+	/// Enter a parse tree produced by <see cref="MRLParser.lambdaExpression"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void EnterLambdaExpression([NotNull] MRLParser.LambdaExpressionContext context) { }
+	/// <summary>
+	/// Exit a parse tree produced by <see cref="MRLParser.lambdaExpression"/>.
+	/// <para>The default implementation does nothing.</para>
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	public virtual void ExitLambdaExpression([NotNull] MRLParser.LambdaExpressionContext context) { }
 
 	/// <inheritdoc/>
 	/// <remarks>The default implementation does nothing.</remarks>

@@ -10,7 +10,9 @@ public static class ASTBuilder
         MRLLexer lexer = new(inputStream);
         CommonTokenStream commonTokenStream = new(lexer);
         MRLParser parser = new(commonTokenStream);
+
         var parseTree = parser.program();
+        Console.WriteLine(parseTree.ToStringTree(parser));
         
         MRLVisitor visitor = new();
         var ast = visitor.Visit(parseTree);

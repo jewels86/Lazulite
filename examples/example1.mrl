@@ -119,7 +119,7 @@ vector4: complete itype vector_t alike vector3 = { # vector4 is like vector3 but
     
     operator this *(scalar: scalar_t) -> vector4 = {
         return this with {
-            x = this.x * scalar,
+            x = (this.x)(scalar),
             y = this.y * scalar,
             z = this.z * scalar,
             w = this.w * scalar,
@@ -223,7 +223,7 @@ classical_backend: complete itype physics_backend = {
     
     acceleration(b: body_t, s: state) -> specific vector3 = {
         let acc = new vector3(0.0, 0.0, 0.0); # we know acc will be a specific vector3
-        for each  other in s.bodies {
+        for each other in s.bodies {
             if other != b {
                 acc += gravity(b, other); # we don't have to worry about the modification operator here because acc is specific
             }

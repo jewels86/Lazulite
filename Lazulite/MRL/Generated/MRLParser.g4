@@ -11,10 +11,8 @@ declaration
     | variableDeclaration SEMICOLON;
     
 typeDeclaration
-    : IDENTIFIER COLON (COMPLETE)? ITYPE interfaceList? (ALIKE identifierList)? EQUAL LBRACE memberDeclaration* RBRACE;
+    : IDENTIFIER COLON (COMPLETE)? ITYPE identifierList? (ALIKE identifierList)? EQUAL LBRACE memberDeclaration* RBRACE;
 
-interfaceList
-    : IDENTIFIER (COMMA IDENTIFIER)*;
 identifierList
     : IDENTIFIER (COMMA IDENTIFIER)*;
 
@@ -69,13 +67,15 @@ functionCall
     : IDENTIFIER LPAREN parameterList? RPAREN;
 
 expression
-    : assignmentExpression;
+    : assignmentExpression
+    | lambdaExpression;
 
 assignmentExpression
     : binaryExpression;
 
 binaryExpression
-    : unaryExpression (operator unaryExpression)*;
+    : unaryExpression (operator unaryExpression)*
+    | LPAREN unaryExpression RPAREN (LPAREN unaryExpression RPAREN)*;
 
 unaryExpression
     : operator unaryExpression
@@ -96,7 +96,7 @@ primaryExpression
     | LPAREN expression RPAREN;
 
 variableDeclaration
-   :  LET IDENTIFIER (COLON modifier* type)? EQUAL expression;
+   :  LET IDENTIFIER (COLON modifier* type)? (EQUAL expression)?;
    
 declaredParameter
     : IDENTIFIER COLON modifier* type;
@@ -130,7 +130,10 @@ withExpression
     : primaryExpression WITH LBRACE (IDENTIFIER EQUAL expression) (COMMA (IDENTIFIER EQUAL expression)?)* RBRACE;
     
 foreachStatement 
-    : FOR EACH IDENTIFIER IN expression (WHERE comparison)? block;
+    : FOR EACH IDENTIFIER IN expression (WHERE lambdaExpression)? block;
     
 ifStatement
     : IF comparison block (ELSE (IF comparison)? block)?;
+    
+lambdaExpression
+    : LPAREN parameterList RPAREN FULLARROW block;

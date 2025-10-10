@@ -130,6 +130,11 @@ operator new this(x: scalar_t, y: scalar_t, z: scalar_t) -> vector3 = {
 }
 ```
 
+### Multiplication Shorthand
+```
+let z: scalar_t = (x)(y);  # Equivalent to x * y
+```
+
 ---
 
 ## Import System
@@ -171,7 +176,7 @@ acceleration(b: body_t, s: state) -> vector3 = {
     assert s.bodies.length > 0, "State must contain at least one body";
     
     let acc = new vector3(0.0, 0.0, 0.0);
-    for other in s.bodies.where(o => o != b) {
+    for each other in s.bodies where (o => o != b) {
         acc += gravity(b, other);
     }
     return acc;
@@ -210,19 +215,19 @@ find_equilibrium(system: state, tolerance: scalar_t) -> state = {
 }
 ```
 
-### For Loops
+### For Each Loops
 
-For loops are syntactic sugar for `.foreach()`:
+For each loops are syntactic sugar for `.foreach()`:
 
 ```
-for item in collection {
+for each item in collection where (x => condition) {
     # statements
 }
 ```
 
 **Desugars to:**
 ```
-collection.foreach(item => {
+collection.where(condition).foreach(item => {
     # statements
 });
 ```
@@ -231,7 +236,7 @@ collection.foreach(item => {
 ```
 total_momentum(bodies: body_t[]) -> vector3 = {
     let total = new vector3(0.0, 0.0, 0.0);
-    for body in bodies {
+    for each body in bodies {
         total += body.momentum();
     }
     return total;
