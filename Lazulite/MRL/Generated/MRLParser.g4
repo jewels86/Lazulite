@@ -11,7 +11,7 @@ declaration
     | variableDeclaration SEMICOLON;
     
 typeDeclaration
-    : IDENTIFIER COLON (COMPLETE)? ITYPE identifierList? (ALIKE identifierList)? EQUAL LBRACE memberDeclaration* RBRACE;
+    : IDENTIFIER COLON (COMPLETE)? ITYPE interfaces=identifierList? (ALIKE alikes=identifierList)? EQUAL LBRACE memberDeclaration* RBRACE;
 
 identifierList
     : IDENTIFIER (COMMA IDENTIFIER)*;

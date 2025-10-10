@@ -277,6 +277,8 @@ public partial class MRLParser : Parser {
 	}
 
 	public partial class TypeDeclarationContext : ParserRuleContext {
+		public IdentifierListContext interfaces;
+		public IdentifierListContext alikes;
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode IDENTIFIER() { return GetToken(MRLParser.IDENTIFIER, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode COLON() { return GetToken(MRLParser.COLON, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode ITYPE() { return GetToken(MRLParser.ITYPE, 0); }
@@ -284,18 +286,18 @@ public partial class MRLParser : Parser {
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode LBRACE() { return GetToken(MRLParser.LBRACE, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode RBRACE() { return GetToken(MRLParser.RBRACE, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode COMPLETE() { return GetToken(MRLParser.COMPLETE, 0); }
-		[System.Diagnostics.DebuggerNonUserCode] public IdentifierListContext[] identifierList() {
-			return GetRuleContexts<IdentifierListContext>();
-		}
-		[System.Diagnostics.DebuggerNonUserCode] public IdentifierListContext identifierList(int i) {
-			return GetRuleContext<IdentifierListContext>(i);
-		}
 		[System.Diagnostics.DebuggerNonUserCode] public ITerminalNode ALIKE() { return GetToken(MRLParser.ALIKE, 0); }
 		[System.Diagnostics.DebuggerNonUserCode] public MemberDeclarationContext[] memberDeclaration() {
 			return GetRuleContexts<MemberDeclarationContext>();
 		}
 		[System.Diagnostics.DebuggerNonUserCode] public MemberDeclarationContext memberDeclaration(int i) {
 			return GetRuleContext<MemberDeclarationContext>(i);
+		}
+		[System.Diagnostics.DebuggerNonUserCode] public IdentifierListContext[] identifierList() {
+			return GetRuleContexts<IdentifierListContext>();
+		}
+		[System.Diagnostics.DebuggerNonUserCode] public IdentifierListContext identifierList(int i) {
+			return GetRuleContext<IdentifierListContext>(i);
 		}
 		public TypeDeclarationContext(ParserRuleContext parent, int invokingState)
 			: base(parent, invokingState)
@@ -350,7 +352,7 @@ public partial class MRLParser : Parser {
 			if (_la==IDENTIFIER) {
 				{
 				State = 97;
-				identifierList();
+				_localctx.interfaces = identifierList();
 				}
 			}
 
@@ -362,7 +364,7 @@ public partial class MRLParser : Parser {
 				State = 100;
 				Match(ALIKE);
 				State = 101;
-				identifierList();
+				_localctx.alikes = identifierList();
 				}
 			}
 
