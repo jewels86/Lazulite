@@ -4,7 +4,7 @@ namespace Lazulite.MRL;
 
 public static class ASTBuilder
 {
-    public static void FromSource(string source)
+    public static ASTNode FromSource(string source)
     {
         AntlrInputStream inputStream = new(source);
         MRLLexer lexer = new(inputStream);
@@ -12,9 +12,9 @@ public static class ASTBuilder
         MRLParser parser = new(commonTokenStream);
 
         var parseTree = parser.program();
-        Console.WriteLine(parseTree.ToStringTree(parser));
         
         MRLVisitor visitor = new();
-        var ast = visitor.Visit(parseTree);
+        ASTNode ast = visitor.Visit(parseTree);
+        return ast;
     }
 }

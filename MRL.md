@@ -449,6 +449,7 @@ body := new normal_body(mass, position, velocity);
 
 ---
 
-## Compilation Target
-
-Compiles to WASM modules for portability. Compiler resolves interface types, generates efficient code, and handles dynamic property computation at compile time where possible.
+## Upcoming Additions
+- Custom Operators (`\cross`, etc)
+- Operator Signatures in `itypes`
+- Array 

@@ -92,17 +92,29 @@ public interface IMRLParserVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitBlock([NotNull] MRLParser.BlockContext context);
 	/// <summary>
+	/// Visit a parse tree produced by <see cref="MRLParser.statement"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitStatement([NotNull] MRLParser.StatementContext context);
+	/// <summary>
 	/// Visit a parse tree produced by <see cref="MRLParser.partialStatement"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	Result VisitPartialStatement([NotNull] MRLParser.PartialStatementContext context);
 	/// <summary>
-	/// Visit a parse tree produced by <see cref="MRLParser.statement"/>.
+	/// Visit a parse tree produced by <see cref="MRLParser.foreachStatement"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
-	Result VisitStatement([NotNull] MRLParser.StatementContext context);
+	Result VisitForeachStatement([NotNull] MRLParser.ForeachStatementContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="MRLParser.ifStatement"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitIfStatement([NotNull] MRLParser.IfStatementContext context);
 	/// <summary>
 	/// Visit a parse tree produced by <see cref="MRLParser.operator"/>.
 	/// </summary>
@@ -115,6 +127,18 @@ public interface IMRLParserVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	Result VisitAssignmentOperator([NotNull] MRLParser.AssignmentOperatorContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="MRLParser.comparisonOperator"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitComparisonOperator([NotNull] MRLParser.ComparisonOperatorContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="MRLParser.declarableOperator"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitDeclarableOperator([NotNull] MRLParser.DeclarableOperatorContext context);
 	/// <summary>
 	/// Visit a parse tree produced by <see cref="MRLParser.parameter"/>.
 	/// </summary>
@@ -133,12 +157,6 @@ public interface IMRLParserVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	Result VisitExpression([NotNull] MRLParser.ExpressionContext context);
-	/// <summary>
-	/// Visit a parse tree produced by <see cref="MRLParser.assignmentExpression"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitAssignmentExpression([NotNull] MRLParser.AssignmentExpressionContext context);
 	/// <summary>
 	/// Visit a parse tree produced by <see cref="MRLParser.logicalOrExpression"/>.
 	/// </summary>
@@ -194,6 +212,18 @@ public interface IMRLParserVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <return>The visitor result.</return>
 	Result VisitCallExpression([NotNull] MRLParser.CallExpressionContext context);
 	/// <summary>
+	/// Visit a parse tree produced by <see cref="MRLParser.withExpression"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitWithExpression([NotNull] MRLParser.WithExpressionContext context);
+	/// <summary>
+	/// Visit a parse tree produced by <see cref="MRLParser.lambdaExpression"/>.
+	/// </summary>
+	/// <param name="context">The parse tree.</param>
+	/// <return>The visitor result.</return>
+	Result VisitLambdaExpression([NotNull] MRLParser.LambdaExpressionContext context);
+	/// <summary>
 	/// Visit a parse tree produced by <see cref="MRLParser.primaryExpression"/>.
 	/// </summary>
 	/// <param name="context">The parse tree.</param>
@@ -247,40 +277,4 @@ public interface IMRLParserVisitor<Result> : IParseTreeVisitor<Result> {
 	/// <param name="context">The parse tree.</param>
 	/// <return>The visitor result.</return>
 	Result VisitOperatorDeclaration([NotNull] MRLParser.OperatorDeclarationContext context);
-	/// <summary>
-	/// Visit a parse tree produced by <see cref="MRLParser.comparisonOperator"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitComparisonOperator([NotNull] MRLParser.ComparisonOperatorContext context);
-	/// <summary>
-	/// Visit a parse tree produced by <see cref="MRLParser.comparison"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitComparison([NotNull] MRLParser.ComparisonContext context);
-	/// <summary>
-	/// Visit a parse tree produced by <see cref="MRLParser.withExpression"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitWithExpression([NotNull] MRLParser.WithExpressionContext context);
-	/// <summary>
-	/// Visit a parse tree produced by <see cref="MRLParser.foreachStatement"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitForeachStatement([NotNull] MRLParser.ForeachStatementContext context);
-	/// <summary>
-	/// Visit a parse tree produced by <see cref="MRLParser.ifStatement"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitIfStatement([NotNull] MRLParser.IfStatementContext context);
-	/// <summary>
-	/// Visit a parse tree produced by <see cref="MRLParser.lambdaExpression"/>.
-	/// </summary>
-	/// <param name="context">The parse tree.</param>
-	/// <return>The visitor result.</return>
-	Result VisitLambdaExpression([NotNull] MRLParser.LambdaExpressionContext context);
 }

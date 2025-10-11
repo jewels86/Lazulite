@@ -40,15 +40,22 @@ block
     : expression SEMICOLON
     | LBRACE statement* RBRACE;
     
-partialStatement 
-    : RETURN expression
-    | variableDeclaration
-    | callExpression assignmentOperator expression;
-    
 statement 
     : partialStatement SEMICOLON
     | ifStatement
     | foreachStatement;
+    
+partialStatement 
+    : RETURN expression?
+    | variableDeclaration
+    | callExpression assignmentOperator expression;
+    
+foreachStatement 
+    : FOR EACH IDENTIFIER IN expression (WHERE lambdaExpression)? block;
+    
+ifStatement
+    : IF logicalAndExpression block (ELSE (IF logicalAndExpression)? block)?;
+    
     
 operator
     : PLUS | MINUS | STAR | SLASH | PERCENT | CARET
@@ -59,6 +66,12 @@ assignmentOperator
     
 comparisonOperator
     : EQUAL EQUAL | LESSTHAN | GREATERTHAN | LESSTHAN EQUAL | GREATERTHAN EQUAL | NOTEQUAL;
+
+declarableOperator
+    : PLUS | MINUS | STAR | SLASH | PERCENT | CARET
+    | SLASH SLASH
+    | MODIFY 
+    | EQUAL EQUAL | LESSTHAN | GREATERTHAN | NOTEQUAL;
     
 parameter
     : (IDENTIFIER EQUAL)? expression;
@@ -67,10 +80,7 @@ parameterList
     : parameter (COMMA parameter)*;
 
 expression
-  : assignmentExpression;
-
-assignmentExpression
-  : logicalOrExpression (EQUAL logicalOrExpression)?;
+  : logicalOrExpression;
 
 logicalOrExpression
   : logicalAndExpression (OR logicalAndExpression)*;
@@ -101,9 +111,16 @@ unaryExpression
 callExpression
   : primaryExpression
   | withExpression
+  | lambdaExpression
   | callExpression DOT IDENTIFIER
   | callExpression LPAREN parameterList? RPAREN;
+  
+withExpression
+  : primaryExpression WITH LBRACE (IDENTIFIER EQUAL expression) (COMMA (IDENTIFIER EQUAL expression)?)* RBRACE;
 
+lambdaExpression
+    : LPAREN parameterList RPAREN FULLARROW block;
+    
 primaryExpression
   : IDENTIFIER
   | literal
@@ -131,23 +148,5 @@ literal
     : STRING | NUMBER | NULL | LBRACK (expression (COMMA expression)*)? RBRACK;
     
 operatorDeclaration 
-    : OPERATOR IDENTIFIER operator LPAREN declaredParameterList? RPAREN INPLACE? ARROW (modifier* type | PRESERVES IDENTIFIER) EQUAL block
+    : OPERATOR IDENTIFIER declarableOperator LPAREN declaredParameterList? RPAREN INPLACE? ARROW (modifier* type | PRESERVES IDENTIFIER) EQUAL block
     | OPERATOR NEW LPAREN declaredParameterList? RPAREN INPLACE? EQUAL block; 
-    
-comparisonOperator
-    : EQUAL EQUAL | LESSTHAN | GREATERTHAN | LESSTHAN EQUAL | GREATERTHAN EQUAL | NOTEQUAL;
-    
-comparison
-    : expression comparisonOperator expression;
-    
-withExpression
-    : primaryExpression WITH LBRACE (IDENTIFIER EQUAL expression) (COMMA (IDENTIFIER EQUAL expression)?)* RBRACE;
-    
-foreachStatement 
-    : FOR EACH IDENTIFIER IN expression (WHERE lambdaExpression)? block;
-    
-ifStatement
-    : IF comparison block (ELSE (IF comparison)? block)?;
-    
-lambdaExpression
-    : LPAREN parameterList RPAREN FULLARROW block;
