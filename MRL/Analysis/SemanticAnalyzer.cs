@@ -1,6 +1,12 @@
-﻿namespace MRL.Analysis;
+﻿using MRL.Parsing;
 
-public class SemanticAnalyzer
+namespace MRL.Analysis;
+
+public static class SemanticAnalyzer
 {
-    
+    public static void Analyze(ProgramNode program)
+    {
+        SymbolTable symbolTable = SymbolTable.BuildSymbolTable(program);
+        
+    }
 }

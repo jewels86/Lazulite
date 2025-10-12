@@ -10,6 +10,8 @@ public class SymbolTable
 
     public static SymbolTable BuildSymbolTable(ProgramNode program)
     {
+        SymbolTable symbolTable = new();
+        
         foreach (var declaration in program.Declarations.Where(d => d is TypeDeclarationNode).Cast<TypeDeclarationNode>())
         {
             TypeInfo typeInfo = new(
@@ -19,8 +21,8 @@ public class SymbolTable
                 declaration.Alikes.Identifiers.Select(i => i.Name).ToList(),
                 [], []
             );
-            
-            declaration.Members.Select(m =>
+
+            declaration.Members.ForEach(m =>
             {
                 if (m is FieldDeclarationNode fieldDeclaration)
                     typeInfo.Fields[fieldDeclaration.Name] = new(
@@ -28,15 +30,40 @@ public class SymbolTable
                         CreateTypeReference(fieldDeclaration.Type, fieldDeclaration.modifiers),
                         CreateFieldModifiers(fieldDeclaration.modifiers),
                         fieldDeclaration.Initializer);
-                if (m is MethodDeclarationNode methodDeclaration) 
-                    typeInfo.Methods[methodDeclaration.MethodSignature.Name] = new(
+                if (m is MethodDeclarationNode methodDeclaration)
+                {
+                    MethodInfo methodInfo = new(
                         methodDeclaration.MethodSignature.Name,
                         CreateParameterInfoList(methodDeclaration.MethodSignature.DeclaredParameters),
-                        CreateTypeReference(methodDeclaration.MethodSignature.ReturnType.Type, methodDeclaration.MethodSignature))
-            })
+                        CreateTypeReference(methodDeclaration.MethodSignature.ReturnType.Type, methodDeclaration.MethodSignature.ReturnType.modifiers),
+                        methodDeclaration.MethodSignature.Inplace,
+                        methodDeclaration.MethodSignature.ReturnType.preserves,
+                        methodDeclaration.Block);
+                    if (!typeInfo.Methods.ContainsKey(methodDeclaration.MethodSignature.Name))
+                        typeInfo.Methods[methodDeclaration.MethodSignature.Name] = [];
+                    typeInfo.Methods[methodDeclaration.MethodSignature.Name].Add(methodInfo);
+                }
+                if (m is OperatorDeclarationNode operatorDeclaration)
+                {
+                    MethodInfo operatorInfo = new(
+                        operatorDeclaration.Operator,
+                        CreateParameterInfoList(operatorDeclaration.DeclaredParameters),
+                        CreateTypeReference(operatorDeclaration.ReturnType.Type, operatorDeclaration.ReturnType.modifiers),
+                        operatorDeclaration.Inplace,
+                        operatorDeclaration.ReturnType.preserves,
+                        operatorDeclaration.Block);
+                    if (!typeInfo.Methods.ContainsKey(operatorDeclaration.Operator))
+                        typeInfo.Methods[operatorDeclaration.Operator] = [];
+                    typeInfo.Methods[operatorDeclaration.Operator].Add(operatorInfo);
+                }
+            });
+            
+            symbolTable.Types[declaration.Name] = typeInfo;
         }
+        return symbolTable;
     }
 
+    #region Helpers
     private static TypeReference CreateTypeReference(TypeNode typeNode, List<ModifierNode> modifiers)
     {
         int arrayCount = typeNode.ArrayCount;
@@ -90,15 +117,17 @@ public class SymbolTable
             .Select(p => new ParameterInfo(p.Name, CreateTypeReference(p.Type, p.modifiers)))
             .ToList();
     }
+    #endregion
 }
 
+#region Records and Enums
 public record TypeInfo(
     string Name,
     bool Complete,
-    List<string> Inferfaces,
+    List<string> Interfaces,
     List<string> Alikes,
     Dictionary<string, FieldInfo> Fields,
-    Dictionary<string, MethodInfo> Methods
+    Dictionary<string, List<MethodInfo>> Methods
 );
         
 
@@ -115,8 +144,6 @@ public record MethodInfo(
     TypeReference ReturnType,
     bool Inplace,
     string? Preserves,
-    bool Operator,
-    string? OperatorSymbol,
     ASTNode? Body
 );
 
@@ -153,3 +180,4 @@ public enum TypeModifiers
     Same = 4,
     Array = 8
 }
+#endregion

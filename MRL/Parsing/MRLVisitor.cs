@@ -91,45 +91,65 @@ public class MRLVisitor : MRLParserBaseVisitor<ASTNode>
 
     public override ASTNode VisitOperatorDeclaration(MRLParser.OperatorDeclarationContext context)
     {
-        if (context.NEW() is null)
-        {
-            string thisName = context.IDENTIFIER()[0].GetText();
-            string op = context.declarableOperator().GetText();
-            List<DeclaredParameterNode> parameters = ((DeclaredParameterListNode)Visit(context.declaredParameterList())).DeclaredParameters;
-            bool inplace = context.INPLACE() != null;
-            string? preserves = context.PRESERVES() != null ? context.IDENTIFIER()[1].GetText() : null;
-            string? returnType = context.type() != null ? ((TypeNode)Visit(context.type())).Name : null;
-            BlockNode block = (BlockNode)Visit(context.block());
+        int line = context.Start.Line;
+        int column = context.Start.Column;
 
-            return new OperatorDeclarationNode(
-                context.Start.Line,
-                context.Start.Column,
-                op,
-                parameters,
-                new ReturnTypeNode(context.Start.Line, context.Start.Column, returnType != null
-                    ? new TypeNode(context.Start.Line, context.Start.Column, returnType)
-                    : null, preserves),
-                block
-            );
+        List<DeclaredParameterNode> parameters = context.declaredParameterList() != null
+            ? ((DeclaredParameterListNode)Visit(context.declaredParameterList())).DeclaredParameters
+            : [];
+
+        var parentTypeContext = GetParentType(context);
+        if (parentTypeContext is not null)
+        {
+            string parentTypeName = parentTypeContext.IDENTIFIER().GetText();
+            parameters.Add(new DeclaredParameterNode(line, column, "this", [], new TypeNode(line, column, parentTypeName)));
+        }
+
+        bool inplace = context.INPLACE() != null;
+        List<ModifierNode> modifiers = context.modifier().Select(Visit).Cast<ModifierNode>().ToList();
+
+        ReturnTypeNode returnType;
+        if (context.PRESERVES() is not null)
+        {
+            string? preserves = context.IDENTIFIER().Length > 1 ? context.IDENTIFIER(1).GetText() : null;
+            TypeNode? preservesType = preserves != null
+                ? parameters.FirstOrDefault(p => p.Name == preserves)?.Type
+                : null;
+            if (preservesType is null) throw new Exception("Preserves type not found- are you trying to preserve a non-existent type?");
+            returnType = new ReturnTypeNode(line, column, preservesType, modifiers, preserves);
         }
         else
         {
-            string parentType = GetParentType(context)!.IDENTIFIER().GetText();
-            List<DeclaredParameterNode> parameters = ((DeclaredParameterListNode)Visit(context.declaredParameterList())).DeclaredParameters;
-            BlockNode block = (BlockNode)Visit(context.block());
-            parameters.Add(new DeclaredParameterNode(context.Start.Line, context.Start.Column, "this", [], new TypeNode(context.Start.Line, context.Start.Column, parentType!)));
-            
+            TypeNode? type = context.type() != null ? (TypeNode?)Visit(context.type()) : null;
+            if (type is null) throw new Exception("Type not found");
+            returnType = new ReturnTypeNode(line, column, type, modifiers, null);
+        }
+
+        BlockNode block = (BlockNode)Visit(context.block());
+
+        if (context.NEW() is not null)
+        {
             return new OperatorDeclarationNode(
-                context.Start.Line,
-                context.Start.Column,
+                line,
+                column,
                 "new",
                 parameters,
-                new ReturnTypeNode(context.Start.Line, context.Start.Column, parentType != null
-                    ? new TypeNode(context.Start.Line, context.Start.Column, parentType)
-                    : null, null),
+                returnType,
+                inplace,
                 block
             );
         }
+
+        string op = context.declarableOperator().GetText();
+        return new OperatorDeclarationNode(
+            line,
+            column,
+            op,
+            parameters,
+            returnType,
+            inplace,
+            block
+        );
     }
 
     public override ASTNode VisitDeclaration(MRLParser.DeclarationContext context)
@@ -466,14 +486,15 @@ public class MRLVisitor : MRLParserBaseVisitor<ASTNode>
         }
         
         bool inplace = context.INPLACE() != null;
-        string? preserves = context.PRESERVES() != null ? context.IDENTIFIER()[1].GetText() : null;
-        string? returnType = context.type() != null ? ((TypeNode)Visit(context.type())).Name : null;
-        
-        return new MethodSignatureNode(line, column, name, parameters, preserves != null 
-            ? new ReturnTypeNode(line, column, null, preserves) 
-            : new ReturnTypeNode(line, column, returnType != null 
-                ? new TypeNode(line, column, returnType) 
-                : null, null), inplace);
+        if (context.PRESERVES() is not null)
+        {
+            string preserving = context.IDENTIFIER(1).GetText();
+            TypeNode preservingType = parameters.First(p => p.Name == preserving).Type;
+            return new MethodSignatureNode(line, column, name, parameters, new ReturnTypeNode(line, column, preservingType, [], preserving), inplace);
+        }
+        TypeNode returnType = (TypeNode)Visit(context.type());
+        List<ModifierNode> modifiers = context.modifier().Select(Visit).Cast<ModifierNode>().ToList();
+        return new MethodSignatureNode(line, column, name, parameters, new ReturnTypeNode(line, column, returnType, modifiers, null), inplace);
     }
 
     public override ASTNode VisitType(MRLParser.TypeContext context)
@@ -576,13 +597,13 @@ public record FieldDeclarationNode(int Line, int Column, string Name, TypeNode T
 public record MethodSignatureNode(int Line, int Column, string Name, List<DeclaredParameterNode> DeclaredParameters, ReturnTypeNode ReturnType, bool Inplace = false)   
     : ASTNode(Line, Column);
 public record OperatorDeclarationNode(int Line, int Column, string Operator, 
-    List<DeclaredParameterNode> DeclaredParameters, ReturnTypeNode ReturnType, BlockNode Block) : ASTNode(Line, Column);
+    List<DeclaredParameterNode> DeclaredParameters, ReturnTypeNode ReturnType, bool Inplace, BlockNode Block) : ASTNode(Line, Column);
 
 public record DeclaredParameterNode(int Line, int Column, string Name, List<ModifierNode> modifiers, TypeNode Type) : ASTNode(Line, Column);
 public record DeclaredParameterListNode(int Line, int Column, List<DeclaredParameterNode> DeclaredParameters) : ASTNode(Line, Column);
 
 public record TypeNode(int Line, int Column, string Name, int ArrayCount = 0) : ASTNode(Line, Column);
-public record ReturnTypeNode(int Line, int Column, TypeNode? Type, string? preserves) : ASTNode(Line, Column);
+public record ReturnTypeNode(int Line, int Column, TypeNode Type, List<ModifierNode> modifiers, string? preserves) : ASTNode(Line, Column);
 
 public record BlockNode(int Line, int Column, List<ASTNode> Statements) : ASTNode(Line, Column);
 
