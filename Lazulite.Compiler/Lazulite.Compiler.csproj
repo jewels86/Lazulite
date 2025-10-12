@@ -14,7 +14,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Lazulite\Lazulite.csproj" />
+      <ProjectReference Include="..\MRL\MRL.csproj" />
     </ItemGroup>
 
 </Project>

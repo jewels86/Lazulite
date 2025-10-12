@@ -11,7 +11,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		MRL.md = MRL.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lazulite", "Lazulite\Lazulite.csproj", "{721F7CD8-F21A-41DD-9443-275B8616A604}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MRL", "MRL\MRL.csproj", "{721F7CD8-F21A-41DD-9443-275B8616A604}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lazulite.Compiler", "Lazulite.Compiler\Lazulite.Compiler.csproj", "{F02C7D17-9919-4074-B04C-4DEC0045C555}"
 EndProject

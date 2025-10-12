@@ -1,6 +1,6 @@
-﻿using Lazulite.MRL;
+﻿using MRL.Parsing;
 
-namespace Lazulite;
+namespace MRL;
 
 public static class MRLCompiler
 {

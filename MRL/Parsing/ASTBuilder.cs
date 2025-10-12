@@ -1,6 +1,6 @@
 ﻿using Antlr4.Runtime;
 
-namespace Lazulite.MRL;
+namespace MRL.Parsing;
 
 public static class ASTBuilder
 {

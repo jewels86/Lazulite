@@ -1,4 +1,4 @@
-﻿using Lazulite.Compiler.Commands;
+﻿using MRL.Compiler.Commands;
 using Spectre.Console.Cli;
 
 namespace Lazulite.Compiler;

@@ -20,7 +20,7 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Resource Include="MRL\Generated\MRLLexer.g4">
+      <Resource Include="Parsing\Generated\MRLLexer.g4">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       </Resource>
     </ItemGroup>

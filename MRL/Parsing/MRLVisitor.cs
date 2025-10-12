@@ -1,8 +1,7 @@
 ﻿using Antlr4.Runtime;
 using Antlr4.Runtime.Tree;
-using Wasm.Interpret;
 
-namespace Lazulite.MRL;
+namespace MRL.Parsing;
 
 public class MRLVisitor : MRLParserBaseVisitor<ASTNode>
 {

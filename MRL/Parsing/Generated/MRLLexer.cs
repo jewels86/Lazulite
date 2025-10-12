@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-// Generated from C:/Users/jewel/RiderProjects/Lazulite/Lazulite/MRL/Generated/MRLLexer.g4 by ANTLR 4.13.2
+// Generated from C:/Users/jewel/RiderProjects/MRL/MRL/MRL/Generated/MRLLexer.g4 by ANTLR 4.13.2
 
 // Unreachable code detected
 #pragma warning disable 0162

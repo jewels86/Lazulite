@@ -1,5 +1,5 @@
 ﻿using Spectre.Console.Cli;
-using Lazulite;
+using MRL;
 
 namespace Lazulite.Compiler.Commands;
 
