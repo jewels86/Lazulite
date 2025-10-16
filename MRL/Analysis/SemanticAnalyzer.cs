@@ -6,7 +6,7 @@ public static class SemanticAnalyzer
 {
     public static void Analyze(ProgramNode program)
     {
-        SymbolTable symbolTable = SymbolTable.BuildSymbolTable(program);
+        TypeSymbolTable typeSymbolTable = TypeSymbolTable.BuildSymbolTable(program);
         
     }
 }

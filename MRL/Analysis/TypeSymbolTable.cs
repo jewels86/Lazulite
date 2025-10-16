@@ -4,13 +4,21 @@ using MRL.Parsing;
 
 namespace MRL.Analysis;
 
-public class SymbolTable
+public class TypeSymbolTable
 {
-    public Dictionary<string, TypeInfo> Types { get; set; } = new();
+    public Dictionary<string, TypeInfo> Types { get; } = new();
+    
+    private Dictionary<(string type, string interfaces), bool> _implementsCache = new();
+    
+    #region Helpers
+    public TypeInfo? GetType(string name) => Types.GetValueOrDefault(name);
+    public bool TypeExists(string name) => Types.ContainsKey(name);
+    
+    #endregion
 
-    public static SymbolTable BuildSymbolTable(ProgramNode program)
+    public static TypeSymbolTable BuildSymbolTable(ProgramNode program)
     {
-        SymbolTable symbolTable = new();
+        TypeSymbolTable typeSymbolTable = new();
         
         foreach (var declaration in program.Declarations.Where(d => d is TypeDeclarationNode).Cast<TypeDeclarationNode>())
         {
@@ -58,20 +66,20 @@ public class SymbolTable
                 }
             });
             
-            symbolTable.Types[declaration.Name] = typeInfo;
+            typeSymbolTable.Types[declaration.Name] = typeInfo;
         }
-        return symbolTable;
+        return typeSymbolTable;
     }
 
-    #region Helpers
+    #region Static Helpers
     private static TypeReference CreateTypeReference(TypeNode typeNode, List<ModifierNode> modifiers)
     {
         int arrayCount = typeNode.ArrayCount;
-        if (arrayCount == 0) return new(typeNode.Name, CreateTypeModifiers(modifiers, arrayCount), null);
+        if (arrayCount == 0) return new(typeNode.Name, CreateTypeModifiers(modifiers, arrayCount), null, 0);
         
         string elementTypeName = typeNode.Name;
         TypeReference elementType = CreateTypeReference(typeNode with { ArrayCount = 0 }, []);
-        return new(elementTypeName, CreateTypeModifiers(modifiers, arrayCount), elementType);
+        return new(elementTypeName, CreateTypeModifiers(modifiers, arrayCount), elementType, arrayCount);
     }
 
     private static TypeModifiers CreateTypeModifiers(List<ModifierNode> modifiers, int arrayCount)
@@ -155,7 +163,8 @@ public record ParameterInfo(
 public record TypeReference(
     string Name,
     TypeModifiers Modifiers,
-    TypeReference? ElementType
+    TypeReference? ElementType,
+    int ArrayCount
 );
 
 [Flags]
