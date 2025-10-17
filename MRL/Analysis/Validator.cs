@@ -9,16 +9,24 @@ public class Validator
     {
         TypeSymbolTable = typeSymbolTable;
     }
-    
-    public bool TypeImplements(TypeInfo concreteType, TypeInfo interfaceType)
-    {
-        
-        
-    }
 
     public bool TypePasses(TypeInfo type, TypeInfo target)
     {
+        foreach (var targetField in target.Fields.Values)
+        {
+            if (!type.Fields.TryGetValue(targetField.Name, out FieldInfo? field)) return false;
+            if (!FieldPasses(field, targetField, type.Name)) return false;
+        }
+        foreach (var methods in target.Methods.Values)
+        foreach (var targetMethod in methods)
+        {
+            if (!type.Methods.TryGetValue(targetMethod.Name, out List<MethodInfo>? methodList)) return false;
+            if (!methodList.Any(m => MethodPasses(m, targetMethod, type.Name))) return false;
+        }
         
+        if (TypePassesCache.TryGetValue(type.Name, out var list)) list.Add(target.Name);
+        else TypePassesCache[type.Name] = [target.Name];
+        return true;
     }
 
     public bool TypePasses(TypeReference type, TypeReference target, string typeName)
@@ -54,6 +62,21 @@ public class Validator
         if (!TypePasses(field.Type, target.Type, typeName)) return false;
         if (!Compatible(field.Modifiers, target.Modifiers)) return false;
         
+        return true;
+    }
+
+    public bool MethodPasses(MethodInfo method, MethodInfo target, string typeName)
+    {
+        if (method.Name != target.Name) return false;
+        if (method.Parameters.Count != target.Parameters.Count) return false;
+        foreach (var tuple in method.Parameters.Zip(target.Parameters))
+        {
+            var (parameter, targetParameter) = tuple;
+            if (!TypePasses(parameter.Type, targetParameter.Type, typeName)) return false;
+            if (!Compatible(parameter.Type.Modifiers, targetParameter.Type.Modifiers)) return false;
+        }
+        if (!TypePasses(method.ReturnType, target.ReturnType, typeName)) return false;
+        if (!Compatible(method.ReturnType.Modifiers, target.ReturnType.Modifiers)) return false;
         return true;
     }
 

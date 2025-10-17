@@ -452,4 +452,6 @@ body := new normal_body(mass, position, velocity);
 ## Upcoming Additions
 - Custom Operators (`\cross`, etc)
 - Operator Signatures in `itypes`
-- Array 
+- Derivatives, integrals, and other mathematical tools
+- Compiler will allow any type that passes as another to work in any usage of the target type; `explicit` keyword requires them to state implementation
+- `public`/`private` for modules
