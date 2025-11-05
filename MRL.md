@@ -455,3 +455,5 @@ body := new normal_body(mass, position, velocity);
 - Derivatives, integrals, and other mathematical tools
 - Compiler will allow any type that passes as another to work in any usage of the target type; `explicit` keyword requires them to state implementation
 - `public`/`private` for modules
+- `and`, `or`, etc
+- Implicit typing

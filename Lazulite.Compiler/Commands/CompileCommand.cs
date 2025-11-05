@@ -3,7 +3,7 @@ using MRL;
 
 namespace Lazulite.Compiler.Commands;
 
-public class DefaultCommand : Command<DefaultCommand.Settings>
+public class CompileCommand : Command<CompileCommand.Settings>
 {
     public class Settings : CommandSettings
     {

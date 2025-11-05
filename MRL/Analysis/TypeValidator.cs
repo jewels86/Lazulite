@@ -1,17 +1,19 @@
 ﻿namespace MRL.Analysis;
 
-public class Validator
+public class TypeValidator
 {
     public TypeSymbolTable TypeSymbolTable { get; }
     public Dictionary<string, List<string>> TypePassesCache { get; } = [];
 
-    public Validator(TypeSymbolTable typeSymbolTable)
+    public TypeValidator(TypeSymbolTable typeSymbolTable)
     {
         TypeSymbolTable = typeSymbolTable;
     }
 
-    public bool TypePasses(TypeInfo type, TypeInfo target)
+    public bool TypePasses(TypeInfo type, TypeInfo? target)
     {
+        if (target is null) return true;
+        
         foreach (var targetField in target.Fields.Values)
         {
             if (!type.Fields.TryGetValue(targetField.Name, out FieldInfo? field)) return false;
@@ -29,8 +31,9 @@ public class Validator
         return true;
     }
 
-    public bool TypePasses(TypeReference type, TypeReference target, string typeName)
+    public bool TypePasses(TypeReference type, TypeReference? target, string typeName)
     {
+        if (target is null) return true;
         string targetTypeName = target.Modifiers.HasFlag(TypeModifiers.Same) ? typeName : target.Name;
     
         if (type.Name == targetTypeName) return true;
@@ -45,16 +48,18 @@ public class Validator
         TypeInfo typeInfo = TypeSymbolTable.GetType(type.Name) ?? throw new Exception($"Type {type.Name} not found");
         TypeInfo targetInfo = TypeSymbolTable.GetType(targetTypeName) ?? throw new Exception($"Type {targetTypeName} not found");
     
-        if (!Compatible(type.Modifiers, target.Modifiers)) return false;
-    
-        return TypePasses(typeInfo, targetInfo);
+        return Compatible(type.Modifiers, target.Modifiers) && TypePasses(typeInfo, targetInfo);
     }
 
     public bool Validate(TypeInfo type)
     {
-        
+        if (type.Interfaces.Select(i => TypePasses(type, TypeSymbolTable.GetType(i))).Any()) return false;
+        if (type.Alikes.Select(i => TypePasses(type, TypeSymbolTable.GetType(i))).Any()) return false;
+
+        return true;
     }
 
+    #region Members
     public bool FieldPasses(FieldInfo field, FieldInfo target, string typeName)
     {
         if (field.Name != target.Name) return false;
@@ -79,6 +84,8 @@ public class Validator
         if (!Compatible(method.ReturnType.Modifiers, target.ReturnType.Modifiers)) return false;
         return true;
     }
+
+    #endregion
 
     #region Modifiers
     public static FieldModifiers Transform(FieldModifiers modifiers)
