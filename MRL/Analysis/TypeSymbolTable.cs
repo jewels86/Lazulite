@@ -32,37 +32,49 @@ public class TypeSymbolTable
 
             declaration.Members.ForEach(m =>
             {
-                if (m is FieldDeclarationNode fieldDeclaration)
-                    typeInfo.Fields[fieldDeclaration.Name] = new(
-                        fieldDeclaration.Name,
-                        CreateTypeReference(fieldDeclaration.Type, fieldDeclaration.modifiers),
-                        CreateFieldModifiers(fieldDeclaration.modifiers),
-                        fieldDeclaration.Initializer);
-                if (m is MethodDeclarationNode methodDeclaration)
+                switch (m)
                 {
-                    MethodInfo methodInfo = new(
-                        methodDeclaration.MethodSignature.Name,
-                        CreateParameterInfoList(methodDeclaration.MethodSignature.DeclaredParameters),
-                        CreateTypeReference(methodDeclaration.MethodSignature.ReturnType.Type, methodDeclaration.MethodSignature.ReturnType.modifiers),
-                        methodDeclaration.MethodSignature.Inplace,
-                        methodDeclaration.MethodSignature.ReturnType.preserves,
-                        methodDeclaration.Block);
-                    if (!typeInfo.Methods.ContainsKey(methodDeclaration.MethodSignature.Name))
-                        typeInfo.Methods[methodDeclaration.MethodSignature.Name] = [];
-                    typeInfo.Methods[methodDeclaration.MethodSignature.Name].Add(methodInfo);
-                }
-                if (m is OperatorDeclarationNode operatorDeclaration)
-                {
-                    MethodInfo operatorInfo = new(
-                        operatorDeclaration.Operator,
-                        CreateParameterInfoList(operatorDeclaration.DeclaredParameters),
-                        CreateTypeReference(operatorDeclaration.ReturnType.Type, operatorDeclaration.ReturnType.modifiers),
-                        operatorDeclaration.Inplace,
-                        operatorDeclaration.ReturnType.preserves,
-                        operatorDeclaration.Block);
-                    if (!typeInfo.Methods.ContainsKey(operatorDeclaration.Operator))
-                        typeInfo.Methods[operatorDeclaration.Operator] = [];
-                    typeInfo.Methods[operatorDeclaration.Operator].Add(operatorInfo);
+                    case FieldDeclarationNode fieldDeclaration:
+                    {
+                        var typeModifiers = fieldDeclaration.modifiers
+                            .Where(mod => mod.Modifier is Modifier.Nullable or Modifier.Specific or Modifier.Same)
+                            .ToList();
+                    
+                        typeInfo.Fields[fieldDeclaration.Name] = new(
+                            fieldDeclaration.Name,
+                            CreateTypeReference(fieldDeclaration.Type, typeModifiers),
+                            CreateFieldModifiers(fieldDeclaration.modifiers),
+                            fieldDeclaration.Initializer);
+                        break;
+                    }
+                    case MethodDeclarationNode methodDeclaration:
+                    {
+                        MethodInfo methodInfo = new(
+                            methodDeclaration.MethodSignature.Name,
+                            CreateParameterInfoList(methodDeclaration.MethodSignature.DeclaredParameters),
+                            CreateTypeReference(methodDeclaration.MethodSignature.ReturnType.Type, methodDeclaration.MethodSignature.ReturnType.modifiers),
+                            methodDeclaration.MethodSignature.Inplace,
+                            methodDeclaration.MethodSignature.ReturnType.preserves,
+                            methodDeclaration.Block);
+                        if (!typeInfo.Methods.ContainsKey(methodDeclaration.MethodSignature.Name))
+                            typeInfo.Methods[methodDeclaration.MethodSignature.Name] = [];
+                        typeInfo.Methods[methodDeclaration.MethodSignature.Name].Add(methodInfo);
+                        break;
+                    }
+                    case OperatorDeclarationNode operatorDeclaration:
+                    {
+                        MethodInfo operatorInfo = new(
+                            operatorDeclaration.Operator,
+                            CreateParameterInfoList(operatorDeclaration.DeclaredParameters),
+                            CreateTypeReference(operatorDeclaration.ReturnType.Type, operatorDeclaration.ReturnType.modifiers),
+                            operatorDeclaration.Inplace,
+                            operatorDeclaration.ReturnType.preserves,
+                            operatorDeclaration.Block);
+                        if (!typeInfo.Methods.ContainsKey(operatorDeclaration.Operator))
+                            typeInfo.Methods[operatorDeclaration.Operator] = [];
+                        typeInfo.Methods[operatorDeclaration.Operator].Add(operatorInfo);
+                        break;
+                    }
                 }
             });
             
@@ -87,13 +99,13 @@ public class TypeSymbolTable
         TypeModifiers typeModifiers = TypeModifiers.None;
         foreach (var modifier in modifiers)
         {
-            switch (modifier.Modifier)
+            typeModifiers |= modifier.Modifier switch
             {
-                case Modifier.Nullable: typeModifiers |= TypeModifiers.Nullable; break;
-                case Modifier.Specific: typeModifiers |= TypeModifiers.Specific; break;
-                case Modifier.Same: typeModifiers |= TypeModifiers.Same; break;
-                default: throw new Exception("Unknown modifier");
-            }
+                Modifier.Nullable => TypeModifiers.Nullable,
+                Modifier.Specific => TypeModifiers.Specific,
+                Modifier.Same => TypeModifiers.Same,
+                _ => throw new Exception("Unknown modifier: " + modifier.Modifier)
+            };
         }
         if (arrayCount > 0) typeModifiers |= TypeModifiers.Array;
         return typeModifiers;

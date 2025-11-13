@@ -84,7 +84,7 @@ public class MRLVisitor : MRLParserBaseVisitor<ASTNode>
         List<ModifierNode> modifiers = context.modifier().Length != 0
             ? context.modifier().Select(Visit).Cast<ModifierNode>().ToList()
             : [];
-        BlockNode? initializer = context.initializer() != null ? (BlockNode)Visit(context.initializer()) : null;
+        ASTNode? initializer = context.initializer() != null ? Visit(context.initializer()) : null;
         
         return new FieldDeclarationNode(line, column, name, type, modifiers, initializer);
     }
@@ -121,7 +121,16 @@ public class MRLVisitor : MRLParserBaseVisitor<ASTNode>
         else
         {
             TypeNode? type = context.type() != null ? (TypeNode?)Visit(context.type()) : null;
-            if (type is null) throw new Exception("Type not found");
+            switch (type)
+            {
+                case null when context.NEW() is null:
+                    throw new Exception("Type not found");
+                case null:
+                    type = new TypeNode(line, column, 
+                        parentTypeContext?.IDENTIFIER().GetText() 
+                        ?? throw new Exception("New operator has no parent type"));
+                    break;
+            }
             returnType = new ReturnTypeNode(line, column, type, modifiers, null);
         }
 
@@ -505,6 +514,29 @@ public class MRLVisitor : MRLParserBaseVisitor<ASTNode>
         string name = context.IDENTIFIER().GetText();
         int arrayCount = context.LBRACK().Length;
         return new TypeNode(line, column, name, arrayCount);
+    }
+
+    public override ASTNode VisitModifier(MRLParser.ModifierContext context)
+    {
+        int line = context.Start.Line;
+        int column = context.Start.Column;
+        
+        Modifier modifier = context.Start.Type switch
+        {
+            MRLLexer.STATIC => Modifier.Static,
+            MRLLexer.ISTATIC => Modifier.IStatic,
+            MRLLexer.READONLY => Modifier.Readonly,
+            MRLLexer.CONSTANT => Modifier.Constant,
+            MRLLexer.ICONSTANT => Modifier.IConstant,
+            MRLLexer.DYNAMIC => Modifier.Dynamic,
+            MRLLexer.REQUIRED => Modifier.Required,
+            MRLLexer.NULLABLE => Modifier.Nullable,
+            MRLLexer.SPECIFIC => Modifier.Specific,
+            MRLLexer.SAME => Modifier.Same,
+            _ => throw new Exception($"Unknown modifier: {context.Start.Text} at {line}:{column}")
+        };
+        
+        return new ModifierNode(line, column, modifier);
     }
 
     public override ASTNode VisitParameterList(MRLParser.ParameterListContext context)
