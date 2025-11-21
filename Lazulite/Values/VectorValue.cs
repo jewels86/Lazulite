@@ -27,8 +27,5 @@ public class VectorValue : Value<double[]>
         return result;
     }
 
-    public ScalarValue Dot(VectorValue b)
-    {
-        return (this * b).Defer().Sum();
-    }
+    public ScalarValue Dot(VectorValue b) => (this * b).Defer().Sum();
 }
