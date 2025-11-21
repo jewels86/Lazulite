@@ -8,17 +8,20 @@ namespace Lazulite;
 public static partial class Computation
 {
     #region Simple Kernels
-    public static Action<AcceleratorStream, Index1D, ArrayView1D<double, Stride1D.Dense>, double> FillKernel;
-    public static Action<AcceleratorStream, Index1D, ArrayView1D<double, Stride1D.Dense>> ZeroKernel;
-    public static Action<AcceleratorStream, Index1D, ArrayView1D<double, Stride1D.Dense>, ArrayView1D<double, Stride1D.Dense>> CopyKernel;
+    public static List<Action<Index1D, ArrayView1D<double, Stride1D.Dense>, double>> FillKernels = [];
+    public static List<Action<Index1D, ArrayView1D<double, Stride1D.Dense>>> ZeroKernels = [];
+    public static List<Action<Index1D, ArrayView1D<double, Stride1D.Dense>, ArrayView1D<double, Stride1D.Dense>>> CopyKernels = [];
     #endregion
 
     public static void InitializeKernels()
     {
-        #region Simple Kernels
-        FillKernel = Accelerators[0].LoadAutoGroupedKernel<Index1D, ArrayView1D<double, Stride1D.Dense>, double>(SimpleKernels.FillKernel);
-        ZeroKernel = Accelerators[0].LoadAutoGroupedKernel<Index1D, ArrayView1D<double, Stride1D.Dense>>(SimpleKernels.ZeroKernel);
-        CopyKernel = Accelerators[0].LoadAutoGroupedKernel<Index1D, ArrayView1D<double, Stride1D.Dense>, ArrayView1D<double, Stride1D.Dense>>(SimpleKernels.CopyKernel);
-        #endregion
+        foreach (var accelerator in Accelerators)
+        {
+            #region Simple Kernels
+            FillKernels.Add(accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<double, Stride1D.Dense>, double>(SimpleKernels.FillKernel));
+            ZeroKernels.Add(accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<double, Stride1D.Dense>>(SimpleKernels.ZeroKernel));
+            CopyKernels.Add(accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<double, Stride1D.Dense>, ArrayView1D<double, Stride1D.Dense>>(SimpleKernels.CopyKernel));
+            #endregion
+        }
     }
 }
