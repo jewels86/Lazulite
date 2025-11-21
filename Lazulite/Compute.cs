@@ -1,4 +1,5 @@
 ﻿using ILGPU;
+using ILGPU.IR.Transformations;
 using ILGPU.Runtime;
 using ILGPU.Runtime.Cuda;
 using Lazulite.Kernels;
@@ -7,6 +8,7 @@ namespace Lazulite;
 
 public static partial class Compute
 {
+    #region Properties
     public static List<Accelerator> Accelerators { get; } = [];
     public static List<int> Users { get; } = [];
     public static Context Context { get; private set; }
@@ -14,14 +16,16 @@ public static partial class Compute
     public static bool GpuInUse { get; private set; } = false;
 
     private static readonly List<List<MemoryBuffer1D<double, Stride1D.Dense>>> _deferred = [];
-    private static readonly List<Dictionary<int, Stack<MemoryBuffer1D<double, Stride1D.Dense>>>> _pool = []; // acceleratorIndex -> stack of buffers sorted by size
+    private static readonly List<Dictionary<int, Stack<MemoryBuffer1D<double, Stride1D.Dense>>>> _pool = []; // aidx -> stack of buffers sorted by size
     // buffers in pool are NOT zeroed yet
+    #endregion
 
     static Compute()
     {
         Context = Context.CreateDefault();
         RefreshDevices();
         InitializeKernels();
+        WarmupKernelsAsync();
     }
 
     #region Management
@@ -56,10 +60,10 @@ public static partial class Compute
         _pool.Clear();
     }
     #region Synchronization
-    public static void Synchronize(int acceleratorIndex)
+    public static void Synchronize(int aidx)
     {
-        Accelerators[acceleratorIndex].Synchronize();
-        foreach (var deferred in _deferred[acceleratorIndex]) Return(deferred);
+        Accelerators[aidx].Synchronize();
+        foreach (var deferred in _deferred[aidx]) Return(deferred);
     }
     public static void SynchronizeAll()
     {
@@ -78,7 +82,7 @@ public static partial class Compute
         return aidx;
     }
 
-    public static void ReleaseAccelerator(int acceleratorIndex) => Users[acceleratorIndex]--;
+    public static void ReleaseAccelerator(int aidx) => Users[aidx]--;
     #endregion
     #endregion
 
@@ -98,50 +102,121 @@ public static partial class Compute
     public static void DeferReturn(params MemoryBuffer1D<double, Stride1D.Dense>[] buffers) => _deferred[buffers[0].AcceleratorIndex()].AddRange(buffers);
     #endregion
     #region Gets
-    public static MemoryBuffer1D<double, Stride1D.Dense> Get(int acceleratorIndex, int size) => TryGetFrom(acceleratorIndex, size);
-    public static MemoryBuffer1D<double, Stride1D.Dense> GetTemp(int acceleratorIndex, int size) => TryGetFrom(acceleratorIndex, size).Defer();
-    public static MemoryBuffer1D<double, Stride1D.Dense>[] Get(int acceleratorIndex, int count, int size) => Enumerable.Range(0, count).Select(_ => Get(acceleratorIndex, size)).ToArray();
-    public static MemoryBuffer1D<double, Stride1D.Dense>[] GetTemps(int acceleratorIndex, int count, int size) => Enumerable.Range(0, count).Select(_ => GetTemp(acceleratorIndex, size)).ToArray();
-
+    public static MemoryBuffer1D<double, Stride1D.Dense> Get(int aidx, int size) => TryGetFrom(aidx, size);
+    public static MemoryBuffer1D<double, Stride1D.Dense> GetTemp(int aidx, int size) => TryGetFrom(aidx, size).Defer();
+    public static MemoryBuffer1D<double, Stride1D.Dense>[] Get(int aidx, int count, int size) => Enumerable.Range(0, count).Select(_ => Get(aidx, size)).ToArray();
+    public static MemoryBuffer1D<double, Stride1D.Dense>[] GetTemps(int aidx, int count, int size) => Enumerable.Range(0, count).Select(_ => GetTemp(aidx, size)).ToArray();
+    public static MemoryBuffer1D<double, Stride1D.Dense> GetLike(MemoryBuffer1D<double, Stride1D.Dense> a) => Get(a.AcceleratorIndex(), (int)a.Length);
+    public static MemoryBuffer1D<double, Stride1D.Dense> GetTempLike(MemoryBuffer1D<double, Stride1D.Dense> a) => GetTemp(a.AcceleratorIndex(), (int)a.Length);
+    
+    public static Value<T> CreateLike<T>(Value<T> a) where T : notnull => a.Create(Get(a.AcceleratorIndex, a.TotalSize));
+    public static Value<T> CreateTempLike<T>(Value<T> a) where T : notnull => a.Create(GetTemp(a.AcceleratorIndex, a.TotalSize));
     #endregion
     #region Helpers
     public static int GetAcceleratorIndex(Accelerator accelerator) => Accelerators.IndexOf(accelerator);
-    public static bool IsGpuAccelerator(int acceleratorIndex) => Accelerators[acceleratorIndex] is CudaAccelerator;
-    public static AcceleratorStream GetStream(int acceleratorIndex) => Accelerators[acceleratorIndex].DefaultStream;
+    public static bool IsGpuAccelerator(int aidx) => Accelerators[aidx] is CudaAccelerator;
+    public static AcceleratorStream GetStream(int aidx) => Accelerators[aidx].DefaultStream;
     public static AcceleratorStream GetStream(Accelerator accelerator) => accelerator.DefaultStream;
     
-    #region Call Overloads
-    public static void Call<T>(int acceleratorIndex, List<Action<T>> kernels, T value) =>
-        kernels[acceleratorIndex](value);
-    public static void Call<T1, T2>(int acceleratorIndex, List<Action<T1, T2>> kernels, T1 a, T2 b) =>
-        kernels[acceleratorIndex](a, b);
-    public static void Call<T1, T2, T3>(int acceleratorIndex, List<Action<T1, T2, T3>> kernels, T1 a, T2 b, T3 c) =>
-        kernels[acceleratorIndex](a, b, c);
-    public static void Call<T1, T2, T3, T4>(int acceleratorIndex, List<Action<T1, T2, T3, T4>> kernels, T1 a, T2 b, T3 c, T4 d) =>
-        kernels[acceleratorIndex](a, b, c, d);
-    public static void Call(int acceleratorIndex, List<Action<Index1D, ArrayView1D<double, Stride1D.Dense>>> kernels, ArrayView1D<double, Stride1D.Dense> view) => 
-        kernels[acceleratorIndex](view.IntExtent, view);
+    #region Calls & Call Overloads
+    #region Calls
+    public static void Call<T>(int aidx, List<Action<T>> kernels, T value) =>
+        kernels[aidx](value);
+    public static void Call<T1, T2>(int aidx, List<Action<T1, T2>> kernels, T1 a, T2 b) =>
+        kernels[aidx](a, b);
+    public static void Call<T1, T2, T3>(int aidx, List<Action<T1, T2, T3>> kernels, T1 a, T2 b, T3 c) =>
+        kernels[aidx](a, b, c);
+    public static void Call<T1, T2, T3, T4>(int aidx, List<Action<T1, T2, T3, T4>> kernels, T1 a, T2 b, T3 c, T4 d) =>
+        kernels[aidx](a, b, c, d);
+    public static void Call(int aidx, List<Action<Index1D, ArrayView1D<double, Stride1D.Dense>>> kernels, ArrayView1D<double, Stride1D.Dense> view) => 
+        kernels[aidx](view.IntExtent, view);
     public static void Call<T>(
-        int acceleratorIndex, List<Action<Index1D, ArrayView1D<double, Stride1D.Dense>, T>> kernels,
+        int aidx, List<Action<Index1D, ArrayView1D<double, Stride1D.Dense>, T>> kernels,
         ArrayView1D<double, Stride1D.Dense> a, T b) => 
-        kernels[acceleratorIndex](a.IntExtent, a, b);
-    public static void Call<T1, T2>(int acceleratorIndex, List<Action<Index1D, ArrayView1D<double, Stride1D.Dense>, T1, T2>> kernels,
+        kernels[aidx](a.IntExtent, a, b);
+    public static void Call<T1, T2>(int aidx, List<Action<Index1D, ArrayView1D<double, Stride1D.Dense>, T1, T2>> kernels,
         ArrayView1D<double, Stride1D.Dense> a, T1 b, T2 c) => 
-        kernels[acceleratorIndex](a.IntExtent, a, b, c);
-    public static void Call<T1, T2, T3>(int acceleratorIndex, List<Action<Index1D, ArrayView1D<double, Stride1D.Dense>, T1, T2, T3>> kernels,
+        kernels[aidx](a.IntExtent, a, b, c);
+    public static void Call<T1, T2, T3>(int aidx, List<Action<Index1D, ArrayView1D<double, Stride1D.Dense>, T1, T2, T3>> kernels,
         ArrayView1D<double, Stride1D.Dense> a, T1 b, T2 c, T3 d) => 
-        kernels[acceleratorIndex](a.IntExtent, a, b, c, d);
+        kernels[aidx](a.IntExtent, a, b, c, d);
     #endregion
     
-    private static MemoryBuffer1D<double, Stride1D.Dense> Allocate(int acceleratorIndex, int size) => Accelerators[acceleratorIndex].Allocate1D<double>(size);
-    private static MemoryBuffer1D<double, Stride1D.Dense> TryGetFrom(int acceleratorIndex, int size)
+    #region Binary Calls
+    public static void BinaryCall(List<Action<Index1D, ArrayView1D<double, Stride1D.Dense>, ArrayView1D<double, Stride1D.Dense>, ArrayView1D<double, Stride1D.Dense>>> kernels,
+        MemoryBuffer1D<double, Stride1D.Dense> a, MemoryBuffer1D<double, Stride1D.Dense> b, MemoryBuffer1D<double, Stride1D.Dense> result) =>
+        kernels[a.AcceleratorIndex()](a.IntExtent, a, b, result);
+    public static MemoryBuffer1D<double, Stride1D.Dense> BinaryCall(
+        List<Action<Index1D, ArrayView1D<double, Stride1D.Dense>, ArrayView1D<double, Stride1D.Dense>, ArrayView1D<double, Stride1D.Dense>>> kernels,
+        MemoryBuffer1D<double, Stride1D.Dense> a, MemoryBuffer1D<double, Stride1D.Dense> b)
+    {
+        var result = GetLike(a);
+        BinaryCall(kernels, a, b, result);
+        return result;
+    }
+
+    public static Value<T> BinaryCall<T>(
+        List<Action<Index1D, ArrayView1D<double, Stride1D.Dense>, ArrayView1D<double, Stride1D.Dense>, ArrayView1D<double, Stride1D.Dense>>> kernels,
+        Value<T> a, Value<T> b) where T : notnull => a.Create(BinaryCall(kernels, a.Data, b.Data));
+
+    public static void BinaryCallChain(
+        MemoryBuffer1D<double, Stride1D.Dense> initial, MemoryBuffer1D<double, Stride1D.Dense> result,
+        params (
+            List<Action<Index1D, ArrayView1D<double, Stride1D.Dense>, ArrayView1D<double, Stride1D.Dense>, ArrayView1D<double, Stride1D.Dense>>>kernels,
+            MemoryBuffer1D<double, Stride1D.Dense> operand)[] ops)
+    {
+        var aidx = initial.AcceleratorIndex();
+        ops[0].kernels[aidx](initial.IntExtent, initial, ops[0].operand, result);
+        for (int i = 1; i < ops.Length; i++) ops[i].kernels[aidx](result.IntExtent, result, ops[i].operand, result);
+    }
+
+    public static MemoryBuffer1D<double, Stride1D.Dense> BinaryCallChain(
+        MemoryBuffer1D<double, Stride1D.Dense> initial,
+        params (
+            List<Action<Index1D, ArrayView1D<double, Stride1D.Dense>, ArrayView1D<double, Stride1D.Dense>, ArrayView1D<double, Stride1D.Dense>>>kernels,
+            MemoryBuffer1D<double, Stride1D.Dense> operand)[] ops)
+    {
+        var result = GetLike(initial);
+        BinaryCallChain(initial, result, ops);
+        return result;
+    }
+    public static Value<T> BinaryCallChain<T>(
+        Value<T> initial,
+        params (
+            List<Action<Index1D, ArrayView1D<double, Stride1D.Dense>, ArrayView1D<double, Stride1D.Dense>, ArrayView1D<double, Stride1D.Dense>>>kernels,
+            Value<T> operand)[] ops) where T : notnull => initial.Create(BinaryCallChain(initial.Data, ops.Select(op => (op.kernels, op.operand.Data)).ToArray()));
+    #endregion
+    
+    #region Unary Calls
+    public static void UnaryCall(List<Action<Index1D, ArrayView1D<double, Stride1D.Dense>, ArrayView1D<double, Stride1D.Dense>>> kernels,
+        MemoryBuffer1D<double, Stride1D.Dense> a, MemoryBuffer1D<double, Stride1D.Dense> result) =>
+        kernels[a.AcceleratorIndex()](a.IntExtent, a, result);
+
+    public static MemoryBuffer1D<double, Stride1D.Dense> UnaryCallUnaryCall(List<Action<Index1D, ArrayView1D<double, Stride1D.Dense>, ArrayView1D<double, Stride1D.Dense>>> kernels,
+        MemoryBuffer1D<double, Stride1D.Dense> a)
+    {
+        var result = GetLike(a);
+        UnaryCall(kernels, a, result);
+        return result;
+    }
+    
+    public static Value<T> UnaryCall<T>(
+        List<Action<Index1D, ArrayView1D<double, Stride1D.Dense>, ArrayView1D<double, Stride1D.Dense>>> kernels,
+        Value<T> a) where T : notnull => a.Create(UnaryCallUnaryCall(kernels, a.Data));
+    
+    
+    #endregion
+    #endregion
+    
+    public static MemoryBuffer1D<double, Stride1D.Dense> Allocate(int aidx, int size) => Accelerators[aidx].Allocate1D<double>(size);
+    private static MemoryBuffer1D<double, Stride1D.Dense> TryGetFrom(int aidx, int size)
     {
         if (size <= 0) throw new ArgumentException("Size must be positive", nameof(size));
-        var pool = _pool[acceleratorIndex];
+        var pool = _pool[aidx];
         MemoryBuffer1D<double, Stride1D.Dense> buffer;
         
         if (pool.TryGetValue(size, out var stack) && stack.Count > 0) buffer = stack.Pop();
-        else buffer = Allocate(acceleratorIndex, size);
+        else buffer = Allocate(aidx, size);
         
         Call(buffer.AcceleratorIndex(), FillKernels, buffer.View, 0.0);
         return buffer;

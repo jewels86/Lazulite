@@ -9,30 +9,37 @@ namespace Lazulite;
 public static partial class Compute
 {
     #region Simple Kernels
-    public readonly static List<Action<Index1D, ArrayView1D<double, Stride1D.Dense>, double>> FillKernels = [];
-    public readonly static List<Action<Index1D, ArrayView1D<double, Stride1D.Dense>>> ZeroKernels = [];
-    public readonly static List<Action<Index1D, ArrayView1D<double, Stride1D.Dense>, ArrayView1D<double, Stride1D.Dense>>> CopyKernels = [];
+    public static List<Action<Index1D, ArrayView1D<double, Stride1D.Dense>, double>> FillKernels { get; } = [];
+    public static List<Action<Index1D, ArrayView1D<double, Stride1D.Dense>>> ZeroKernels { get; } = [];
+    public static List<Action<Index1D, ArrayView1D<double, Stride1D.Dense>, ArrayView1D<double, Stride1D.Dense>>> CopyKernels { get; } = [];
     #endregion
     #region Elementwise Kernels
     #region Binary
-    public readonly static List<Action<Index1D, ArrayView1D<double, Stride1D.Dense>, ArrayView1D<double, Stride1D.Dense>,
-        ArrayView1D<double, Stride1D.Dense>>> ElementwiseAddKernels = [];
-    public readonly static List<Action<Index1D, ArrayView1D<double, Stride1D.Dense>, ArrayView1D<double, Stride1D.Dense>,
-        ArrayView1D<double, Stride1D.Dense>>> ElementwiseSubtractKernels = [];
-    public readonly static List<Action<Index1D, ArrayView1D<double, Stride1D.Dense>, ArrayView1D<double, Stride1D.Dense>,
-        ArrayView1D<double, Stride1D.Dense>>> ElementwiseMultiplyKernels = [];
-    public readonly static List<Action<Index1D, ArrayView1D<double, Stride1D.Dense>, ArrayView1D<double, Stride1D.Dense>,
-        ArrayView1D<double, Stride1D.Dense>>> ElementwiseDivideKernels = [];
-    public readonly static List<Action<Index1D, ArrayView1D<double, Stride1D.Dense>, ArrayView1D<double, Stride1D.Dense>,
-        ArrayView1D<double, Stride1D.Dense>>> ElementwisePowerKernels = [];
+    public static List<Action<Index1D, ArrayView1D<double, Stride1D.Dense>, ArrayView1D<double, Stride1D.Dense>,
+        ArrayView1D<double, Stride1D.Dense>>> ElementwiseAddKernels { get; } = [];
+    public static List<Action<Index1D, ArrayView1D<double, Stride1D.Dense>, ArrayView1D<double, Stride1D.Dense>,
+        ArrayView1D<double, Stride1D.Dense>>> ElementwiseSubtractKernels { get; } = [];
+    public static List<Action<Index1D, ArrayView1D<double, Stride1D.Dense>, ArrayView1D<double, Stride1D.Dense>,
+        ArrayView1D<double, Stride1D.Dense>>> ElementwiseMultiplyKernels { get; } = [];
+    public static List<Action<Index1D, ArrayView1D<double, Stride1D.Dense>, ArrayView1D<double, Stride1D.Dense>,
+        ArrayView1D<double, Stride1D.Dense>>> ElementwiseDivideKernels { get; } = [];
+    public static List<Action<Index1D, ArrayView1D<double, Stride1D.Dense>, ArrayView1D<double, Stride1D.Dense>,
+        ArrayView1D<double, Stride1D.Dense>>> ElementwisePowerKernels { get; } = [];
     #endregion
     #region Unary
-    public readonly static List<Action<Index1D, ArrayView1D<double, Stride1D.Dense>, ArrayView1D<double, Stride1D.Dense>>> ElementwiseExpKernels = [];
-    public readonly static List<Action<Index1D, ArrayView1D<double, Stride1D.Dense>, ArrayView1D<double, Stride1D.Dense>>> ElementwiseLogKernels = [];
-    public readonly static List<Action<Index1D, ArrayView1D<double, Stride1D.Dense>, ArrayView1D<double, Stride1D.Dense>>> ElementwiseSqrtKernels = [];
+    public static List<Action<Index1D, ArrayView1D<double, Stride1D.Dense>, ArrayView1D<double, Stride1D.Dense>>> ElementwiseExpKernels { get; } = [];
+    public static List<Action<Index1D, ArrayView1D<double, Stride1D.Dense>, ArrayView1D<double, Stride1D.Dense>>> ElementwiseLogKernels { get; } = [];
+    public static List<Action<Index1D, ArrayView1D<double, Stride1D.Dense>, ArrayView1D<double, Stride1D.Dense>>> ElementwiseSqrtKernels { get; } = [];
+    public static List<Action<Index1D, ArrayView1D<double, Stride1D.Dense>, ArrayView1D<double, Stride1D.Dense>>> ElementwiseAbsKernels { get; } = [];
+    public static List<Action<Index1D, ArrayView1D<double, Stride1D.Dense>, ArrayView1D<double, Stride1D.Dense>>> ElementwiseNegateKernels { get; } = [];
     #endregion
     public readonly static List<Action<Index1D, ArrayView1D<double, Stride1D.Dense>, ArrayView1D<double, Stride1D.Dense>,
         ArrayView1D<double, Stride1D.Dense>>> ElementwiseScalarPowerKernels = [];
+    #endregion
+    #region Helpers
+    private static Task? _warmupTask;
+    public static void WarmupKernelsAsync() => _warmupTask = Task.Run(WarmupKernels);
+    public static void EnsureWarmup() => _warmupTask?.Wait();
     #endregion
 
     public static void InitializeKernels()
@@ -64,10 +71,38 @@ public static partial class Compute
                 ArrayView1D<double, Stride1D.Dense>>(ElementwiseLogKernel));
             ElementwiseSqrtKernels.Add(accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<double, Stride1D.Dense>,
                 ArrayView1D<double, Stride1D.Dense>>(ElementwiseSqrtKernel));
+            ElementwiseAbsKernels.Add(accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<double, Stride1D.Dense>,
+                ArrayView1D<double, Stride1D.Dense>>(ElementwiseAbsKernel));
+            ElementwiseNegateKernels.Add(accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<double, Stride1D.Dense>,
+                ArrayView1D<double, Stride1D.Dense>>(ElementwiseNegateKernel));
             #endregion
             ElementwiseScalarPowerKernels.Add(accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<double, Stride1D.Dense>, 
                 ArrayView1D<double, Stride1D.Dense>, ArrayView1D<double, Stride1D.Dense>>(ElementwiseScalarPowerKernel));
             #endregion
+        }
+    }
+    
+    public static void WarmupKernels()
+    {
+        for (int i = 0; i < Accelerators.Count; i++)
+        {
+            using var dummy = Get(i, 10);
+            
+            Call(i, FillKernels, dummy, 0);
+            Call(i, ZeroKernels, dummy);
+            Call(i, CopyKernels, dummy, dummy);
+            Call(i, ElementwiseAddKernels, dummy, dummy, dummy);
+            Call(i, ElementwiseSubtractKernels, dummy, dummy, dummy);
+            Call(i, ElementwiseMultiplyKernels, dummy, dummy, dummy);
+            Call(i, ElementwiseDivideKernels, dummy, dummy, dummy);
+            Call(i, ElementwisePowerKernels, dummy, dummy, dummy);
+            Call(i, ElementwiseExpKernels, dummy, dummy);
+            Call(i, ElementwiseLogKernels, dummy, dummy);
+            Call(i, ElementwiseSqrtKernels, dummy, dummy);
+            Call(i, ElementwiseAbsKernels, dummy, dummy);
+            Call(i, ElementwiseNegateKernels, dummy, dummy);
+            Call(i, ElementwiseScalarPowerKernels, dummy, dummy, dummy);
+            Synchronize(i);
         }
     }
 }

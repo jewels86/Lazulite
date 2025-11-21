@@ -1,13 +1,17 @@
-﻿namespace Testing;
+﻿using Lazulite;
+
+namespace Testing;
 
 class Program
 {
     public static void Main(string[] args)
     {
-        SimpleTests.FillTest(true);
+        //SimpleTests.FillTest(true);
         //SimpleTests.FillTest(false);
         
-        SimpleTests.SimpleMathTest(true);
+        //SimpleTests.SimpleMathTest(true);
         //SimpleTests.SimpleMathTest(false);
+        
+        SimpleTests.ScalarTest(true);
     }
 }

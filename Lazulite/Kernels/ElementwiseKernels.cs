@@ -45,6 +45,14 @@ public static class ElementwiseKernels
     public static void ElementwiseSqrtKernel(
         Index1D index, ArrayView1D<double, Stride1D.Dense> a, ArrayView1D<double, Stride1D.Dense> result) =>
         result[index] = XMath.Sqrt(a[index]);
+    
+    public static void ElementwiseAbsKernel(
+        Index1D index, ArrayView1D<double, Stride1D.Dense> a, ArrayView1D<double, Stride1D.Dense> result) =>
+        result[index] = XMath.Abs(a[index]);
+    
+    public static void ElementwiseNegateKernel(
+        Index1D index, ArrayView1D<double, Stride1D.Dense> a, ArrayView1D<double, Stride1D.Dense> result) =>
+        result[index] = -a[index];
     #endregion
 
     #region Weird Ones

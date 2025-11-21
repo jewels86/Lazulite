@@ -10,6 +10,7 @@ public abstract class Value<T>(MemoryBuffer1D<double, Stride1D.Dense> data) : ID
     public int[] Shape => GetShape(Data.IntExtent);
     public int TotalSize => (int)Data.Length;
     public int AcceleratorIndex => Compute.GetAcceleratorIndex(Data.Accelerator);
+    public bool IsValid { get; private set; } = true; // this may be false if the buffer was deferred but wasn't returned yet- it can still be used during that iteration
 
     public T ToHost()
     {
@@ -19,7 +20,11 @@ public abstract class Value<T>(MemoryBuffer1D<double, Stride1D.Dense> data) : ID
     public void FromHost(T value) => Data.CopyFromCPU(Roll(value));
     public void UpdateWith(Value<T> other) => Data.CopyFrom(other.Data);
 
-    public void Dispose() => Compute.DeferReturn(Data);
+    public void Dispose()
+    {
+        Compute.DeferReturn(Data);
+        IsValid = false;
+    }
 
     ~Value() => Dispose();
 
@@ -29,4 +34,11 @@ public abstract class Value<T>(MemoryBuffer1D<double, Stride1D.Dense> data) : ID
     public abstract Value<T> Create(MemoryBuffer1D<double, Stride1D.Dense> buffer);
     
     public static implicit operator T(Value<T> value) => value.ToHost();
+    public static implicit operator MemoryBuffer1D<double, Stride1D.Dense>(Value<T> value) => value.Data;
+
+    public static Value<T> operator +(Value<T> a, Value<T> b) => Compute.BinaryCall(Compute.ElementwiseAddKernels, a, b);
+    public static Value<T> operator -(Value<T> a, Value<T> b) => Compute.BinaryCall(Compute.ElementwiseSubtractKernels, a, b);
+    public static Value<T> operator *(Value<T> a, Value<T> b) => Compute.BinaryCall(Compute.ElementwiseMultiplyKernels, a, b);
+    public static Value<T> operator /(Value<T> a, Value<T> b) => Compute.BinaryCall(Compute.ElementwiseDivideKernels, a, b);
+    public static Value<T> operator -(Value<T> a) => Compute.UnaryCall(Compute.ElementwiseNegateKernels, a);
 }

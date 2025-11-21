@@ -71,4 +71,33 @@ public static class SimpleTests
         
         Console.WriteLine(sw.ElapsedMilliseconds);
     }
+
+    public static void ScalarTest(bool gpu)
+    {
+        _aidx = Compute.RequestAccelerator(gpu);
+        Console.WriteLine(Compute.IsGpuAccelerator(_aidx) ? "GPU accelerator" : "CPU accelerator");
+        
+        ScalarValue a = new(1, _aidx);
+        ScalarValue b = new(2, _aidx);
+        ScalarValue c = new(3, _aidx);
+        
+        var d = a + b;
+        var e = d * c;
+        var f = e - a;
+        // this is bad- we allocated 3 values but only one is output
+        
+        Console.WriteLine(f);
+        
+        f = Compute.BinaryCallChain(a, 
+            (Compute.ElementwiseAddKernels, b),
+            (Compute.ElementwiseMultiplyKernels, c),
+            (Compute.ElementwiseSubtractKernels, a));
+        // this is much better- we only allocate 1 value, f
+        
+        Console.WriteLine(f);
+        
+        Compute.Synchronize(_aidx);
+        Compute.FlushAll();
+        Compute.ReleaseAccelerator(_aidx);
+    }
 }
