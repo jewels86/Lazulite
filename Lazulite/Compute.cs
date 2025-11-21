@@ -5,7 +5,7 @@ using Lazulite.Kernels;
 
 namespace Lazulite;
 
-public static partial class Computation
+public static partial class Compute
 {
     public static List<Accelerator> Accelerators { get; } = [];
     public static List<int> Users { get; } = [];
@@ -15,9 +15,9 @@ public static partial class Computation
 
     private static readonly List<List<MemoryBuffer1D<double, Stride1D.Dense>>> _deferred = [];
     private static readonly List<Dictionary<int, Stack<MemoryBuffer1D<double, Stride1D.Dense>>>> _pool = []; // acceleratorIndex -> stack of buffers sorted by size
-    // buffers in pool are NOT zeroed
+    // buffers in pool are NOT zeroed yet
 
-    static Computation()
+    static Compute()
     {
         Context = Context.CreateDefault();
         RefreshDevices();
@@ -100,6 +100,9 @@ public static partial class Computation
     #region Gets
     public static MemoryBuffer1D<double, Stride1D.Dense> Get(int acceleratorIndex, int size) => TryGetFrom(acceleratorIndex, size);
     public static MemoryBuffer1D<double, Stride1D.Dense> GetTemp(int acceleratorIndex, int size) => TryGetFrom(acceleratorIndex, size).Defer();
+    public static MemoryBuffer1D<double, Stride1D.Dense>[] Get(int acceleratorIndex, int count, int size) => Enumerable.Range(0, count).Select(_ => Get(acceleratorIndex, size)).ToArray();
+    public static MemoryBuffer1D<double, Stride1D.Dense>[] GetTemps(int acceleratorIndex, int count, int size) => Enumerable.Range(0, count).Select(_ => GetTemp(acceleratorIndex, size)).ToArray();
+
     #endregion
     #region Helpers
     public static int GetAcceleratorIndex(Accelerator accelerator) => Accelerators.IndexOf(accelerator);

@@ -1,0 +1,43 @@
+﻿using ILGPU;
+using ILGPU.Runtime;
+
+namespace Lazulite.Values;
+
+public class MatrixValue : Value<double[,]>
+{
+    public MatrixValue(double[,] value, int aidx) 
+        : base(Compute.Get(aidx, value.GetLength(0) * value.GetLength(1))) => FromHost(value);
+    public MatrixValue(MemoryBuffer1D<double, Stride1D.Dense> buffer) : base(buffer) { }
+    
+    public override double[] Roll(double[,] value)
+    {
+        var (rows, cols) = (value.GetLength(0), value.GetLength(1));
+        var vector = new double[rows * cols];
+        for (int i = 0; i < rows; i++) 
+        for (int j = 0; j < cols; j++)
+            vector[IndexOf(i, j, cols)] = value[i, j];
+        return vector;
+    }
+    public override double[,] Unroll(double[] rolled)
+    {
+        var (rows, cols) = (Shape[0], Shape[1]);
+        var matrix = new double[rows, cols];
+        for (int i = 0; i < rows; i++) 
+        for (int j = 0; j < cols; j++)
+            matrix[i, j] = rolled[IndexOf(i, j, cols)];
+        return matrix;
+    }
+
+    public override int[] GetShape(Index1D index)
+    {
+        var(row, col) = FromIndex(index.X, Shape[1]);
+        return [row, col];
+    }
+
+    public override Value<double[,]> Create(MemoryBuffer1D<double, Stride1D.Dense> buffer) => new MatrixValue(buffer);
+
+    public static int IndexOf(int row, int col, int cols) => row * cols + col;
+    public static (int row, int col) FromIndex(int index, int cols) => (index / cols, index % cols);
+}
+
+public class Value2(double[,] value, int aidx) : MatrixValue(value, aidx);

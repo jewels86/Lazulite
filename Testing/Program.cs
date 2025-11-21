@@ -4,7 +4,10 @@ class Program
 {
     public static void Main(string[] args)
     {
-        SimpleTests.Test(true);
-        SimpleTests.Test(false);
+        SimpleTests.FillTest(true);
+        //SimpleTests.FillTest(false);
+        
+        SimpleTests.SimpleMathTest(true);
+        //SimpleTests.SimpleMathTest(false);
     }
 }
