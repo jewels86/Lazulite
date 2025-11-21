@@ -38,6 +38,11 @@ public class MatrixValue : Value<double[,]>
 
     public static int IndexOf(int row, int col, int cols) => row * cols + col;
     public static (int row, int col) FromIndex(int index, int cols) => (index / cols, index % cols);
+    
+    public static MatrixValue operator +(MatrixValue a, MatrixValue b) => Compute.BinaryCall(Compute.ElementwiseAddKernels, a, b).AsMatrix();
+    public static MatrixValue operator -(MatrixValue a, MatrixValue b) => Compute.BinaryCall(Compute.ElementwiseSubtractKernels, a, b).AsMatrix();
+    public static MatrixValue operator *(MatrixValue a, MatrixValue b) => Compute.BinaryCall(Compute.ElementwiseMultiplyKernels, a, b).AsMatrix();
+    public static MatrixValue operator /(MatrixValue a, MatrixValue b) => Compute.BinaryCall(Compute.ElementwiseDivideKernels, a, b).AsMatrix();
+    public static MatrixValue operator -(MatrixValue a) => Compute.UnaryCall(Compute.ElementwiseNegateKernels, a).AsMatrix();
+    public static MatrixValue operator %(MatrixValue a, MatrixValue b) => Compute.BinaryCall(Compute.ElementwiseModuloKernels, a, b).AsMatrix();
 }
-
-public class Value2(double[,] value, int aidx) : MatrixValue(value, aidx);

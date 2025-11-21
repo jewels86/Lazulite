@@ -3,14 +3,14 @@ using ILGPU.Runtime;
 
 namespace Lazulite.Values;
 
-public class Value3 : Value<double[,,]>
+public class TensorValue3 : Value<double[,,]>
 {
-    public Value3(double[,,] value, int aidx) 
+    public TensorValue3(double[,,] value, int aidx) 
         : base(Compute.Get(
                 aidx, 
                 value.GetLength(0) * value.GetLength(1) * value.GetLength(2))) => 
         FromHost(value);
-    public Value3(MemoryBuffer1D<double, Stride1D.Dense> buffer) : base(buffer) { }
+    public TensorValue3(MemoryBuffer1D<double, Stride1D.Dense> buffer) : base(buffer) { }
     
     public override double[,,] Unroll(double[] rolled)
     {
@@ -42,7 +42,7 @@ public class Value3 : Value<double[,,]>
         var (x, y, z) = FromIndex(index.X, Shape[1], Shape[2]);
         return [x, y, z];
     }
-    public override Value<double[,,]> Create(MemoryBuffer1D<double, Stride1D.Dense> buffer) => new Value3(buffer);
+    public override Value<double[,,]> Create(MemoryBuffer1D<double, Stride1D.Dense> buffer) => new TensorValue3(buffer);
 
     public static int IndexOf(int x, int y, int z, int d1, int d2) 
         => x * (d1 * d2) + y * d2 + z;

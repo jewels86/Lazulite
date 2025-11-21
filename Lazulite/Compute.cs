@@ -14,6 +14,7 @@ public static partial class Compute
     public static Context Context { get; private set; }
     public static bool AllowGpu { get; set; } = true;
     public static bool GpuInUse { get; private set; } = false;
+    public static double Epsilon { get; set; } = 1e-10;
 
     private static readonly List<List<MemoryBuffer1D<double, Stride1D.Dense>>> _deferred = [];
     private static readonly List<Dictionary<int, Stack<MemoryBuffer1D<double, Stride1D.Dense>>>> _pool = []; // aidx -> stack of buffers sorted by size

@@ -27,6 +27,10 @@ public static class ElementwiseKernels
         ArrayView1D<double, Stride1D.Dense> b, ArrayView1D<double, Stride1D.Dense> result) =>
         result[index] = a[index] / b[index];
     
+    public static void ElementwiseModuloKernel(Index1D index, ArrayView1D<double, Stride1D.Dense> a, 
+        ArrayView1D<double, Stride1D.Dense> b, ArrayView1D<double, Stride1D.Dense> result) =>
+        result[index] = a[index] % b[index];
+    
     public static void ElementwisePowerKernel(
         Index1D index, ArrayView1D<double, Stride1D.Dense> a, 
         ArrayView1D<double, Stride1D.Dense> b, ArrayView1D<double, Stride1D.Dense> result) =>

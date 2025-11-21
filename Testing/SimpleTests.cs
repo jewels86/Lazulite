@@ -80,6 +80,7 @@ public static class SimpleTests
         ScalarValue a = new(1, _aidx);
         ScalarValue b = new(2, _aidx);
         ScalarValue c = new(3, _aidx);
+        VectorValue vec = new([1, 2, 3], _aidx);
         
         var d = a + b;
         var e = d * c;
@@ -91,7 +92,7 @@ public static class SimpleTests
         f = Compute.BinaryCallChain(a, 
             (Compute.ElementwiseAddKernels, b),
             (Compute.ElementwiseMultiplyKernels, c),
-            (Compute.ElementwiseSubtractKernels, a));
+            (Compute.ElementwiseSubtractKernels, a)).AsScalar();
         // this is much better- we only allocate 1 value, f
         
         Console.WriteLine(f);

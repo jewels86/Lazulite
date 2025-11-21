@@ -1,4 +1,6 @@
 ﻿using ILGPU;
+using ILGPU.Algorithms;
+using ILGPU.Algorithms.ScanReduceOperations;
 using ILGPU.Runtime;
 using Lazulite.Kernels;
 using static Lazulite.Kernels.SimpleKernels;
@@ -23,6 +25,8 @@ public static partial class Compute
         ArrayView1D<double, Stride1D.Dense>>> ElementwiseMultiplyKernels { get; } = [];
     public static List<Action<Index1D, ArrayView1D<double, Stride1D.Dense>, ArrayView1D<double, Stride1D.Dense>,
         ArrayView1D<double, Stride1D.Dense>>> ElementwiseDivideKernels { get; } = [];
+    public static List<Action<Index1D, ArrayView1D<double, Stride1D.Dense>, ArrayView1D<double, Stride1D.Dense>,
+        ArrayView1D<double, Stride1D.Dense>>> ElementwiseModuloKernels { get; } = [];
     public static List<Action<Index1D, ArrayView1D<double, Stride1D.Dense>, ArrayView1D<double, Stride1D.Dense>,
         ArrayView1D<double, Stride1D.Dense>>> ElementwisePowerKernels { get; } = [];
     #endregion
@@ -61,6 +65,8 @@ public static partial class Compute
                 ArrayView1D<double, Stride1D.Dense>, ArrayView1D<double, Stride1D.Dense>>(ElementwiseMultiplyKernel));
             ElementwiseDivideKernels.Add(accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<double, Stride1D.Dense>,
                 ArrayView1D<double, Stride1D.Dense>, ArrayView1D<double, Stride1D.Dense>>(ElementwiseDivideKernel));
+            ElementwiseModuloKernels.Add(accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<double, Stride1D.Dense>,
+                ArrayView1D<double, Stride1D.Dense>, ArrayView1D<double, Stride1D.Dense>>(ElementwiseModuloKernel));
             ElementwisePowerKernels.Add(accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<double, Stride1D.Dense>, 
                 ArrayView1D<double, Stride1D.Dense>, ArrayView1D<double, Stride1D.Dense>>(ElementwisePowerKernel));
             #endregion
@@ -88,13 +94,14 @@ public static partial class Compute
         {
             using var dummy = Get(i, 10);
             
-            Call(i, FillKernels, dummy, 0);
             Call(i, ZeroKernels, dummy);
+            Call(i, FillKernels, dummy, 1);
             Call(i, CopyKernels, dummy, dummy);
             Call(i, ElementwiseAddKernels, dummy, dummy, dummy);
             Call(i, ElementwiseSubtractKernels, dummy, dummy, dummy);
             Call(i, ElementwiseMultiplyKernels, dummy, dummy, dummy);
             Call(i, ElementwiseDivideKernels, dummy, dummy, dummy);
+            Call(i, ElementwiseModuloKernels, dummy, dummy, dummy);
             Call(i, ElementwisePowerKernels, dummy, dummy, dummy);
             Call(i, ElementwiseExpKernels, dummy, dummy);
             Call(i, ElementwiseLogKernels, dummy, dummy);
