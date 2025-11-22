@@ -6,7 +6,7 @@ class Program
 {
     public static void Main(string[] args)
     {
-        //Compute.EnsureWarmup();
+        Compute.EnsureWarmup();
         
         //SimpleTests.FillTest(false);
         //SimpleTests.FillTest(true);
@@ -15,6 +15,7 @@ class Program
         //SimpleTests.SimpleMathTest(true);
         
         //SimpleTests.ScalarTest(true);
-        SimpleTests.PhysicsTest(true);
+        //SimpleTests.PhysicsTest(true);
+        SimpleTests.ParallelProcessingTest(true);
     }
 }

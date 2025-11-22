@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Formats.Tar;
@@ -202,5 +203,103 @@ public static class SimpleTests
         Console.WriteLine($"Total bodies: {n}");
         Console.WriteLine($"Bodies processed per ms: {(finalT / dt) * n / sw.ElapsedMilliseconds:F2}.)");
         Console.WriteLine($"Elapsed time: {sw.ElapsedMilliseconds} ms ({sw.ElapsedMilliseconds / (finalT/dt):F2} ms/timestep, or {(finalT/dt) / sw.ElapsedMilliseconds:F2} timesteps/ms).");
+    }
+    
+    public static void ParallelProcessingTest(bool gpu)
+    {
+        int totalBatches = 6000;
+        var (m, k, n) = (100, 200, 300);
+        int mk = m * k;
+        int kn = k * n;
+        int mn = m * n;
+        Index1D extent = new(mn);
+
+        ConcurrentQueue<(double[] a, double[] b)> workQueue = [];
+        ConcurrentBag<MemoryBuffer1D<double, Stride1D.Dense>> results = new();
+        Random random = new();
+
+        double[,] RandomMatrix(int rows, int cols)
+        {
+            double[,] matrix = new double[rows, cols];
+            for (int i = 0; i < rows; i++) 
+            for (int j = 0; j < cols; j++) matrix[i, j] = random.NextDouble();
+            return matrix;
+        }
+        
+        Console.WriteLine("Generating matrices...");
+        for (int i = 0; i < totalBatches; i++) workQueue.Enqueue((
+            MatrixValue.Roll(RandomMatrix(m, k), m, k), 
+            MatrixValue.Roll(RandomMatrix(k, n), k, n)));
+
+        int aidx = Compute.RequestAccelerator(gpu);
+        Stopwatch sw = new();
+        
+        Console.WriteLine($"Starting processing on accelerator {aidx} ({Compute.Accelerators[aidx].Name}).");
+        sw.Start();
+        foreach (var (a, b) in workQueue)
+        {
+            var aBuffer = Compute.GetTemp(aidx, mk);
+            var bBuffer = Compute.GetTemp(aidx, kn);
+            var resultBuffer = Compute.Get(aidx, mn);
+            aBuffer.CopyFromCPU(a);
+            bBuffer.CopyFromCPU(b);
+            Compute.Call(aidx, Compute.MatrixMultiplyKernels, extent, aBuffer.View, bBuffer.View, resultBuffer.View, m, k, n);
+            results.Add(resultBuffer);
+            Compute.Flush(aidx);
+        }
+        Compute.Synchronize(aidx);
+        sw.Stop();
+        
+        Console.WriteLine($"Total time: {sw.ElapsedMilliseconds} ms.");
+        
+        Compute.Return(results.ToArray());
+        Compute.ClearAll();
+        Compute.ReleaseAccelerator(aidx);
+        results.Clear();
+        
+        Console.WriteLine("Regenerating matrices for next batch of work...");
+        workQueue.Clear();
+        for (int i = 0; i < totalBatches; i++) workQueue.Enqueue((
+            MatrixValue.Roll(RandomMatrix(m, k), m, k), 
+            MatrixValue.Roll(RandomMatrix(k, n), k, n)));
+        
+        var gpuIndices = Compute.Accelerators
+            .Select((acc, idx) => (acc, idx))
+            .Where(x => x.acc.AcceleratorType != AcceleratorType.CPU)
+            .Select(x => x.idx)
+            .ToList();
+
+        
+        Console.WriteLine("Starting parallel processing...");
+        sw.Restart();
+        Task[] tasks = new Task[gpuIndices.Count];
+        for (int i = 0; i < gpuIndices.Count; i++)
+        {
+            int aidx_ = gpuIndices[i];
+            Console.WriteLine($"Starting parallel processing on accelerator {aidx_} ({Compute.Accelerators[aidx_].Name}).");
+            tasks[i] = Task.Run(() =>
+            {
+                while (workQueue.TryDequeue(out var tuple))
+                {
+                    var aBuffer = Compute.GetTemp(aidx_, mk);
+                    var bBuffer = Compute.GetTemp(aidx_, kn);
+                    var resultBuffer = Compute.Get(aidx_, mn);
+        
+                    aBuffer.CopyFromCPU(tuple.a);
+                    bBuffer.CopyFromCPU(tuple.b);
+                    Compute.Call(aidx_, Compute.MatrixMultiplyKernels, extent, 
+                        aBuffer.View, bBuffer.View, resultBuffer.View, m, k, n);
+        
+                    results.Add(resultBuffer);
+                    Compute.Flush(aidx_);
+                }
+                Compute.Synchronize(aidx_);
+                Console.WriteLine($"{aidx_} finished processing!");
+            });
+        }
+        Task.WaitAll(tasks);
+        sw.Stop();
+        
+        Console.WriteLine($"Total time: {sw.ElapsedMilliseconds} ms.");
     }
 }

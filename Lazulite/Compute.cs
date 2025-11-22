@@ -41,14 +41,17 @@ public static partial class Compute
             .Default()
             .EnableAlgorithms()
             .AllAccelerators());
+
+        HashSet<(AcceleratorType, string, long)> seen = [];
         
         foreach (Device device in Context.Devices.Where(device => device is not CudaDevice || AllowGpu))
         {
+            if (!seen.Add((device.AcceleratorType, device.Name, device.MemorySize))) continue;
             Accelerators.Add(device.CreateAccelerator(Context));
             Users.Add(0);
             _pool.Add([]);
             _deferred.Add([]);
-            GpuInUse = true;
+            if (device is CudaDevice) GpuInUse = true;
         }
     }
     public static void ClearAll()
@@ -144,6 +147,8 @@ public static partial class Compute
         kernels[aidx](a, b, c, d, e);
     public static void Call<T1, T2, T3, T4, T5, T6>(int aidx, List<Action<T1, T2, T3, T4, T5, T6>> kernels, T1 a, T2 b, T3 c, T4 d, T5 e, T6 f) =>
         kernels[aidx](a, b, c, d, e, f);
+    public static void Call<T1, T2, T3, T4, T5, T6, T7>(int aidx, List<Action<T1, T2, T3, T4, T5, T6, T7>> kernels, T1 a, T2 b, T3 c, T4 d, T5 e, T6 f, T7 g) =>
+        kernels[aidx](a, b, c, d, e, f, g);
     public static void Call(int aidx, List<Action<Index1D, ArrayView1D<double, Stride1D.Dense>>> kernels, ArrayView1D<double, Stride1D.Dense> view) => 
         kernels[aidx](view.IntExtent, view);
     public static void Call<T>(

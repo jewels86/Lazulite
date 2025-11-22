@@ -5,6 +5,7 @@ using ILGPU.Runtime;
 using Lazulite.Kernels;
 using static Lazulite.Kernels.SimpleKernels;
 using static Lazulite.Kernels.ElementwiseKernels;
+using static Lazulite.Kernels.MatrixKernels;
 
 namespace Lazulite;
 
@@ -43,6 +44,10 @@ public static partial class Compute
         ArrayView1D<double, Stride1D.Dense>>> ElementwiseScalarMultiplyKernels = [];
     public readonly static List<Action<Index1D, ArrayView1D<double, Stride1D.Dense>, ArrayView1D<double, Stride1D.Dense>,
         ArrayView1D<double, Stride1D.Dense>>> ElementwiseScalarDivideKernels = [];
+    #endregion
+    #region Matrix Kernels
+    public static List<Action<Index1D, ArrayView1D<double, Stride1D.Dense>, ArrayView1D<double, Stride1D.Dense>, 
+        ArrayView1D<double, Stride1D.Dense>, int, int, int>> MatrixMultiplyKernels { get; } = [];
     #endregion
     #region Helpers
     private static Task? _warmupTask;
@@ -93,6 +98,10 @@ public static partial class Compute
             ElementwiseScalarDivideKernels.Add(accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<double, Stride1D.Dense>, 
                 ArrayView1D<double, Stride1D.Dense>, ArrayView1D<double, Stride1D.Dense>>(ElementwiseScalarDivideKernel));
             #endregion
+            #region Matrix 
+            MatrixMultiplyKernels.Add(accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<double, Stride1D.Dense>,
+                ArrayView1D<double, Stride1D.Dense>, ArrayView1D<double, Stride1D.Dense>, int, int, int>(MatrixMultiplyKernel));
+            #endregion
         }
     }
     
@@ -118,7 +127,7 @@ public static partial class Compute
             Call(i, ElementwiseNegateKernels, dummy, dummy);
             Call(i, ElementwiseScalarPowerKernels, dummy, dummy, dummy);
             Call(i, ElementwiseScalarMultiplyKernels, dummy, dummy, dummy);
-            Call(i, ElementwiseScalarDivideKernels, dummy, dummy, dummy);;
+            Call(i, ElementwiseScalarDivideKernels, dummy, dummy, dummy);
             Synchronize(i);
         }
     }

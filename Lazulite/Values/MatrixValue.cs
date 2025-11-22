@@ -12,15 +12,25 @@ public class MatrixValue : Value<double[,]>
     public override double[] Roll(double[,] value)
     {
         var (rows, cols) = (value.GetLength(0), value.GetLength(1));
+        return Roll(value, rows, cols);
+    }
+    public override double[,] Unroll(double[] rolled)
+    {
+        var (rows, cols) = (Shape[0], Shape[1]);
+        return Unroll(rolled, rows, cols);
+    }
+
+    public static double[] Roll(double[,] value, int rows, int cols)
+    {
         var vector = new double[rows * cols];
         for (int i = 0; i < rows; i++) 
         for (int j = 0; j < cols; j++)
             vector[IndexOf(i, j, cols)] = value[i, j];
         return vector;
     }
-    public override double[,] Unroll(double[] rolled)
+
+    public static double[,] Unroll(double[] rolled, int rows, int cols)
     {
-        var (rows, cols) = (Shape[0], Shape[1]);
         var matrix = new double[rows, cols];
         for (int i = 0; i < rows; i++) 
         for (int j = 0; j < cols; j++)
