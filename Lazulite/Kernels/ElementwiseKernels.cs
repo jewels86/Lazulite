@@ -69,5 +69,10 @@ public static class ElementwiseKernels
         Index1D index, ArrayView1D<double, Stride1D.Dense> a,
         ArrayView1D<double, Stride1D.Dense> b, ArrayView1D<double, Stride1D.Dense> result) =>
         result[index] = a[index] * b[0];
+    
+    public static void ElementwiseScalarDivideKernel(
+        Index1D index, ArrayView1D<double, Stride1D.Dense> a,
+        ArrayView1D<double, Stride1D.Dense> b, ArrayView1D<double, Stride1D.Dense> result) =>
+        result[index] = a[index] / b[0];
     #endregion
 }

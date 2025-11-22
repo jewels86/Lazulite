@@ -16,7 +16,9 @@ public class VectorValue : Value<double[]>
     public static VectorValue operator +(VectorValue a, VectorValue b) => Compute.BinaryCall(Compute.ElementwiseAddKernels, a, b).AsVector();
     public static VectorValue operator -(VectorValue a, VectorValue b) => Compute.BinaryCall(Compute.ElementwiseSubtractKernels, a, b).AsVector();
     public static VectorValue operator *(VectorValue a, VectorValue b) => Compute.BinaryCall(Compute.ElementwiseMultiplyKernels, a, b).AsVector();
+    public static VectorValue operator *(VectorValue a, ScalarValue b) => new(Compute.BinaryCall(Compute.ElementwiseScalarMultiplyKernels, a, b));
     public static VectorValue operator /(VectorValue a, VectorValue b) => Compute.BinaryCall(Compute.ElementwiseDivideKernels, a, b).AsVector();
+    public static VectorValue operator /(VectorValue a, ScalarValue b) => new(Compute.BinaryCall(Compute.ElementwiseScalarDivideKernels, a, b));
     public static VectorValue operator -(VectorValue a) => Compute.UnaryCall(Compute.ElementwiseNegateKernels, a).AsVector();
     public static VectorValue operator %(VectorValue a, VectorValue b) => Compute.BinaryCall(Compute.ElementwiseModuloKernels, a, b).AsVector();
 

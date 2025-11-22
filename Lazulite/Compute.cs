@@ -32,7 +32,7 @@ public static partial class Compute
     #region Management
     public static void RefreshDevices()
     {
-        FlushAll();
+        ClearAll();
         foreach (Accelerator accelerator in Accelerators) accelerator.Dispose();
         
         Accelerators.Clear();
@@ -51,7 +51,7 @@ public static partial class Compute
             GpuInUse = true;
         }
     }
-    public static void FlushAll()
+    public static void ClearAll()
     {
         foreach (MemoryBuffer1D<double, Stride1D.Dense> b in _deferred.SelectMany(buffer => buffer)) Return(b);
         foreach (Stack<MemoryBuffer1D<double, Stride1D.Dense>> stack in _pool.SelectMany(pool => pool.Values))
@@ -63,12 +63,23 @@ public static partial class Compute
     #region Synchronization
     public static void Synchronize(int aidx)
     {
+        Flush(aidx);
         Accelerators[aidx].Synchronize();
-        foreach (var deferred in _deferred[aidx]) Return(deferred);
     }
+
     public static void SynchronizeAll()
     {
         for (int i = 0; i < Accelerators.Count; i++) Synchronize(i);
+    }
+
+    public static void Flush(int aidx)
+    {
+        foreach (var deferred in _deferred[aidx]) Return(deferred);
+    }
+
+    public static void FlushAll()
+    {
+        for (int i = 0; i < Accelerators.Count; i++) Flush(i);
     }
     #endregion
     #region Accelerator Management
@@ -129,6 +140,10 @@ public static partial class Compute
         kernels[aidx](a, b, c);
     public static void Call<T1, T2, T3, T4>(int aidx, List<Action<T1, T2, T3, T4>> kernels, T1 a, T2 b, T3 c, T4 d) =>
         kernels[aidx](a, b, c, d);
+    public static void Call<T1, T2, T3, T4, T5>(int aidx, List<Action<T1, T2, T3, T4, T5>> kernels, T1 a, T2 b, T3 c, T4 d, T5 e) =>
+        kernels[aidx](a, b, c, d, e);
+    public static void Call<T1, T2, T3, T4, T5, T6>(int aidx, List<Action<T1, T2, T3, T4, T5, T6>> kernels, T1 a, T2 b, T3 c, T4 d, T5 e, T6 f) =>
+        kernels[aidx](a, b, c, d, e, f);
     public static void Call(int aidx, List<Action<Index1D, ArrayView1D<double, Stride1D.Dense>>> kernels, ArrayView1D<double, Stride1D.Dense> view) => 
         kernels[aidx](view.IntExtent, view);
     public static void Call<T>(
@@ -207,6 +222,41 @@ public static partial class Compute
     
     
     #endregion
+    #endregion
+    #region Load & Load Overloads
+    public static List<Action<Index1D, T>> Load<T>(Action<Index1D, T> kernel)
+        where T : struct =>
+        Accelerators.Select(a => a.LoadAutoGroupedStreamKernel(kernel)).ToList();
+    public static List<Action<Index1D, T1, T2>> Load<T1, T2>(Action<Index1D, T1, T2> kernel)
+        where T1 : struct
+        where T2 : struct =>
+        Accelerators.Select(a => a.LoadAutoGroupedStreamKernel(kernel)).ToList();
+    public static List<Action<Index1D, T1, T2, T3>> Load<T1, T2, T3>(Action<Index1D, T1, T2, T3> kernel)
+        where T1 : struct
+        where T2 : struct
+        where T3 : struct =>
+        Accelerators.Select(a => a.LoadAutoGroupedStreamKernel(kernel)).ToList();
+    public static List<Action<Index1D, T1, T2, T3, T4>> Load<T1, T2, T3, T4>(Action<Index1D, T1, T2, T3, T4> kernel)
+        where T1 : struct
+        where T2 : struct
+        where T3 : struct
+        where T4 : struct =>
+        Accelerators.Select(a => a.LoadAutoGroupedStreamKernel(kernel)).ToList();
+    public static List<Action<Index1D, T1, T2, T3, T4, T5>> Load<T1, T2, T3, T4, T5>(Action<Index1D, T1, T2, T3, T4, T5> kernel)
+        where T1 : struct
+        where T2 : struct
+        where T3 : struct
+        where T4 : struct
+        where T5 : struct =>
+        Accelerators.Select(a => a.LoadAutoGroupedStreamKernel(kernel)).ToList();
+    public static List<Action<Index1D, T1, T2, T3, T4, T5, T6>> Load<T1, T2, T3, T4, T5, T6>(Action<Index1D, T1, T2, T3, T4, T5, T6> kernel)
+        where T1 : struct
+        where T2 : struct
+        where T3 : struct
+        where T4 : struct
+        where T5 : struct
+        where T6 : struct =>
+        Accelerators.Select(a => a.LoadAutoGroupedStreamKernel(kernel)).ToList();
     #endregion
     
     public static MemoryBuffer1D<double, Stride1D.Dense> Allocate(int aidx, int size) => Accelerators[aidx].Allocate1D<double>(size);

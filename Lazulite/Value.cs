@@ -18,10 +18,14 @@ public abstract class Value<T>(MemoryBuffer1D<double, Stride1D.Dense> data) : ID
         return Unroll(Data.View.GetAsArray1D());
     }
     public void FromHost(T value) => Data.CopyFromCPU(Roll(value));
-    public void UpdateWith(Value<T> other) => Data.CopyFrom(other.Data);
+    public void UpdateWith(Value<T> other)
+    {
+        Data.CopyFrom(other.Data);
+    }
 
     public void Dispose()
     {
+        if (!IsValid) return;
         Compute.DeferReturn(Data);
         IsValid = false;
     }
