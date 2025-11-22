@@ -39,6 +39,8 @@ public static partial class Compute
     #endregion
     public readonly static List<Action<Index1D, ArrayView1D<double, Stride1D.Dense>, ArrayView1D<double, Stride1D.Dense>,
         ArrayView1D<double, Stride1D.Dense>>> ElementwiseScalarPowerKernels = [];
+    public readonly static List<Action<Index1D, ArrayView1D<double, Stride1D.Dense>, ArrayView1D<double, Stride1D.Dense>,
+        ArrayView1D<double, Stride1D.Dense>>> ElementwiseScalarMultiplyKernels = [];
     #endregion
     #region Helpers
     private static Task? _warmupTask;
@@ -84,6 +86,8 @@ public static partial class Compute
             #endregion
             ElementwiseScalarPowerKernels.Add(accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<double, Stride1D.Dense>, 
                 ArrayView1D<double, Stride1D.Dense>, ArrayView1D<double, Stride1D.Dense>>(ElementwiseScalarPowerKernel));
+            ElementwiseScalarMultiplyKernels.Add(accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<double, Stride1D.Dense>, 
+                ArrayView1D<double, Stride1D.Dense>, ArrayView1D<double, Stride1D.Dense>>(ElementwiseScalarMultiplyKernel));
             #endregion
         }
     }

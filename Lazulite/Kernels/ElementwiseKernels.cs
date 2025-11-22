@@ -64,5 +64,10 @@ public static class ElementwiseKernels
         Index1D index, ArrayView1D<double, Stride1D.Dense> a, 
         ArrayView1D<double, Stride1D.Dense> b, ArrayView1D<double, Stride1D.Dense> result) =>
         result[index] = XMath.Pow(a[index], b[0]);
+
+    public static void ElementwiseScalarMultiplyKernel(
+        Index1D index, ArrayView1D<double, Stride1D.Dense> a,
+        ArrayView1D<double, Stride1D.Dense> b, ArrayView1D<double, Stride1D.Dense> result) =>
+        result[index] = a[index] * b[0];
     #endregion
 }
