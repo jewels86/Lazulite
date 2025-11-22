@@ -63,9 +63,9 @@ public static class SimpleTests
         sw.Start();
         for (int i = 0; i < 200; i++) 
             Compute.Call(_aidx, Compute.ElementwiseMultiplyKernels, buffers[i].Data.View, buffers[i].Data.View, results[i].Data.View);
+        Compute.Synchronize(_aidx);
         sw.Stop();
         
-        Compute.Synchronize(_aidx);
         Compute.FlushAll();
         Compute.ReleaseAccelerator(_aidx);
         
@@ -80,7 +80,6 @@ public static class SimpleTests
         ScalarValue a = new(1, _aidx);
         ScalarValue b = new(2, _aidx);
         ScalarValue c = new(3, _aidx);
-        VectorValue vec = new([1, 2, 3], _aidx);
         
         var d = a + b;
         var e = d * c;

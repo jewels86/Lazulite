@@ -18,6 +18,12 @@ public static class MemoryBufferExtensions
     public static int AcceleratorIndex(this MemoryBuffer1D<double, Stride1D.Dense> buffer) => Compute.GetAcceleratorIndex(buffer.Accelerator);
     public static AcceleratorStream GetStream(this MemoryBuffer1D<double, Stride1D.Dense> buffer) => Compute.GetStream(buffer.Accelerator);
     public static void Return(this MemoryBuffer1D<double, Stride1D.Dense> buffer) => Compute.Return(buffer);
+
+    public static MemoryBuffer1D<double, Stride1D.Dense> DeferReturn(this MemoryBuffer1D<double, Stride1D.Dense> buffer)
+    {
+        Compute.DeferReturn(buffer);
+        return buffer;
+    }
 }
 
 public static class ArrayViewExtensions

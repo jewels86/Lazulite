@@ -26,8 +26,6 @@ public abstract class Value<T>(MemoryBuffer1D<double, Stride1D.Dense> data) : ID
         IsValid = false;
     }
 
-    ~Value() => Dispose();
-
     public abstract T Unroll(double[] rolled);
     public abstract double[] Roll(T value);
     public abstract int[] GetShape(Index1D index);

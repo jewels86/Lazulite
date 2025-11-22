@@ -57,8 +57,8 @@ public static partial class Compute
         foreach (Stack<MemoryBuffer1D<double, Stride1D.Dense>> stack in _pool.SelectMany(pool => pool.Values))
             while (stack.Count > 0)
                 stack.Pop().Dispose();
-        _deferred.Clear();
-        _pool.Clear();
+        foreach (var deferred in _deferred) deferred.Clear();
+        foreach (var pool in _pool) pool.Clear();
     }
     #region Synchronization
     public static void Synchronize(int aidx)
@@ -104,7 +104,7 @@ public static partial class Compute
     #endregion
     #region Gets
     public static MemoryBuffer1D<double, Stride1D.Dense> Get(int aidx, int size) => TryGetFrom(aidx, size);
-    public static MemoryBuffer1D<double, Stride1D.Dense> GetTemp(int aidx, int size) => TryGetFrom(aidx, size).Defer();
+    public static MemoryBuffer1D<double, Stride1D.Dense> GetTemp(int aidx, int size) => TryGetFrom(aidx, size).DeferReturn();
     public static MemoryBuffer1D<double, Stride1D.Dense>[] Get(int aidx, int count, int size) => Enumerable.Range(0, count).Select(_ => Get(aidx, size)).ToArray();
     public static MemoryBuffer1D<double, Stride1D.Dense>[] GetTemps(int aidx, int count, int size) => Enumerable.Range(0, count).Select(_ => GetTemp(aidx, size)).ToArray();
     public static MemoryBuffer1D<double, Stride1D.Dense> GetLike(MemoryBuffer1D<double, Stride1D.Dense> a) => Get(a.AcceleratorIndex(), (int)a.Length);
