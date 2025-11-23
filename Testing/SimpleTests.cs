@@ -14,6 +14,7 @@ namespace Testing;
 public static class SimpleTests
 {
     private static int _aidx = -1;
+    private static Random _random = new();
 
     public static void FillTest(bool gpu)
     {
@@ -217,19 +218,11 @@ public static class SimpleTests
         ConcurrentQueue<(float[] a, float[] b)> workQueue = [];
         ConcurrentBag<MemoryBuffer1D<float, Stride1D.Dense>> results = new();
         Random random = new();
-
-        float[,] RandomMatrix(int rows, int cols)
-        {
-            float[,] matrix = new float[rows, cols];
-            for (int i = 0; i < rows; i++) 
-            for (int j = 0; j < cols; j++) matrix[i, j] = (float)random.NextDouble();
-            return matrix;
-        }
         
         Console.WriteLine("Generating matrices...");
         for (int i = 0; i < totalBatches; i++) workQueue.Enqueue((
-            MatrixValue.Roll(RandomMatrix(m, k), m, k), 
-            MatrixValue.Roll(RandomMatrix(k, n), k, n)));
+            MatrixProxy.Roll(RandomMatrix(m, k)), 
+            MatrixProxy.Roll(RandomMatrix(k, n))));
 
         int aidx = Compute.RequestAccelerator(gpu);
         Stopwatch sw = new();
@@ -260,8 +253,8 @@ public static class SimpleTests
         Console.WriteLine("Regenerating matrices for next batch of work...");
         workQueue.Clear();
         for (int i = 0; i < totalBatches; i++) workQueue.Enqueue((
-            MatrixValue.Roll(RandomMatrix(m, k), m, k), 
-            MatrixValue.Roll(RandomMatrix(k, n), k, n)));
+            MatrixProxy.Roll(RandomMatrix(m, k)), 
+            MatrixProxy.Roll(RandomMatrix(k, n))));
         
         var gpuIndices = Compute.Accelerators
             .Select((acc, idx) => (acc, idx))
@@ -300,8 +293,18 @@ public static class SimpleTests
         Task.WaitAll(tasks);
         sw.Stop();
         
-        
-        
+        Compute.Return(results.ToArray());
+        Compute.ClearAll();
+        Compute.ReleaseAccelerator(aidx);
+        results.Clear();
         Console.WriteLine($"Total time: {sw.ElapsedMilliseconds} ms.");
+    }
+    
+    public static float[,] RandomMatrix(int rows, int cols)
+    {
+        float[,] matrix = new float[rows, cols];
+        for (int i = 0; i < rows; i++) 
+        for (int j = 0; j < cols; j++) matrix[i, j] = (float)_random.NextDouble();
+        return matrix;
     }
 }

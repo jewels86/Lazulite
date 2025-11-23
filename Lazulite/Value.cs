@@ -34,7 +34,28 @@ public abstract class Value<T>(MemoryBuffer1D<float, Stride1D.Dense> data) : IDi
     public abstract float[] Roll(T value);
     public abstract int[] GetShape(Index1D index);
     public abstract Value<T> Create(MemoryBuffer1D<float, Stride1D.Dense> buffer);
+    public abstract ValueProxy<T> ToProxy();
     
     public static implicit operator T(Value<T> value) => value.ToHost();
     public static implicit operator MemoryBuffer1D<float, Stride1D.Dense>(Value<T> value) => value.Data;
+}
+
+public abstract class ValueProxy<T> where T : notnull
+{
+    public float[] FlatData { get; }
+    public int[] Shape { get; }
+
+    protected ValueProxy(Value<T> data)
+    {
+        FlatData = data.Data.View.GetAsArray1D();
+        Shape = data.Shape;
+    }
+    protected ValueProxy(float[] flatData, int[] shape)
+    {
+        FlatData = flatData;
+        Shape = shape;
+    }
+
+    public abstract float Get(int[] index);
+    public abstract T ToHost();
 }
