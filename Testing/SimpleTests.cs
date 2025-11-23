@@ -300,6 +300,8 @@ public static class SimpleTests
         Task.WaitAll(tasks);
         sw.Stop();
         
+        
+        
         Console.WriteLine($"Total time: {sw.ElapsedMilliseconds} ms.");
     }
 }
