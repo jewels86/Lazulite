@@ -1,4 +1,5 @@
-﻿using ILGPU;
+﻿using System.Linq.Expressions;
+using ILGPU;
 using ILGPU.Algorithms;
 using ILGPU.Runtime;
 

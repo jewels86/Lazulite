@@ -1,4 +1,5 @@
-﻿using ILGPU;
+﻿using System.Linq.Expressions;
+using ILGPU;
 using ILGPU.IR.Transformations;
 using ILGPU.Runtime;
 using ILGPU.Runtime.Cuda;
@@ -17,7 +18,6 @@ public static partial class Compute
 
     private static readonly List<List<MemoryBuffer1D<float, Stride1D.Dense>>> _deferred = [];
     private static readonly List<Dictionary<int, Stack<MemoryBuffer1D<float, Stride1D.Dense>>>> _pool = []; // aidx -> stack of buffers sorted by size
-    // buffers in pool are NOT zeroed yet
     #endregion
 
     static Compute()
@@ -276,5 +276,81 @@ public static partial class Compute
         Call(buffer.AcceleratorIndex(), FillKernels, buffer.View, 0);
         return buffer;
     }
+    #endregion
+    #region Fusion
+    private static ParameterExpression ArrayViewParameter() => Expression.Parameter(typeof(ArrayView1D<double, Stride1D.Dense>));
+    private static Expression Extract(Expression<Func<float, float, float>> op, Expression left, Expression right, ParameterExpression indexParam)
+    {
+        var leftIndexed = Expression.ArrayAccess(left, indexParam);
+        var rightIndexed = Expression.ArrayAccess(right, indexParam);
+    
+        if (op.Body is BinaryExpression binary)
+            return Expression.MakeBinary(binary.NodeType, leftIndexed, rightIndexed);
+    
+        throw new ArgumentException("Only binary operations are supported");
+    }
+
+    public static List<Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>>
+        Fuse(int aidx, Expression<Func<float, float, float>> op)
+    {
+        var indexParam = Expression.Parameter(typeof(Index1D), "index");
+        var initialParam = ArrayViewParameter();
+        var operand1Param = ArrayViewParameter();
+        var resultParam = ArrayViewParameter();
+    
+        var current = Extract(op, initialParam, operand1Param, indexParam);
+        var assignment = Expression.Assign(Expression.ArrayAccess(resultParam, indexParam), current);
+    
+        var lambda = Expression.Lambda<Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>>(
+            assignment, indexParam, initialParam, operand1Param, resultParam);
+    
+        
+        return Load(lambda.Compile());
+    }
+
+    public static List<Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>> 
+        Fuse(int aidx, Expression<Func<float, float, float>> op1, Expression<Func<float, float, float>> op2)
+    {
+        var indexParam = Expression.Parameter(typeof(Index1D), "index");
+        var initialParam = ArrayViewParameter();
+        var operand1Param = ArrayViewParameter();
+        var operand2Param = ArrayViewParameter();
+        var resultParam = ArrayViewParameter();
+    
+        var current = Extract(op1, initialParam, operand1Param, indexParam);
+        current = Extract(op2, current, operand2Param, indexParam);
+    
+        var assignment = Expression.Assign(Expression.ArrayAccess(resultParam, indexParam), current);
+    
+        var lambda = Expression.Lambda<Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, 
+            ArrayView1D<float, Stride1D.Dense>>>(assignment, indexParam, initialParam, operand1Param, operand2Param, resultParam);
+    
+        return Load(lambda.Compile());
+    }
+    
+    public static List<Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, 
+            ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>> 
+        Fuse(int aidx, Expression<Func<float, float, float>> op1, Expression<Func<float, float, float>> op2, Expression<Func<float, float, float>> op3)
+    {
+        var indexParam = Expression.Parameter(typeof(Index1D), "index");
+        var initialParam = ArrayViewParameter();
+        var operand1Param = ArrayViewParameter();
+        var operand2Param = ArrayViewParameter();
+        var resultParam = ArrayViewParameter();
+    
+        var current = Extract(op1, initialParam, operand1Param, indexParam);
+        current = Extract(op2, current, operand2Param, indexParam);
+        current = Extract(op3, current, operand2Param, indexParam);
+    
+        var assignment = Expression.Assign(Expression.ArrayAccess(resultParam, indexParam), current);
+    
+        var lambda = Expression.Lambda<Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, 
+            ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>>(assignment, indexParam, initialParam, operand1Param, operand2Param, resultParam);
+    
+        return Load(lambda.Compile());
+    }
+    
+    
+
     #endregion
 }
