@@ -100,6 +100,11 @@ public static class SimpleTests
         
         Console.WriteLine(f);
         
+        var addMultSub = Compute.Fuse(_aidx, Operations.AddOp, Operations.MultiplyOp, Operations.SubtractOp);
+        Compute.Call(_aidx, addMultSub, a.Data.IntExtent, a.Data.View, b.Data.View, c.Data.View, a.Data.View, f.Data.View);
+        // this is even better- we only allocate 1 value, f, and we can fuse the operations into one kernel call
+        Console.WriteLine(f);
+        
         Compute.Synchronize(_aidx);
         Compute.ClearAll();
         Compute.ReleaseAccelerator(_aidx);
@@ -236,7 +241,7 @@ public static class SimpleTests
             var resultBuffer = Compute.Get(aidx, mn);
             aBuffer.CopyFromCPU(a);
             bBuffer.CopyFromCPU(b);
-            Compute.Call(aidx, Compute.MatrixMultiplyKernels, extent, aBuffer.View, bBuffer.View, resultBuffer.View, m, k, n);
+            Operations.MatrixMultiply(aBuffer, bBuffer, resultBuffer, m, k, n);
             results.Add(resultBuffer);
             Compute.Flush(aidx);
         }
@@ -280,8 +285,7 @@ public static class SimpleTests
         
                     aBuffer.CopyFromCPU(tuple.a);
                     bBuffer.CopyFromCPU(tuple.b);
-                    Compute.Call(aidx_, Compute.MatrixMultiplyKernels, extent, 
-                        aBuffer.View, bBuffer.View, resultBuffer.View, m, k, n);
+                    Operations.MatrixMultiply(aBuffer, bBuffer, resultBuffer, m, k, n);
         
                     results.Add(resultBuffer);
                     Compute.Flush(aidx_);

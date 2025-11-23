@@ -61,6 +61,7 @@ public static partial class Compute
                 stack.Pop().Dispose();
         foreach (var deferred in _deferred) deferred.Clear();
         foreach (var pool in _pool) pool.Clear();
+        Operations.Cleanup();
     }
     #region Synchronization
     public static void Synchronize(int aidx)
@@ -352,4 +353,6 @@ public static partial class Compute
     
 
     #endregion
+
+    
 }
