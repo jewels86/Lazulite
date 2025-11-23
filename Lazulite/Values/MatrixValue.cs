@@ -3,35 +3,35 @@ using ILGPU.Runtime;
 
 namespace Lazulite.Values;
 
-public class MatrixValue : Value<double[,]>
+public class MatrixValue : Value<float[,]>
 {
-    public MatrixValue(double[,] value, int aidx) 
+    public MatrixValue(float[,] value, int aidx) 
         : base(Compute.Get(aidx, value.GetLength(0) * value.GetLength(1))) => FromHost(value);
-    public MatrixValue(MemoryBuffer1D<double, Stride1D.Dense> buffer) : base(buffer) { }
+    public MatrixValue(MemoryBuffer1D<float, Stride1D.Dense> buffer) : base(buffer) { }
     
-    public override double[] Roll(double[,] value)
+    public override float[] Roll(float[,] value)
     {
         var (rows, cols) = (value.GetLength(0), value.GetLength(1));
         return Roll(value, rows, cols);
     }
-    public override double[,] Unroll(double[] rolled)
+    public override float[,] Unroll(float[] rolled)
     {
         var (rows, cols) = (Shape[0], Shape[1]);
         return Unroll(rolled, rows, cols);
     }
 
-    public static double[] Roll(double[,] value, int rows, int cols)
+    public static float[] Roll(float[,] value, int rows, int cols)
     {
-        var vector = new double[rows * cols];
+        var vector = new float[rows * cols];
         for (int i = 0; i < rows; i++) 
         for (int j = 0; j < cols; j++)
             vector[IndexOf(i, j, cols)] = value[i, j];
         return vector;
     }
 
-    public static double[,] Unroll(double[] rolled, int rows, int cols)
+    public static float[,] Unroll(float[] rolled, int rows, int cols)
     {
-        var matrix = new double[rows, cols];
+        var matrix = new float[rows, cols];
         for (int i = 0; i < rows; i++) 
         for (int j = 0; j < cols; j++)
             matrix[i, j] = rolled[IndexOf(i, j, cols)];
@@ -44,7 +44,7 @@ public class MatrixValue : Value<double[,]>
         return [row, col];
     }
 
-    public override Value<double[,]> Create(MemoryBuffer1D<double, Stride1D.Dense> buffer) => new MatrixValue(buffer);
+    public override Value<float[,]> Create(MemoryBuffer1D<float, Stride1D.Dense> buffer) => new MatrixValue(buffer);
 
     public static int IndexOf(int row, int col, int cols) => row * cols + col;
     public static (int row, int col) FromIndex(int index, int cols) => (index / cols, index % cols);

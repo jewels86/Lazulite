@@ -7,9 +7,9 @@ public static class MatrixKernels
 {
     public static void MatrixMultiplyKernel(
         Index1D index,
-        ArrayView1D<double, Stride1D.Dense> a,
-        ArrayView1D<double, Stride1D.Dense> b,
-        ArrayView1D<double, Stride1D.Dense> result,
+        ArrayView1D<float, Stride1D.Dense> a,
+        ArrayView1D<float, Stride1D.Dense> b,
+        ArrayView1D<float, Stride1D.Dense> result,
         int m, int k, int n) // a is m x k, b is k x n, result is m x n
     {
         if (index >= m * n) return;
@@ -17,7 +17,7 @@ public static class MatrixKernels
         int row = index / n;
         int col = index % n;
     
-        double sum = 0;
+        float sum = 0;
         for (int i = 0; i < k; i++)
         {
             sum += a[row * k + i] * b[i * n + col];

@@ -3,15 +3,15 @@ using ILGPU.Runtime;
 
 namespace Lazulite.Values;
 
-public class VectorValue : Value<double[]>
+public class VectorValue : Value<float[]>
 {
-    public VectorValue(double[] value, int aidx) : base(Compute.Get(aidx, value.Length)) => FromHost(value);
-    public VectorValue(MemoryBuffer1D<double, Stride1D.Dense> buffer) : base(buffer) { }
+    public VectorValue(float[] value, int aidx) : base(Compute.Get(aidx, value.Length)) => FromHost(value);
+    public VectorValue(MemoryBuffer1D<float, Stride1D.Dense> buffer) : base(buffer) { }
     
-    public override double[] Unroll(double[] rolled) => rolled;
-    public override double[] Roll(double[] value) => value;
+    public override float[] Unroll(float[] rolled) => rolled;
+    public override float[] Roll(float[] value) => value;
     public override int[] GetShape(Index1D index) => [index.X];
-    public override Value<double[]> Create(MemoryBuffer1D<double, Stride1D.Dense> buffer) => new VectorValue(buffer);
+    public override Value<float[]> Create(MemoryBuffer1D<float, Stride1D.Dense> buffer) => new VectorValue(buffer);
     
     public static VectorValue operator +(VectorValue a, VectorValue b) => Compute.BinaryCall(Compute.ElementwiseAddKernels, a, b).AsVector();
     public static VectorValue operator -(VectorValue a, VectorValue b) => Compute.BinaryCall(Compute.ElementwiseSubtractKernels, a, b).AsVector();

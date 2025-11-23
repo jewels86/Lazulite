@@ -3,10 +3,10 @@ using ILGPU.Runtime;
 
 namespace Lazulite;
 
-public abstract class Value<T>(MemoryBuffer1D<double, Stride1D.Dense> data) : IDisposable
+public abstract class Value<T>(MemoryBuffer1D<float, Stride1D.Dense> data) : IDisposable
     where T : notnull
 {
-    public MemoryBuffer1D<double, Stride1D.Dense> Data { get; set; } = data;
+    public MemoryBuffer1D<float, Stride1D.Dense> Data { get; set; } = data;
     public int[] Shape => GetShape(Data.IntExtent);
     public int TotalSize => (int)Data.Length;
     public int AcceleratorIndex => Compute.GetAcceleratorIndex(Data.Accelerator);
@@ -30,11 +30,11 @@ public abstract class Value<T>(MemoryBuffer1D<double, Stride1D.Dense> data) : ID
         IsValid = false;
     }
 
-    public abstract T Unroll(double[] rolled);
-    public abstract double[] Roll(T value);
+    public abstract T Unroll(float[] rolled);
+    public abstract float[] Roll(T value);
     public abstract int[] GetShape(Index1D index);
-    public abstract Value<T> Create(MemoryBuffer1D<double, Stride1D.Dense> buffer);
+    public abstract Value<T> Create(MemoryBuffer1D<float, Stride1D.Dense> buffer);
     
     public static implicit operator T(Value<T> value) => value.ToHost();
-    public static implicit operator MemoryBuffer1D<double, Stride1D.Dense>(Value<T> value) => value.Data;
+    public static implicit operator MemoryBuffer1D<float, Stride1D.Dense>(Value<T> value) => value.Data;
 }

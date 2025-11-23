@@ -49,10 +49,10 @@ public static class SimpleTests
         Console.WriteLine(Compute.IsGpuAccelerator(_aidx) ? "GPU accelerator" : "CPU accelerator");
         Stopwatch sw = new();
 
-        double[][,] matrices = new double[200][,];
+        float[][,] matrices = new float[200][,];
         for (int i = 0; i < 200; i++)
         {
-            double[,] matrix = new double[1000, 1000];
+            float[,] matrix = new float[1000, 1000];
             for (int j = 0; j < 1000; j++) 
             for (int k = 0; k < 1000; k++) matrix[j, k] = j + k;
             matrices[i] = matrix;
@@ -61,7 +61,7 @@ public static class SimpleTests
         MatrixValue[] buffers = new MatrixValue[200];
         MatrixValue[] results = new MatrixValue[200];
         for (int i = 0; i < 200; i++) buffers[i] = new(matrices[i], _aidx);
-        for (int i = 0; i < 200; i++) results[i] = new(new double[1000, 1000], _aidx);
+        for (int i = 0; i < 200; i++) results[i] = new(new float[1000, 1000], _aidx);
 
         sw.Start();
         for (int i = 0; i < 200; i++) 
@@ -111,17 +111,17 @@ public static class SimpleTests
         Stopwatch sw = new();
 
         int finalT = 100; // end time
-        double dt = 0.01; // time step size
+        float dt = 0.01f; // time step size
         int n = 1000; // number of bodies
-        double G = 6.674e-11; // gravitational constant
+        float G = 6.674e-11f; // gravitational constant
         Random random = new();
 
-        double[] positions = new double[n * 3];
-        double[] velocities = new double[n * 3];
-        double[] masses = new double[n];
-        double[] forces = new double[n * 3];
+        float[] positions = new float[n * 3];
+        float[] velocities = new float[n * 3];
+        float[] masses = new float[n];
+        float[] forces = new float[n * 3];
         
-        Func<double, double, double> randomDouble = (min, max) => random.NextDouble() * (max - min) + min;
+        Func<float, float, float> randomDouble = (min, max) => (float)random.NextDouble() * (max - min) + min;
 
         for (int i = 0; i < n; i++)
         {
@@ -131,21 +131,21 @@ public static class SimpleTests
             (forces[i * 3], forces[i * 3 + 1], forces[i * 3 + 2]) = (0, 0, 0);
         }
 
-        MemoryBuffer1D<double, Stride1D.Dense> positionsBuffer = Compute.GetTemp(_aidx, n * 3);
-        MemoryBuffer1D<double, Stride1D.Dense> velocitiesBuffer = Compute.GetTemp(_aidx, n * 3);
-        MemoryBuffer1D<double, Stride1D.Dense> massesBuffer = Compute.GetTemp(_aidx, n);
-        MemoryBuffer1D<double, Stride1D.Dense> forcesBuffer = Compute.GetTemp(_aidx, n * 3);
+        MemoryBuffer1D<float, Stride1D.Dense> positionsBuffer = Compute.GetTemp(_aidx, n * 3);
+        MemoryBuffer1D<float, Stride1D.Dense> velocitiesBuffer = Compute.GetTemp(_aidx, n * 3);
+        MemoryBuffer1D<float, Stride1D.Dense> massesBuffer = Compute.GetTemp(_aidx, n);
+        MemoryBuffer1D<float, Stride1D.Dense> forcesBuffer = Compute.GetTemp(_aidx, n * 3);
         positionsBuffer.CopyFromCPU(positions);
         velocitiesBuffer.CopyFromCPU(velocities);
         massesBuffer.CopyFromCPU(masses);
         forcesBuffer.CopyFromCPU(forces);
         var extent = new Index1D(n);
 
-        Action<Index1D, ArrayView1D<double, Stride1D.Dense>, ArrayView1D<double, Stride1D.Dense>, ArrayView1D<double, Stride1D.Dense>, double, int> gravityKernel =
+        Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, float, int> gravityKernel =
             (index, rs, ms, fs, g, total) =>
             {
                 int i = index.X;
-                var (fx, fy, fz) = (0.0, 0.0, 0.0);
+                var (fx, fy, fz) = (0f, 0f, 0f);
                 var (rx, ry, rz) = KernelProgramming.GetVector3(rs, i);
 
                 for (int j = 0; j < total; j++)
@@ -165,7 +165,7 @@ public static class SimpleTests
                 (fx, fy, fz) = KernelProgramming.DivideVector3((fx, fy, fz), ms[i]);
                 KernelProgramming.SetVector3(fs, i, (fx, fy, fz));
             };
-        Action<Index1D, ArrayView1D<double, Stride1D.Dense>, ArrayView1D<double, Stride1D.Dense>, ArrayView1D<double, Stride1D.Dense>, ArrayView1D<double, Stride1D.Dense>, double>
+        Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, float>
             eulerKernel =
                 (index, rs, vs, fs, ms, dt_) =>
                 {
@@ -188,7 +188,7 @@ public static class SimpleTests
         var eulerKernels = Compute.Load(eulerKernel);
         
         sw.Start();
-        for (double t = 0; t < finalT; t += dt)
+        for (float t = 0; t < finalT; t += dt)
         {
             Compute.Call(_aidx, gravityKernels, extent, positionsBuffer.View, massesBuffer.View, forcesBuffer.View, G, n);
             Compute.Call(_aidx, eulerKernels, extent, positionsBuffer.View, velocitiesBuffer.View, forcesBuffer.View, massesBuffer.View, dt);
@@ -199,10 +199,10 @@ public static class SimpleTests
         Compute.ClearAll();
         Compute.ReleaseAccelerator(_aidx);
         
-        Console.WriteLine($"Total timesteps: {finalT / dt}.");
+        Console.WriteLine($"Total timesteps: {finalT / dt}");
         Console.WriteLine($"Total bodies: {n}");
-        Console.WriteLine($"Bodies processed per ms: {(finalT / dt) * n / sw.ElapsedMilliseconds:F2}.)");
-        Console.WriteLine($"Elapsed time: {sw.ElapsedMilliseconds} ms ({sw.ElapsedMilliseconds / (finalT/dt):F2} ms/timestep, or {(finalT/dt) / sw.ElapsedMilliseconds:F2} timesteps/ms).");
+        Console.WriteLine($"Bodies processed per ms: {(finalT / dt) * n / sw.ElapsedMilliseconds:F2}");
+        Console.WriteLine($"Elapsed time: {sw.ElapsedMilliseconds} ms ({sw.ElapsedMilliseconds / (finalT/dt):F2} ms/timestep, or {(finalT/dt) / sw.ElapsedMilliseconds:F2} timesteps/ms)");
     }
     
     public static void ParallelProcessingTest(bool gpu)
@@ -214,15 +214,15 @@ public static class SimpleTests
         int mn = m * n;
         Index1D extent = new(mn);
 
-        ConcurrentQueue<(double[] a, double[] b)> workQueue = [];
-        ConcurrentBag<MemoryBuffer1D<double, Stride1D.Dense>> results = new();
+        ConcurrentQueue<(float[] a, float[] b)> workQueue = [];
+        ConcurrentBag<MemoryBuffer1D<float, Stride1D.Dense>> results = new();
         Random random = new();
 
-        double[,] RandomMatrix(int rows, int cols)
+        float[,] RandomMatrix(int rows, int cols)
         {
-            double[,] matrix = new double[rows, cols];
+            float[,] matrix = new float[rows, cols];
             for (int i = 0; i < rows; i++) 
-            for (int j = 0; j < cols; j++) matrix[i, j] = random.NextDouble();
+            for (int j = 0; j < cols; j++) matrix[i, j] = (float)random.NextDouble();
             return matrix;
         }
         
