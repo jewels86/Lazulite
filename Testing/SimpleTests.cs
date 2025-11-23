@@ -100,8 +100,8 @@ public static class SimpleTests
         
         Console.WriteLine(f);
         
-        var addMultSub = Compute.Fuse(_aidx, Operations.AddOp, Operations.MultiplyOp, Operations.SubtractOp);
-        Compute.Call(_aidx, addMultSub, a.Data.IntExtent, a.Data.View, b.Data.View, c.Data.View, a.Data.View, f.Data.View);
+        var addMultSub = Compute.Load((i, a_, b_, c_, r) => r[i] = ((a_[i] + b_[i]) * c_[i]) - a_[i]);
+        Compute.Call(_aidx, addMultSub, a.Data.IntExtent, a.Data.View, b.Data.View, c.Data.View, f.Data.View);
         // this is even better- we only allocate 1 value, f, and we can fuse the operations into one kernel call
         Console.WriteLine(f);
         
@@ -213,8 +213,8 @@ public static class SimpleTests
     
     public static void ParallelProcessingTest(bool gpu)
     {
-        int totalBatches = 6000;
-        var (m, k, n) = (100, 200, 300);
+        int totalBatches = 8000;
+        var (m, k, n) = (150, 250, 350);
         int mk = m * k;
         int kn = k * n;
         int mn = m * n;

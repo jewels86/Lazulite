@@ -39,21 +39,13 @@ public abstract class Value<T>(MemoryBuffer1D<float, Stride1D.Dense> data, int[]
     public static implicit operator MemoryBuffer1D<float, Stride1D.Dense>(Value<T> value) => value.Data;
 }
 
-public abstract class ValueProxy<T> where T : notnull
+public abstract class ValueProxy<T>(float[] flatData, int[] shape)
+    where T : notnull
 {
-    public float[] FlatData { get; }
-    public int[] Shape { get; }
+    public float[] FlatData { get; } = flatData;
+    public int[] Shape { get; } = shape;
 
-    protected ValueProxy(Value<T> data)
-    {
-        FlatData = data.Data.View.GetAsArray1D();
-        Shape = data.Shape;
-    }
-    protected ValueProxy(float[] flatData, int[] shape)
-    {
-        FlatData = flatData;
-        Shape = shape;
-    }
+    protected ValueProxy(Value<T> data) : this(data.Data.View.GetAsArray1D(), data.Shape) { }
 
     public abstract float Get(int[] index);
     public abstract T ToHost();
