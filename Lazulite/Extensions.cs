@@ -40,6 +40,6 @@ public static class ValueExtensions
 {
     public static ScalarValue AsScalar(this Value<float> value) => new(value.Data);
     public static VectorValue AsVector(this Value<float[]> value) => new(value.Data);
-    public static MatrixValue AsMatrix(this Value<float[,]> value) => new(value.Data);
-    public static TensorValue3 AsTensorValue3(this Value<float[,,]> value) => new(value.Data);
+    public static MatrixValue AsMatrix(this Value<float[,]> value) => new(value.Data, value.Shape);
+    public static TensorValue3 AsTensorValue3(this Value<float[,,]> value) => new(value.Data, value.Shape);
 }

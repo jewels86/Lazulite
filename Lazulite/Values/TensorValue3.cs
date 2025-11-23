@@ -5,25 +5,19 @@ namespace Lazulite.Values;
 
 public class TensorValue3 : Value<float[,,]>
 {
-    public TensorValue3(float[,,] value, int aidx) 
-        : base(Compute.Get(aidx, value.GetLength(0) * value.GetLength(1) * value.GetLength(2))) => FromHost(value);
-    public TensorValue3(MemoryBuffer1D<float, Stride1D.Dense> buffer) : base(buffer) { }
+    public TensorValue3(float[,,] value, int aidx) : base(
+        Compute.Get(aidx, value.GetLength(0) * value.GetLength(1) * value.GetLength(2)),
+        [value.GetLength(0), value.GetLength(1), value.GetLength(2)]) => FromHost(value);
+    public TensorValue3(MemoryBuffer1D<float, Stride1D.Dense> buffer, int[] shape) : base(buffer, shape) { }
 
     public override float[] Roll(float[,,] value) => TensorProxy3.Roll(value);
     public override float[,,] Unroll(float[] rolled) => TensorProxy3.Unroll(rolled, Shape[1], Shape[2]);
-    public override int[] GetShape(Index1D index)
-    {
-        var (x, y, z) = TensorProxy3.FromIndex(index.X, Shape[1], Shape[2]);
-        return [x, y, z];
-    }
-    public override TensorValue3 Create(MemoryBuffer1D<float, Stride1D.Dense> buffer) => new TensorValue3(buffer);
+    public override TensorValue3 Create(MemoryBuffer1D<float, Stride1D.Dense> buffer, int[] shape) => new(buffer, shape);
     public override TensorProxy3 ToProxy() => new(this);
 }
 
-public class TensorProxy3 : ValueProxy<float[,,]>
+public class TensorProxy3(TensorValue3 value) : ValueProxy<float[,,]>(value)
 {
-    public TensorProxy3(TensorValue3 value) : base(value) { }
-
     public float this[int i, int j, int k] => FlatData[IndexOf(i, j, k, Shape[1], Shape[2])];
     public override float Get(int[] index) => this[index[0], index[1], index[2]];
     public override float[,,] ToHost() => Unroll(FlatData, Shape[1], Shape[2]);

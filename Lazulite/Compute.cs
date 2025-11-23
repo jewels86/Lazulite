@@ -123,8 +123,8 @@ public static partial class Compute
     public static MemoryBuffer1D<float, Stride1D.Dense> GetLike(MemoryBuffer1D<float, Stride1D.Dense> a) => Get(a.AcceleratorIndex(), (int)a.Length);
     public static MemoryBuffer1D<float, Stride1D.Dense> GetTempLike(MemoryBuffer1D<float, Stride1D.Dense> a) => GetTemp(a.AcceleratorIndex(), (int)a.Length);
     
-    public static Value<T> CreateLike<T>(Value<T> a) where T : notnull => a.Create(Get(a.AcceleratorIndex, a.TotalSize));
-    public static Value<T> CreateTempLike<T>(Value<T> a) where T : notnull => a.Create(GetTemp(a.AcceleratorIndex, a.TotalSize));
+    public static Value<T> CreateLike<T>(Value<T> a) where T : notnull => a.Create(Get(a.AcceleratorIndex, a.TotalSize), a.Shape);
+    public static Value<T> CreateTempLike<T>(Value<T> a) where T : notnull => a.Create(GetTemp(a.AcceleratorIndex, a.TotalSize), a.Shape);
     #endregion
     #region Helpers
     public static int GetAcceleratorIndex(Accelerator accelerator) => Accelerators.IndexOf(accelerator);
@@ -177,7 +177,7 @@ public static partial class Compute
 
     public static Value<T> BinaryCall<T>(
         List<Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>> kernels,
-        Value<T> a, Value<T> b) where T : notnull => a.Create(BinaryCall(kernels, a.Data, b.Data));
+        Value<T> a, Value<T> b) where T : notnull => a.Create(BinaryCall(kernels, a.Data, b.Data), a.Shape);
 
     public static void BinaryCallChain(
         MemoryBuffer1D<float, Stride1D.Dense> initial, MemoryBuffer1D<float, Stride1D.Dense> result,
@@ -204,7 +204,8 @@ public static partial class Compute
         Value<T> initial,
         params (
             List<Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>>kernels,
-            Value<T> operand)[] ops) where T : notnull => initial.Create(BinaryCallChain(initial.Data, ops.Select(op => (op.kernels, op.operand.Data)).ToArray()));
+            Value<T> operand)[] ops) where T : notnull => 
+        initial.Create(BinaryCallChain(initial.Data, ops.Select(op => (op.kernels, op.operand.Data)).ToArray()), initial.Shape);
     #endregion
     
     #region Unary Calls
@@ -222,9 +223,7 @@ public static partial class Compute
     
     public static Value<T> UnaryCall<T>(
         List<Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>> kernels,
-        Value<T> a) where T : notnull => a.Create(UnaryCallUnaryCall(kernels, a.Data));
-    
-    
+        Value<T> a) where T : notnull => a.Create(UnaryCallUnaryCall(kernels, a.Data), a.Shape);
     #endregion
     #endregion
     #region Load & Load Overloads

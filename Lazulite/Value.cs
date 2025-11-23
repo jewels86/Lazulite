@@ -3,15 +3,15 @@ using ILGPU.Runtime;
 
 namespace Lazulite;
 
-public abstract class Value<T>(MemoryBuffer1D<float, Stride1D.Dense> data) : IDisposable
+public abstract class Value<T>(MemoryBuffer1D<float, Stride1D.Dense> data, int[] shape) : IDisposable
     where T : notnull
 {
     public MemoryBuffer1D<float, Stride1D.Dense> Data { get; set; } = data;
-    public int[] Shape => GetShape(Data.IntExtent);
+    public int[] Shape { get; } = shape;
     public int TotalSize => (int)Data.Length;
     public int AcceleratorIndex => Compute.GetAcceleratorIndex(Data.Accelerator);
     public bool IsValid { get; private set; } = true; // this may be false if the buffer was deferred but wasn't returned yet- it can still be used during that iteration
-
+    
     public T ToHost()
     {
         Compute.Synchronize(AcceleratorIndex);
@@ -32,8 +32,7 @@ public abstract class Value<T>(MemoryBuffer1D<float, Stride1D.Dense> data) : IDi
 
     public abstract T Unroll(float[] rolled);
     public abstract float[] Roll(T value);
-    public abstract int[] GetShape(Index1D index);
-    public abstract Value<T> Create(MemoryBuffer1D<float, Stride1D.Dense> buffer);
+    public abstract Value<T> Create(MemoryBuffer1D<float, Stride1D.Dense> buffer, int[] shape);
     public abstract ValueProxy<T> ToProxy();
     
     public static implicit operator T(Value<T> value) => value.ToHost();

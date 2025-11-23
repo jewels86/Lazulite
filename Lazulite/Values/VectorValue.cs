@@ -5,13 +5,12 @@ namespace Lazulite.Values;
 
 public class VectorValue : Value<float[]>
 {
-    public VectorValue(float[] value, int aidx) : base(Compute.Get(aidx, value.Length)) => FromHost(value);
-    public VectorValue(MemoryBuffer1D<float, Stride1D.Dense> buffer) : base(buffer) { }
+    public VectorValue(float[] value, int aidx) : base(Compute.Get(aidx, value.Length), [value.Length]) => FromHost(value);
+    public VectorValue(MemoryBuffer1D<float, Stride1D.Dense> buffer) : base(buffer, [(int)buffer.Length]) { }
     
     public override float[] Unroll(float[] rolled) => rolled;
     public override float[] Roll(float[] value) => value;
-    public override int[] GetShape(Index1D index) => [index.X];
-    public override VectorValue Create(MemoryBuffer1D<float, Stride1D.Dense> buffer) => new(buffer);
+    public override VectorValue Create(MemoryBuffer1D<float, Stride1D.Dense> buffer, int[] shape) => new(buffer);
     public override VectorProxy ToProxy() => new(this);
 
     public static VectorValue operator +(VectorValue a, VectorValue b) => Compute.BinaryCall(Compute.ElementwiseAddKernels, a, b).AsVector();
@@ -33,10 +32,8 @@ public class VectorValue : Value<float[]>
     public ScalarValue Dot(VectorValue b) => (this * b).Defer().Sum();
 }
 
-public class VectorProxy : ValueProxy<float[]>
+public class VectorProxy(VectorValue value) : ValueProxy<float[]>(value)
 {
-    public VectorProxy(VectorValue value) : base(value) { }
-    
     public float this[int i] => FlatData[i];
     public override float Get(int[] index) => FlatData[index[0]];
     public override float[] ToHost() => FlatData;

@@ -23,9 +23,10 @@ public static class ValueTests
         sw.Stop();
         Console.WriteLine($"ToHost elapsed time: {sw.ElapsedMilliseconds}");
         Console.WriteLine($"Matrix sum at (0, 0): {matrix[0, 0]}");
-        
+
+        using var d = a + b;
         sw.Restart();
-        MatrixProxy proxy = c.ToProxy();
+        MatrixProxy proxy = d.ToProxy();
         sw.Stop();
         Console.WriteLine($"ToProxy elapsed time: {sw.ElapsedMilliseconds}");
         Console.WriteLine($"Matrix sum at (0, 0): {proxy[0, 0]}");

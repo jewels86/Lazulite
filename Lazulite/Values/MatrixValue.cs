@@ -5,19 +5,15 @@ namespace Lazulite.Values;
 
 public class MatrixValue : Value<float[,]>
 {
-    public MatrixValue(float[,] value, int aidx) 
-        : base(Compute.Get(aidx, value.GetLength(0) * value.GetLength(1))) => FromHost(value);
-    public MatrixValue(MemoryBuffer1D<float, Stride1D.Dense> buffer) : base(buffer) { }
+    public MatrixValue(float[,] value, int aidx) : base(
+        Compute.Get(aidx, value.GetLength(0) * value.GetLength(1)),
+        [value.GetLength(0), value.GetLength(1)]) => FromHost(value);
+    public MatrixValue(MemoryBuffer1D<float, Stride1D.Dense> buffer, int[] shape) : base(buffer, shape) { }
     
     public override float[] Roll(float[,] value) => MatrixProxy.Roll(value);
     public override float[,] Unroll(float[] rolled) => MatrixProxy.Unroll(rolled, Shape[1]);
-    public override int[] GetShape(Index1D index)
-    {
-        var (rows, cols) = MatrixProxy.FromIndex(index.X, Shape[1]);
-        return [rows, cols];
-    }
 
-    public override MatrixValue Create(MemoryBuffer1D<float, Stride1D.Dense> buffer) => new(buffer);
+    public override MatrixValue Create(MemoryBuffer1D<float, Stride1D.Dense> buffer, int[] shape) => new(buffer, shape);
     public override MatrixProxy ToProxy() => new(this);
     
     public static MatrixValue operator +(MatrixValue a, MatrixValue b) => Compute.BinaryCall(Compute.ElementwiseAddKernels, a, b).AsMatrix();
