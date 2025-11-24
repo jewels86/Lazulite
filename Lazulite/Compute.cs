@@ -43,7 +43,8 @@ public static partial class Compute
             .AllAccelerators());
 
         HashSet<(AcceleratorType, string, long)> seen = [];
-        
+
+        int aidx = 0;
         foreach (Device device in Context.Devices.Where(device => device is not CudaDevice || AllowGpu))
         {
             if (!seen.Add((device.AcceleratorType, device.Name, device.MemorySize))) continue;
@@ -51,7 +52,12 @@ public static partial class Compute
             Users.Add(0);
             _pool.Add([]);
             _deferred.Add([]);
-            if (device is CudaDevice) GpuInUse = true;
+            if (device is CudaDevice)
+            {
+                GpuInUse = true;
+                Operations.GetCuBlas(aidx);
+            }
+            aidx++;
         }
     }
     public static void ClearAll()

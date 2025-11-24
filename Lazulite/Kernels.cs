@@ -6,6 +6,7 @@ using Lazulite.Kernels;
 using static Lazulite.Kernels.SimpleKernels;
 using static Lazulite.Kernels.ElementwiseKernels;
 using static Lazulite.Kernels.MatrixKernels;
+using static Lazulite.Kernels.VectorKernels;
 
 namespace Lazulite;
 
@@ -48,6 +49,12 @@ public static partial class Compute
     #region Matrix Kernels
     public static List<Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, 
         ArrayView1D<float, Stride1D.Dense>, int, int, int>> MatrixMultiplyKernels { get; } = [];
+    public static List<Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, 
+        ArrayView1D<float, Stride1D.Dense>, int, int>> MatrixVectorMultiplyKernels { get; } = [];
+    #endregion
+    #region Vector Kernels
+    public static List<Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, 
+        ArrayView1D<float, Stride1D.Dense>, int, int>> OuterProductKernels { get; } = [];
     #endregion
     #region Helpers
     private static Task? _warmupTask;
@@ -101,6 +108,12 @@ public static partial class Compute
             #region Matrix 
             MatrixMultiplyKernels.Add(accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
                 ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, int, int, int>(MatrixMultiplyKernel));
+            MatrixVectorMultiplyKernels.Add(accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>, 
+                ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, int, int>(MatrixVectorMultiplyKernel));
+            #endregion
+            #region Vectors
+            OuterProductKernels.Add(accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>, 
+                ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, int, int>(OuterProductKernel));
             #endregion
         }
     }

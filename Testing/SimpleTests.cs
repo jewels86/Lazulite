@@ -211,10 +211,11 @@ public static class SimpleTests
         Console.WriteLine($"Elapsed time: {sw.ElapsedMilliseconds} ms ({sw.ElapsedMilliseconds / (finalT/dt):F2} ms/timestep, or {(finalT/dt) / sw.ElapsedMilliseconds:F2} timesteps/ms)");
     }
     
-    public static void ParallelProcessingTest(bool gpu)
+    public static void ParallelProcessingTest(bool gpu, bool cublas = true)
     {
-        int totalBatches = 8000;
-        var (m, k, n) = (150, 250, 350);
+        Console.WriteLine(cublas ? "Using cuBLAS" : "Using nuBLAS");
+        int totalBatches = 500;
+        var (m, k, n) = (256, 512, 256);
         int mk = m * k;
         int kn = k * n;
         int mn = m * n;
@@ -241,7 +242,7 @@ public static class SimpleTests
             var resultBuffer = Compute.Get(aidx, mn);
             aBuffer.CopyFromCPU(a);
             bBuffer.CopyFromCPU(b);
-            Operations.MatrixMultiply(aBuffer, bBuffer, resultBuffer, m, k, n);
+            Operations.MatrixMultiply(aBuffer, bBuffer, resultBuffer, m, k, n, !cublas);
             results.Add(resultBuffer);
             Compute.Flush(aidx);
         }
@@ -255,11 +256,11 @@ public static class SimpleTests
         Compute.ReleaseAccelerator(aidx);
         results.Clear();
         
-        Console.WriteLine("Regenerating matrices for next batch of work...");
+        /*Console.WriteLine("Regenerating matrices for next batch of work...");
         workQueue.Clear();
         for (int i = 0; i < totalBatches; i++) workQueue.Enqueue((
             MatrixProxy.Roll(RandomMatrix(m, k)), 
-            MatrixProxy.Roll(RandomMatrix(k, n))));
+            MatrixProxy.Roll(RandomMatrix(k, n))));*/
         
         var gpuIndices = Compute.Accelerators
             .Select((acc, idx) => (acc, idx))
@@ -285,7 +286,7 @@ public static class SimpleTests
         
                     aBuffer.CopyFromCPU(tuple.a);
                     bBuffer.CopyFromCPU(tuple.b);
-                    Operations.MatrixMultiply(aBuffer, bBuffer, resultBuffer, m, k, n);
+                    Operations.MatrixMultiply(aBuffer, bBuffer, resultBuffer, m, k, n, !cublas);
         
                     results.Add(resultBuffer);
                     Compute.Flush(aidx_);
@@ -303,12 +304,43 @@ public static class SimpleTests
         results.Clear();
         Console.WriteLine($"Total time: {sw.ElapsedMilliseconds} ms.");
     }
+
+    public static void BigMatMulTest(bool gpu)
+    {
+        _aidx = Compute.RequestAccelerator(gpu);
+        Console.WriteLine(Compute.IsGpuAccelerator(_aidx) ? "GPU accelerator" : "CPU accelerator");
+        Stopwatch sw = new();
+        
+        int m = 10000;
+        int k = 10000;
+        int n = 10000;
+        int mk = m * k;
+        int kn = k * n;
+        int mn = m * n;
+        
+        float[,] a = RandomMatrix(m, k);
+        float[,] b = RandomMatrix(k, n);
+        MemoryBuffer1D<float, Stride1D.Dense> aBuffer = Compute.GetTemp(_aidx, mk);
+        MemoryBuffer1D<float, Stride1D.Dense> bBuffer = Compute.GetTemp(_aidx, kn);
+        MemoryBuffer1D<float, Stride1D.Dense> resultBuffer = Compute.Get(_aidx, mn);
+        aBuffer.CopyFromCPU(MatrixProxy.Roll(a));
+        bBuffer.CopyFromCPU(MatrixProxy.Roll(b));
+        
+        sw.Start();
+        Operations.MatrixMultiply(aBuffer, bBuffer, resultBuffer, m, k, n);
+        Compute.Synchronize(_aidx);
+        sw.Stop();
+        
+        Console.WriteLine($"Total time: {sw.ElapsedMilliseconds} ms.");
+    }
     
     public static float[,] RandomMatrix(int rows, int cols)
     {
         float[,] matrix = new float[rows, cols];
-        for (int i = 0; i < rows; i++) 
-        for (int j = 0; j < cols; j++) matrix[i, j] = (float)_random.NextDouble();
+        Parallel.For(0, rows, i =>
+        {
+            for (int j = 0; j < cols; j++) matrix[i, j] = (float)_random.NextDouble();
+        });
         return matrix;
     }
 }

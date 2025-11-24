@@ -17,7 +17,9 @@ class Program
         
         //SimpleTests.ScalarTest(true);
         //SimpleTests.PhysicsTest(true);
-        SimpleTests.ParallelProcessingTest(true);
+        SimpleTests.ParallelProcessingTest(true, true);
+        SimpleTests.ParallelProcessingTest(true, false);
+        SimpleTests.BigMatMulTest(true);
         //ValueTests.MathTest(true);
         
         Compute.ClearAll();

@@ -25,4 +25,22 @@ public static class MatrixKernels
     
         result[row * n + col] = sum;
     }
+    
+    public static void MatrixVectorMultiplyKernel(
+        Index1D index,
+        ArrayView1D<float, Stride1D.Dense> matrix, 
+        ArrayView1D<float, Stride1D.Dense> vector,
+        ArrayView1D<float, Stride1D.Dense> result,
+        int m, int n) // matrix is m x n, vector is n, result is m
+    {
+        int row = index.X;
+        if (row >= m) return;
+    
+        float sum = 0;
+        for (int col = 0; col < n; col++)
+        {
+            sum += matrix[row * n + col] * vector[col];
+        }
+        result[row] = sum;
+    }
 }
