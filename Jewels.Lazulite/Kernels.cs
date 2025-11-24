@@ -2,13 +2,13 @@
 using ILGPU.Algorithms;
 using ILGPU.Algorithms.ScanReduceOperations;
 using ILGPU.Runtime;
-using Lazulite.Kernels;
-using static Lazulite.Kernels.SimpleKernels;
-using static Lazulite.Kernels.ElementwiseKernels;
-using static Lazulite.Kernels.MatrixKernels;
-using static Lazulite.Kernels.VectorKernels;
+using Jewels.Lazulite.Kernels;
+using static Jewels.Lazulite.Kernels.SimpleKernels;
+using static Jewels.Lazulite.Kernels.ElementwiseKernels;
+using static Jewels.Lazulite.Kernels.MatrixKernels;
+using static Jewels.Lazulite.Kernels.VectorKernels;
 
-namespace Lazulite;
+namespace Jewels.Lazulite;
 
 public static partial class Compute
 {

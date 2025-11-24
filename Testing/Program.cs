@@ -1,5 +1,5 @@
 ﻿using ILGPU.Runtime.Cuda;
-using Lazulite;
+using Jewels.Lazulite;
 
 namespace Testing;
 

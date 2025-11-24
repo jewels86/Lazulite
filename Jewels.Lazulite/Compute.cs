@@ -4,9 +4,9 @@ using ILGPU;
 using ILGPU.IR.Transformations;
 using ILGPU.Runtime;
 using ILGPU.Runtime.Cuda;
-using Lazulite.Kernels;
+using Jewels.Lazulite.Kernels;
 
-namespace Lazulite;
+namespace Jewels.Lazulite;
 
 public static partial class Compute
 {

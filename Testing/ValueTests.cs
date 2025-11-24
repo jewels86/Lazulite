@@ -2,7 +2,7 @@
 using System.Diagnostics;
 using ILGPU;
 using ILGPU.Runtime;
-using Lazulite;
+using Jewels.Lazulite;
 
 namespace Testing;
 

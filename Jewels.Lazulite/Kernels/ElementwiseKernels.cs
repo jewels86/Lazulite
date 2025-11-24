@@ -3,7 +3,7 @@ using ILGPU;
 using ILGPU.Algorithms;
 using ILGPU.Runtime;
 
-namespace Lazulite.Kernels;
+namespace Jewels.Lazulite.Kernels;
 
 public static class ElementwiseKernels
 {

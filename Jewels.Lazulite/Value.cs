@@ -2,7 +2,7 @@
 using ILGPU;
 using ILGPU.Runtime;
 
-namespace Lazulite;
+namespace Jewels.Lazulite;
 
 public abstract class Value<T>(MemoryBuffer1D<float, Stride1D.Dense> data, int[] shape) : IDisposable
     where T : notnull

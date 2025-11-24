@@ -1,7 +1,7 @@
 ﻿using ILGPU;
 using ILGPU.Runtime;
 
-namespace Lazulite;
+namespace Jewels.Lazulite;
 
 public class TensorValue3 : Value<float[,,]>
 {

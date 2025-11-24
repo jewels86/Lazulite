@@ -6,7 +6,7 @@ using System.Formats.Tar;
 using System.Xml;
 using ILGPU;
 using ILGPU.Runtime;
-using Lazulite;
+using Jewels.Lazulite;
 
 namespace Testing;
 

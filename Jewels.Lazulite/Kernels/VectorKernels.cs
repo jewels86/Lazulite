@@ -1,7 +1,7 @@
 ﻿using ILGPU;
 using ILGPU.Runtime;
 
-namespace Lazulite.Kernels;
+namespace Jewels.Lazulite.Kernels;
 
 public static class VectorKernels
 {

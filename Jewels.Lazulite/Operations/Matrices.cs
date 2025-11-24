@@ -2,7 +2,7 @@
 using ILGPU.Runtime;
 using ILGPU.Runtime.Cuda;
 
-namespace Lazulite;
+namespace Jewels.Lazulite;
 
 public static partial class Operations
 {
