@@ -212,7 +212,7 @@ public static class SimpleTests
     
     public static void ParallelProcessingTest(bool gpu, bool cublas = true)
     {
-        Console.WriteLine(cublas ? "Using cuBLAS" : "Using nuBLAS");
+        Console.WriteLine(cublas ? "Using cuBLAS" : "Using no-BLAS");
         int totalBatches = 500;
         var (m, k, n) = (256, 512, 256);
         int mk = m * k;
@@ -255,17 +255,11 @@ public static class SimpleTests
         Compute.ReleaseAccelerator(aidx);
         results.Clear();
         
-        /*Console.WriteLine("Regenerating matrices for next batch of work...");
-        workQueue.Clear();
-        for (int i = 0; i < totalBatches; i++) workQueue.Enqueue((
-            MatrixProxy.Roll(RandomMatrix(m, k)), 
-            MatrixProxy.Roll(RandomMatrix(k, n))));*/
-        
         var gpuIndices = Compute.Accelerators
             .Select((acc, idx) => (acc, idx))
             .Where(x => x.acc.AcceleratorType != AcceleratorType.CPU)
             .Select(x => x.idx)
-            .ToList();
+            .ToList(); // you can run this test with a CPU as well, but the tail will bite you unless you have a lottt of matrices
 
         
         Console.WriteLine("Starting parallel processing...");
