@@ -1,6 +1,5 @@
 ﻿using ILGPU;
 using ILGPU.Runtime;
-using Lazulite.Values;
 
 namespace Lazulite;
 

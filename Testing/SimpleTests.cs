@@ -7,7 +7,6 @@ using System.Xml;
 using ILGPU;
 using ILGPU.Runtime;
 using Lazulite;
-using Lazulite.Values;
 
 namespace Testing;
 

@@ -2,7 +2,7 @@
 using ILGPU;
 using ILGPU.Runtime;
 
-namespace Lazulite.Values;
+namespace Lazulite;
 
 public class ScalarValue : Value<float>
 {

@@ -1,7 +1,7 @@
 ﻿using ILGPU;
 using ILGPU.Runtime;
 
-namespace Lazulite.Values;
+namespace Lazulite;
 
 public class VectorValue : Value<float[]>
 {
