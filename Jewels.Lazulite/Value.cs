@@ -4,7 +4,16 @@ using ILGPU.Runtime;
 
 namespace Jewels.Lazulite;
 
-public abstract class Value<T>(MemoryBuffer1D<float, Stride1D.Dense> data, int[] shape) : IDisposable
+public interface IValue : IDisposable
+{
+    public MemoryBuffer1D<float, Stride1D.Dense> Data { get; }
+    public int[] Shape { get; }
+    public int TotalSize { get; }
+    public int AcceleratorIndex { get; }
+    public bool IsValid { get; }
+}
+
+public abstract class Value<T>(MemoryBuffer1D<float, Stride1D.Dense> data, int[] shape) : IValue
     where T : notnull
 {
     public MemoryBuffer1D<float, Stride1D.Dense> Data { get; set; } = data;
@@ -38,6 +47,8 @@ public abstract class Value<T>(MemoryBuffer1D<float, Stride1D.Dense> data, int[]
     
     public static implicit operator T(Value<T> value) => value.ToHost();
     public static implicit operator MemoryBuffer1D<float, Stride1D.Dense>(Value<T> value) => value.Data;
+    public static implicit operator ValueProxy<T>(Value<T> value) => value.ToProxy();
+    public static implicit operator ArrayView1D<float, Stride1D.Dense>(Value<T> value) => value.Data.View;
 }
 
 public abstract class ValueProxy<T>(float[] flatData, int[] shape)

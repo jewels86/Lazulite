@@ -35,7 +35,7 @@ public static partial class Operations
             blas = new CuBlas(cudaAccelerator);
             _cublasHandles[aidx] = blas;
         }
-        catch (Exception ex) { _cublasHandles[aidx] = null; }
+        catch (Exception) { _cublasHandles[aidx] = null; }
         return blas;
     }
 }

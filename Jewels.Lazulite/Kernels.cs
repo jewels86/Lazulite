@@ -70,8 +70,13 @@ public static partial class Compute
         ArrayView1D<float, Stride1D.Dense>, int, int>> OuterProductKernels { get; } = [];
     #endregion
 
+    private static bool _coreInitialized = false;
+    private static bool _extraScalarInitialized = false;
+    private static bool _extraElementwiseInitialized = false;
+
     public static void InitializeCoreKernels(bool warmup = true)
     {
+        if (_coreInitialized) return;
         foreach (var accelerator in Accelerators)
         {
             FillKernels.Add(accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>, float>(FillKernel));
@@ -109,10 +114,12 @@ public static partial class Compute
         }
         
         if (warmup) WarmupCoreKernels();
+        _coreInitialized = true;
     }
 
     public static void InitializeExtraScalarKernels(bool warmup = true)
     {
+        if (_extraScalarInitialized) return;
         foreach (var accelerator in Accelerators)
         {
             ElementwiseScalarMaxKernels.Add(accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>, 
@@ -126,10 +133,12 @@ public static partial class Compute
         }
         
         if (warmup) WarmupExtraScalarKernels();
+        _extraScalarInitialized = true;
     }
 
     public static void InitializeExtraElementwiseKernels(bool warmup = true)
     {
+        if (_extraElementwiseInitialized) return;
         foreach (var accelerator in Accelerators)
         {
             ElementwiseModuloKernels.Add(accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
@@ -154,6 +163,7 @@ public static partial class Compute
         }
         
         if (warmup) WarmupExtraElementwiseKernels();
+        _extraElementwiseInitialized = true;
     }
     
     public static void WarmupCoreKernels()
