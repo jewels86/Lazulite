@@ -301,7 +301,7 @@ public static class SimpleTests
     public static void BigMatMulTest(bool gpu)
     {
         _aidx = Compute.RequestAccelerator(gpu);
-        Console.WriteLine(Compute.IsGpuAccelerator(_aidx) ? "GPU accelerator" : "CPU accelerator");
+        Console.WriteLine(Compute.IsGpuAccelerator(_aidx) ? $"GPU accelerator {_aidx}" : "CPU accelerator");
         Stopwatch sw = new();
         
         int m = 10000;
@@ -319,8 +319,10 @@ public static class SimpleTests
         aBuffer.CopyFromCPU(MatrixProxy.Roll(a));
         bBuffer.CopyFromCPU(MatrixProxy.Roll(b));
         
+        Console.WriteLine("Starting processing...");
         sw.Start();
-        Operations.MatrixMultiply(aBuffer, bBuffer, resultBuffer, m, k, n);
+        Operations.MatrixMultiply(aBuffer, bBuffer, resultBuffer, m, k, n, false);
+        Console.WriteLine("Finished processing!");
         Compute.Synchronize(_aidx);
         sw.Stop();
         

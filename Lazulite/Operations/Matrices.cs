@@ -14,7 +14,7 @@ public static partial class Operations
     {
         int aidx = a.AcceleratorIndex();
         var blas = GetCuBlas(aidx);
-        if (blas is null || noCuBlas || m * k * n < 1e6)
+        if (blas is null || noCuBlas || result.Length < 1e6)
             Compute.Call(aidx, Compute.MatrixMultiplyKernels, result.IntExtent, a.View, b.View, result.View, m, k, n);
         else
             blas.Gemm(
@@ -38,7 +38,7 @@ public static partial class Operations
         var aidx = matrix.AcceleratorIndex();
         var blas = GetCuBlas(aidx);
 
-        if (blas is null || noCuBlas || m * n < 1e5)
+        if (blas is null || noCuBlas || matrix.Length < 1e5)
             Compute.Call(aidx, Compute.MatrixVectorMultiplyKernels, m, matrix.View, vector.View, result.View, m, n);
         else
             blas.Gemv(

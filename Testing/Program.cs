@@ -7,7 +7,8 @@ class Program
 {
     public static void Main(string[] args)
     {
-        Compute.EnsureWarmup();
+        using var scope = new ComputeScope();
+        Compute.InitializeExtraKernels();
         
         //SimpleTests.FillTest(false);
         //SimpleTests.FillTest(true);
@@ -17,8 +18,8 @@ class Program
         
         //SimpleTests.ScalarTest(true);
         //SimpleTests.PhysicsTest(true);
-        SimpleTests.ParallelProcessingTest(true, true);
-        SimpleTests.ParallelProcessingTest(true, false);
+        //SimpleTests.ParallelProcessingTest(true, true);
+        //SimpleTests.ParallelProcessingTest(true, false);
         SimpleTests.BigMatMulTest(true);
         //ValueTests.MathTest(true);
         

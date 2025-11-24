@@ -25,8 +25,7 @@ public static partial class Compute
     {
         Context = Context.CreateDefault();
         RefreshDevices();
-        InitializeKernels();
-        WarmupKernelsAsync();
+        InitializeCoreKernels();
     }
 
     #region Management
@@ -308,4 +307,9 @@ public static partial class Compute
     }
     #endregion
     
+}
+
+public class ComputeScope : IDisposable
+{
+    public void Dispose() => Compute.ClearAll();
 }
