@@ -75,5 +75,15 @@ public static class ElementwiseKernels
         Index1D index, ArrayView1D<float, Stride1D.Dense> a,
         ArrayView1D<float, Stride1D.Dense> b, ArrayView1D<float, Stride1D.Dense> result) =>
         result[index] = a[index] / b[0];
+    
+    public static void ElementwiseFloatPowerKernel(
+        Index1D index, ArrayView1D<float, Stride1D.Dense> a, 
+        ArrayView1D<float, Stride1D.Dense> result, float power) =>
+        result[index] = XMath.Pow(a[index], power);
+    
+    public static void ElementwiseFloatMultiplyKernel(
+        Index1D index, ArrayView1D<float, Stride1D.Dense> a, 
+        ArrayView1D<float, Stride1D.Dense> result, float b) =>
+        result[index] = a[index] * b;
     #endregion
 }

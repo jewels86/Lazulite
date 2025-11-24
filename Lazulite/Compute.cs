@@ -12,7 +12,7 @@ public static partial class Compute
 {
     #region Properties
     public static List<Accelerator> Accelerators { get; } = [];
-    public static List<int> Users { get; } = [];
+    public static List<bool> InUse { get; } = [];
     public static Context Context { get; private set; }
     public static bool AllowGpu { get; set; } = true;
     public static bool GpuInUse { get; private set; } = false;
@@ -49,7 +49,7 @@ public static partial class Compute
         {
             if (!seen.Add((device.AcceleratorType, device.Name, device.MemorySize))) continue;
             Accelerators.Add(device.CreateAccelerator(Context));
-            Users.Add(0);
+            InUse.Add(false);
             _pool.Add([]);
             _deferred.Add([]);
             if (device is CudaDevice)
@@ -96,15 +96,16 @@ public static partial class Compute
     public static int RequestAccelerator(bool gpu = true)
     {
         Accelerator accelerator;
-        var lowestUsers = Users.IndexOf(Users.Min());
-        if (gpu) accelerator = Accelerators.FirstOrDefault(a => a is CudaAccelerator) ?? Accelerators[lowestUsers];
-        else accelerator = Accelerators[lowestUsers];
+        var available = InUse.Select((b, i) => (b, i)).Where(t => !t.b).Select((b, i) => i).ToList();
+        if (available.Count == 0) throw new Exception("No accelerators available.");
+        if (gpu) accelerator = Accelerators.FirstOrDefault(a => a is CudaAccelerator) ?? Accelerators[available[0]];
+        else accelerator = Accelerators[available[0]];
         var aidx = GetAcceleratorIndex(accelerator);
-        Users[aidx]++;
+        InUse[aidx] = true;
         return aidx;
     }
 
-    public static void ReleaseAccelerator(int aidx) => Users[aidx]--;
+    public static void ReleaseAccelerator(int aidx) => InUse[aidx] = false;
     #endregion
     #endregion
 

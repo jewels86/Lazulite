@@ -1,4 +1,5 @@
-﻿using ILGPU;
+﻿using System.Runtime.CompilerServices;
+using ILGPU;
 using ILGPU.Runtime;
 
 namespace Lazulite;

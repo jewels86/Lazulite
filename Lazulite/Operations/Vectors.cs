@@ -59,12 +59,7 @@ public static partial class Operations
         var aidx = x.AcceleratorIndex();
         var blas = GetCuBlas(aidx);
         if (blas is null || noCuBlas || x.Length < 1e5)
-        {
-            var temp = Compute.Get(aidx, 1);
-            temp.CopyFromCPU([alpha]);
-            Compute.Call(aidx, Compute.ElementwiseScalarMultiplyKernels, x, temp, x);
-            Compute.Return(temp);
-        }
+            Compute.Call(aidx, Compute.ElementwiseFloatMultiplyKernels, x, x, alpha);
         else blas.Scal(alpha, x.View.AsGeneral());
     }
 
