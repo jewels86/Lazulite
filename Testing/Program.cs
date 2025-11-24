@@ -20,8 +20,9 @@ class Program
         //SimpleTests.PhysicsTest(true);
         //SimpleTests.ParallelProcessingTest(true, true);
         //SimpleTests.ParallelProcessingTest(true, false);
-        SimpleTests.BigMatMulTest(true);
+        //SimpleTests.BigMatMulTest(true);
         //ValueTests.MathTest(true);
+        ValueTests.OpsTest(true);
         
         Compute.ClearAll();
     }
