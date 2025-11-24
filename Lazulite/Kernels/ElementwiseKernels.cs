@@ -36,6 +36,12 @@ public static class ElementwiseKernels
         Index1D index, ArrayView1D<float, Stride1D.Dense> a, 
         ArrayView1D<float, Stride1D.Dense> b, ArrayView1D<float, Stride1D.Dense> result) =>
         result[index] = XMath.Pow(a[index], b[index]);
+    
+    public static void ElementwiseMaxKernel(
+        Index1D index, ArrayView1D<float, Stride1D.Dense> a, 
+        ArrayView1D<float, Stride1D.Dense> b,
+        ArrayView1D<float, Stride1D.Dense> result) =>
+        result[index] = XMath.Max(a[index], b[index]);
     #endregion
     
     #region Unary
@@ -58,6 +64,18 @@ public static class ElementwiseKernels
     public static void ElementwiseNegateKernel(
         Index1D index, ArrayView1D<float, Stride1D.Dense> a, ArrayView1D<float, Stride1D.Dense> result) =>
         result[index] = -a[index];
+    
+    public static void ElementwiseTanhKernel(
+        Index1D index, ArrayView1D<float, Stride1D.Dense> a, ArrayView1D<float, Stride1D.Dense> result) =>
+        result[index] = XMath.Tanh(a[index]);
+    
+    public static void ElementwiseSech2Kernel(
+        Index1D index, ArrayView1D<float, Stride1D.Dense> a, ArrayView1D<float, Stride1D.Dense> result) =>
+        result[index] = 1 / XMath.Cosh(a[index]);
+    
+    public static void ElementwiseNaturalLogKernel(
+        Index1D index, ArrayView1D<float, Stride1D.Dense> a, ArrayView1D<float, Stride1D.Dense> result) =>
+        result[index] = XMath.Log(a[index], XMath.E);
     #endregion
 
     #region Weird Ones
@@ -76,6 +94,12 @@ public static class ElementwiseKernels
         ArrayView1D<float, Stride1D.Dense> b, ArrayView1D<float, Stride1D.Dense> result) =>
         result[index] = a[index] / b[0];
     
+    public static void ElementwiseScalarMaxKernel(
+        Index1D index, ArrayView1D<float, Stride1D.Dense> a,
+        ArrayView1D<float, Stride1D.Dense> b,
+        ArrayView1D<float, Stride1D.Dense> result) =>
+        result[index] = XMath.Max(a[index], b[0]);
+    
     public static void ElementwiseFloatPowerKernel(
         Index1D index, ArrayView1D<float, Stride1D.Dense> a, 
         ArrayView1D<float, Stride1D.Dense> result, float power) =>
@@ -85,5 +109,10 @@ public static class ElementwiseKernels
         Index1D index, ArrayView1D<float, Stride1D.Dense> a, 
         ArrayView1D<float, Stride1D.Dense> result, float b) =>
         result[index] = a[index] * b;
+
+    public static void ElementwiseFloatMaxKernel(
+        Index1D index, ArrayView1D<float, Stride1D.Dense> a,
+        ArrayView1D<float, Stride1D.Dense> result, float b) =>
+        result[index] = XMath.Max(a[index], b);
     #endregion
 }
