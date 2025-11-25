@@ -16,6 +16,9 @@ public static partial class Compute
     public static List<Action<Index1D, ArrayView1D<float, Stride1D.Dense>, float>> FillKernels { get; } = [];
     public static List<Action<Index1D, ArrayView1D<float, Stride1D.Dense>>> ZeroKernels { get; } = [];
     public static List<Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>> CopyKernels { get; } = [];
+    public static List<Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, 
+        ArrayView1D<float, Stride1D.Dense>>> ConcatKernels { get; } = [];
+    public static List<Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, int>> SliceKernels { get; } = []; 
     #endregion
     #region Elementwise Kernels
     #region Binary
@@ -81,6 +84,9 @@ public static partial class Compute
             FillKernels.Add(accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>, float>(FillKernel));
             ZeroKernels.Add(accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>>(ZeroKernel));
             CopyKernels.Add(accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>(CopyKernel));
+            ConcatKernels.Add(accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, 
+                ArrayView1D<float, Stride1D.Dense>>(ConcatKernel));
+            SliceKernels.Add(accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, int>(SliceKernel));
 
             ElementwiseAddKernels.Add(accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
                 ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>(ElementwiseAddKernel));

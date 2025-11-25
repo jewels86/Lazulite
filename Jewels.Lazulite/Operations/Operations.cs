@@ -18,7 +18,7 @@ public static partial class Compute
             Index1D i,
             ArrayView1D<float, Stride1D.Dense> x,
             ArrayView1D<float, Stride1D.Dense> y,
-            float alpha) => y[i] = (alpha * x[i]) + y[i]);
+            float alpha) => y[i] = alpha * x[i] + y[i]);
     }
 
     public static void CleanupCuBlas()

@@ -130,6 +130,21 @@ public static partial class Compute
     public static MemoryBuffer1D<float, Stride1D.Dense>[] GetTemps(int aidx, int count, int size) => Enumerable.Range(0, count).Select(_ => GetTemp(aidx, size)).ToArray();
     public static MemoryBuffer1D<float, Stride1D.Dense> GetLike(MemoryBuffer1D<float, Stride1D.Dense> a) => Get(a.AcceleratorIndex(), (int)a.Length);
     public static MemoryBuffer1D<float, Stride1D.Dense> GetTempLike(MemoryBuffer1D<float, Stride1D.Dense> a) => GetTemp(a.AcceleratorIndex(), (int)a.Length);
+
+    public static MemoryBuffer1D<float, Stride1D.Dense> Make(int aidx, int size, float[] values)
+    {
+        var result = Get(aidx, size);
+        result.CopyFromCPU(values);
+        return result;
+    }
+    public static MemoryBuffer1D<float, Stride1D.Dense> MakeTemp(int aidx, int size, float[] values)
+    {
+        var result = GetTemp(aidx, size);
+        result.CopyFromCPU(values);
+        return result;
+    }
+    public static MemoryBuffer1D<float, Stride1D.Dense> Make(int aidx, int size, float value) => Make(aidx, size, Enumerable.Repeat(value, size).ToArray());
+    public static MemoryBuffer1D<float, Stride1D.Dense> MakeTemp(int aidx, int size, float value) => MakeTemp(aidx, size, Enumerable.Repeat(value, size).ToArray());
     
     public static Value<T> CreateLike<T>(Value<T> a) where T : notnull => a.Create(Get(a.AcceleratorIndex, a.TotalSize), a.Shape);
     public static Value<T> CreateTempLike<T>(Value<T> a) where T : notnull => a.Create(GetTemp(a.AcceleratorIndex, a.TotalSize), a.Shape);

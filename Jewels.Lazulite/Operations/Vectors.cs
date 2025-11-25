@@ -81,4 +81,13 @@ public static partial class Compute
                 y.View.AsGeneral(),
                 result.View.BaseView, n);
     }
+
+    public static MemoryBuffer1D<float, Stride1D.Dense> Concat(
+        MemoryBuffer1D<float, Stride1D.Dense> a,
+        MemoryBuffer1D<float, Stride1D.Dense> b) // a is m, b is n, result is m + n
+    {
+        var result = Get(a.AcceleratorIndex(), (int)(a.Length + b.Length));
+        Call(a.AcceleratorIndex(), ConcatKernels, a, b, result);
+        return result;
+    }
 }

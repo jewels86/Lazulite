@@ -10,7 +10,8 @@ public static partial class Compute
         MemoryBuffer1D<float, Stride1D.Dense> a,
         MemoryBuffer1D<float, Stride1D.Dense> b,
         MemoryBuffer1D<float, Stride1D.Dense> result,
-        int m, int k, int n, bool noCuBlas = false)
+        int m, int k, int n, bool noCuBlas = false,
+        bool transposeA = false, bool transposeB = false)
     {
         int aidx = a.AcceleratorIndex();
         var blas = GetCuBlas(aidx);
@@ -18,8 +19,8 @@ public static partial class Compute
             Call(aidx, MatrixMultiplyKernels, result.IntExtent, a.View, b.View, result.View, m, k, n);
         else
             blas.Gemm(
-                CuBlasOperation.NonTranspose,
-                CuBlasOperation.NonTranspose,
+                transposeA ? CuBlasOperation.Transpose : CuBlasOperation.NonTranspose,
+                transposeB ? CuBlasOperation.Transpose : CuBlasOperation.NonTranspose,
                 n, m, k,
                 1.0f,
                 b.View.BaseView, n,
