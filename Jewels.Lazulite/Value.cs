@@ -40,6 +40,8 @@ public abstract class Value<T>(MemoryBuffer1D<float, Stride1D.Dense> data, int[]
         IsValid = false;
     }
 
+    public Value<T> Zeros() => Create(Compute.GetLike(this), Shape);
+
     public abstract T Unroll(float[] rolled);
     public abstract float[] Roll(T value);
     public abstract Value<T> Create(MemoryBuffer1D<float, Stride1D.Dense> buffer, int[] shape);

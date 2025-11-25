@@ -4,7 +4,7 @@ using ILGPU.Runtime.Cuda;
 
 namespace Jewels.Lazulite;
 
-public static partial class Operations
+public static partial class Compute
 {
     public static void MatrixMultiply(
         MemoryBuffer1D<float, Stride1D.Dense> a,
@@ -15,7 +15,7 @@ public static partial class Operations
         int aidx = a.AcceleratorIndex();
         var blas = GetCuBlas(aidx);
         if (blas is null || noCuBlas || result.Length < 1e6)
-            Compute.Call(aidx, Compute.MatrixMultiplyKernels, result.IntExtent, a.View, b.View, result.View, m, k, n);
+            Call(aidx, MatrixMultiplyKernels, result.IntExtent, a.View, b.View, result.View, m, k, n);
         else
             blas.Gemm(
                 CuBlasOperation.NonTranspose,
@@ -39,7 +39,7 @@ public static partial class Operations
         var blas = GetCuBlas(aidx);
 
         if (blas is null || noCuBlas || matrix.Length < 1e5)
-            Compute.Call(aidx, Compute.MatrixVectorMultiplyKernels, m, matrix.View, vector.View, result.View, m, n);
+            Call(aidx, MatrixVectorMultiplyKernels, m, matrix.View, vector.View, result.View, m, n);
         else
             blas.Gemv(
             CuBlasOperation.NonTranspose,

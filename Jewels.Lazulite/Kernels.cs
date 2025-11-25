@@ -41,7 +41,6 @@ public static partial class Compute
     public static List<Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>> ElementwiseAbsKernels { get; } = [];
     public static List<Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>> ElementwiseNegateKernels { get; } = [];
     public static List<Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>> ElementwiseTanhKernels { get; } = [];
-    public static List<Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>> ElementwiseSech2Kernels { get; } = [];
     public static List<Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>> ElementwiseNaturalLogKernels { get; } = [];
     #endregion
     public readonly static List<Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>,
@@ -156,8 +155,6 @@ public static partial class Compute
                 ArrayView1D<float, Stride1D.Dense>>(ElementwiseAbsKernel));
             ElementwiseTanhKernels.Add(accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
                 ArrayView1D<float, Stride1D.Dense>>(ElementwiseTanhKernel));
-            ElementwiseSech2Kernels.Add(accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
-                ArrayView1D<float, Stride1D.Dense>>(ElementwiseSech2Kernel));
             ElementwiseNaturalLogKernels.Add(accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
                 ArrayView1D<float, Stride1D.Dense>>(ElementwiseNaturalLogKernel));
         }
@@ -218,7 +215,6 @@ public static partial class Compute
             Call(i, ElementwiseLogKernels, dummy, dummy);
             Call(i, ElementwiseAbsKernels, dummy, dummy);
             Call(i, ElementwiseTanhKernels, dummy, dummy);
-            Call(i, ElementwiseSech2Kernels, dummy, dummy);
             Call(i, ElementwiseNaturalLogKernels, dummy, dummy);
         }
     }

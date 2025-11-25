@@ -69,10 +69,6 @@ public static class ElementwiseKernels
         Index1D index, ArrayView1D<float, Stride1D.Dense> a, ArrayView1D<float, Stride1D.Dense> result) =>
         result[index] = XMath.Tanh(a[index]);
     
-    public static void ElementwiseSech2Kernel(
-        Index1D index, ArrayView1D<float, Stride1D.Dense> a, ArrayView1D<float, Stride1D.Dense> result) =>
-        result[index] = 1 / XMath.Cosh(a[index]);
-    
     public static void ElementwiseNaturalLogKernel(
         Index1D index, ArrayView1D<float, Stride1D.Dense> a, ArrayView1D<float, Stride1D.Dense> result) =>
         result[index] = XMath.Log(a[index], XMath.E);

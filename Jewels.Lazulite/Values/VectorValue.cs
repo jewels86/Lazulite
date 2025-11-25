@@ -25,11 +25,16 @@ public class VectorValue : Value<float[]>
     public ScalarValue Sum()
     {
         var result = new ScalarValue(0, AcceleratorIndex);
-        Operations.Sum(this, result);
+        Compute.Sum(this, result);
         return result;
     }
 
-    public ScalarValue Dot(VectorValue b) => (this * b).Defer().Sum();
+    public ScalarValue Dot(VectorValue b)
+    {
+        var result = new ScalarValue(0, AcceleratorIndex);
+        Compute.Dot(this, b, result);
+        return result;
+    }
 }
 
 public class VectorProxy(VectorValue value) : ValueProxy<float[]>(value)

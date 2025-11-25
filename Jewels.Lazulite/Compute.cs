@@ -54,7 +54,7 @@ public static partial class Compute
             if (device is CudaDevice)
             {
                 GpuInUse = true;
-                Operations.GetCuBlas(aidx);
+                GetCuBlas(aidx);
             }
             aidx++;
         }
@@ -67,7 +67,7 @@ public static partial class Compute
                 stack.Pop().Dispose();
         foreach (var deferred in _deferred) deferred.Clear();
         foreach (var pool in _pool) pool.Clear();
-        Operations.Cleanup();
+        CleanupCuBlas();
     }
     #region Synchronization
     public static void Synchronize(int aidx)

@@ -88,7 +88,6 @@ public static class ValueTests
         Compute.Call(aidx, Compute.ElementwiseAbsKernels, a.View, absBuffer.View);
         Compute.Call(aidx, Compute.ElementwiseNegateKernels, a.View, negateBuffer.View);
         Compute.Call(aidx, Compute.ElementwiseTanhKernels, a.View, tanhBuffer.View);
-        Compute.Call(aidx, Compute.ElementwiseSech2Kernels, a.View, sech2Buffer.View);
         Compute.Call(aidx, Compute.ElementwiseNaturalLogKernels, a.View, naturalLogBuffer.View);
         
         Compute.Synchronize(aidx);
@@ -98,7 +97,6 @@ public static class ValueTests
         Console.WriteLine($"abs(a): {string.Join(',', absBuffer.GetAsArray1D())} vs {string.Join(',', realA.Select(Math.Abs))}");
         Console.WriteLine($"-a: {string.Join(',', negateBuffer.GetAsArray1D())} vs {string.Join(',', realA.Select(x => -x))}");
         Console.WriteLine($"tanh(a): {string.Join(',', tanhBuffer.GetAsArray1D())} vs {string.Join(',', realA.Select(x => (float)Math.Tanh(x)))}");
-        Console.WriteLine($"sech^2(a): {string.Join(',', sech2Buffer.GetAsArray1D())} vs {string.Join(',', realA.Select(x =>  1 / ((float)Math.Cosh(x) * Math.Cosh(x))))}");
         Console.WriteLine($"ln(a): {string.Join(',', naturalLogBuffer.GetAsArray1D())} vs {string.Join(',', realA.Select(x => (float)Math.Log(x)))}");
         
         Compute.ReleaseAccelerator(aidx);

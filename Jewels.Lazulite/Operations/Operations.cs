@@ -7,21 +7,21 @@ using ILGPU.Runtime.Cuda;
 
 namespace Jewels.Lazulite;
 
-public static partial class Operations
+public static partial class Compute
 {
     private static readonly Dictionary<int, CuBlas?> _cublasHandles = [];
 
-    public static void Initialize()
+    public static void InitializeCuBlas()
     {
-        foreach (var accelerator in Compute.Accelerators) GetCuBlas(accelerator.AcceleratorIndex());
-        ApxyKernels = Compute.Load((
+        foreach (var accelerator in Accelerators) GetCuBlas(accelerator.AcceleratorIndex());
+        ApxyKernels = Load((
             Index1D i,
             ArrayView1D<float, Stride1D.Dense> x,
             ArrayView1D<float, Stride1D.Dense> y,
             float alpha) => y[i] = (alpha * x[i]) + y[i]);
     }
 
-    public static void Cleanup()
+    public static void CleanupCuBlas()
     {
         foreach (var handle in _cublasHandles) handle.Value?.Dispose();
         _cublasHandles.Clear();
@@ -29,7 +29,7 @@ public static partial class Operations
 
     public static CuBlas? GetCuBlas(int aidx)
     {
-        if (_cublasHandles.TryGetValue(aidx, out var blas) || Compute.Accelerators[aidx] is not CudaAccelerator cudaAccelerator) return blas;
+        if (_cublasHandles.TryGetValue(aidx, out var blas) || Accelerators[aidx] is not CudaAccelerator cudaAccelerator) return blas;
         try
         {
             blas = new CuBlas(cudaAccelerator);

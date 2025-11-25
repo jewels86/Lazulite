@@ -28,7 +28,7 @@ public class MatrixValue : Value<float[,]>
         // this should be m * k, they should be k * n
         if (Shape[1] != other.Shape[0]) throw new InvalidOperationException("Matrix dimensions are not compatible.");
         var result = Compute.Get(AcceleratorIndex, Shape[0] * other.Shape[1]);
-        Operations.MatrixMultiply(this, other, result, Shape[0], Shape[1], other.Shape[1]);
+        Compute.MatrixMultiply(this, other, result, Shape[0], Shape[1], other.Shape[1]);
         return new(result, [Shape[0], other.Shape[1]]);
     }
 }

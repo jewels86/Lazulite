@@ -241,7 +241,7 @@ public static class SimpleTests
             var resultBuffer = Compute.Get(aidx, mn);
             aBuffer.CopyFromCPU(a);
             bBuffer.CopyFromCPU(b);
-            Operations.MatrixMultiply(aBuffer, bBuffer, resultBuffer, m, k, n, !cublas);
+            Compute.MatrixMultiply(aBuffer, bBuffer, resultBuffer, m, k, n, !cublas);
             results.Add(resultBuffer);
             Compute.Flush(aidx);
         }
@@ -279,7 +279,7 @@ public static class SimpleTests
         
                     aBuffer.CopyFromCPU(tuple.a);
                     bBuffer.CopyFromCPU(tuple.b);
-                    Operations.MatrixMultiply(aBuffer, bBuffer, resultBuffer, m, k, n, !cublas);
+                    Compute.MatrixMultiply(aBuffer, bBuffer, resultBuffer, m, k, n, !cublas);
         
                     results.Add(resultBuffer);
                     Compute.Flush(aidx_);
@@ -321,7 +321,7 @@ public static class SimpleTests
         
         Console.WriteLine("Starting processing...");
         sw.Start();
-        Operations.MatrixMultiply(aBuffer, bBuffer, resultBuffer, m, k, n, false);
+        Compute.MatrixMultiply(aBuffer, bBuffer, resultBuffer, m, k, n, false);
         Console.WriteLine("Finished processing!");
         Compute.Synchronize(_aidx);
         sw.Stop();
