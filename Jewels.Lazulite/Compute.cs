@@ -160,7 +160,7 @@ public static partial class Compute
     {
         var result = GetLike(alike);
         compute(result);
-        return alike;
+        return result;
     }
     public static MemoryBuffer1D<float, Stride1D.Dense> Encase(int aidx, int size, Action<MemoryBuffer1D<float, Stride1D.Dense>> compute) => Encase(Get(aidx, size), compute);
     #endregion

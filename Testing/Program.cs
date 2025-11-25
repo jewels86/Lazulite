@@ -23,6 +23,7 @@ class Program
         //SimpleTests.BigMatMulTest(true);
         //ValueTests.MathTest(true);
         ValueTests.OpsTest(true);
+        ValueTests.MemoryTest(true);
         
         Compute.ClearAll();
     }

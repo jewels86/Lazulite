@@ -40,7 +40,7 @@ public static partial class Compute
 
     public static MemoryBuffer1D<float, Stride1D.Dense> Dot(
         MemoryBuffer1D<float, Stride1D.Dense> a,
-        MemoryBuffer1D<float, Stride1D.Dense> b, bool noCuBlas = false) => Encase(a, r => Dot(a, b, r, noCuBlas));
+        MemoryBuffer1D<float, Stride1D.Dense> b, bool noCuBlas = false) => Encase(a.AcceleratorIndex(), 1, r => Dot(a, b, r, noCuBlas));
 
     public static void Axpy(
         float alpha,

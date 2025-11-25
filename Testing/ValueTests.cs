@@ -100,8 +100,39 @@ public static class ValueTests
         Console.WriteLine($"ln(a): {string.Join(',', naturalLogBuffer.GetAsArray1D())} vs {string.Join(',', realA.Select(x => (float)Math.Log(x)))}");
         
         var dot = realA.Select((x, i) => x * realB[i]).Sum();
-        using var dotBuffer = Compute.Dot(a, b);
+        using var dotBuffer = Compute.Dot(a, b); //= Compute.Get(aidx, 1); 
+        Compute.Synchronize(aidx);
         Console.WriteLine($"dot(a, b): {dot} vs {dotBuffer.GetAsArray1D()[0]}");
+        
+        Compute.ReleaseAccelerator(aidx);
+    }
+
+    public static void MemoryTest(bool gpu)
+    {
+        int aidx = Compute.RequestAccelerator(gpu);
+        
+        var a = new ScalarValue(1, aidx);
+        var b = new ScalarValue(2, aidx);
+        var c = a + b;
+        Console.WriteLine(a.Data.GetHashCode());
+        Console.WriteLine(b.Data.GetHashCode());
+        Console.WriteLine(c.Data.GetHashCode());
+        a.Dispose();
+        b.Dispose();
+        c.Dispose();
+        Compute.Synchronize(aidx);
+
+        var d = new ScalarValue(3, aidx);
+        var e = d * c;
+        Console.WriteLine(d.Data.GetHashCode());
+        Console.WriteLine(e.Data.GetHashCode());
+        d.Dispose();
+        e.Dispose();
+        Compute.Synchronize(aidx);
+
+        var f = Compute.Get(aidx, 1);
+        Console.WriteLine(f.GetAsArray1D()[0]);
+        Console.WriteLine(f.GetHashCode());
         
         Compute.ReleaseAccelerator(aidx);
     }
