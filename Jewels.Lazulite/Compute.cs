@@ -131,23 +131,38 @@ public static partial class Compute
     public static MemoryBuffer1D<float, Stride1D.Dense> GetLike(MemoryBuffer1D<float, Stride1D.Dense> a) => Get(a.AcceleratorIndex(), (int)a.Length);
     public static MemoryBuffer1D<float, Stride1D.Dense> GetTempLike(MemoryBuffer1D<float, Stride1D.Dense> a) => GetTemp(a.AcceleratorIndex(), (int)a.Length);
 
-    public static MemoryBuffer1D<float, Stride1D.Dense> Make(int aidx, int size, float[] values)
+    public static MemoryBuffer1D<float, Stride1D.Dense> Make(int aidx, float[] values)
     {
-        var result = Get(aidx, size);
+        var result = Get(aidx, values.Length);
         result.CopyFromCPU(values);
         return result;
     }
-    public static MemoryBuffer1D<float, Stride1D.Dense> MakeTemp(int aidx, int size, float[] values)
+    public static MemoryBuffer1D<float, Stride1D.Dense> MakeTemp(int aidx, float[] values)
     {
-        var result = GetTemp(aidx, size);
+        var result = GetTemp(aidx, values.Length);
         result.CopyFromCPU(values);
         return result;
     }
-    public static MemoryBuffer1D<float, Stride1D.Dense> Make(int aidx, int size, float value) => Make(aidx, size, Enumerable.Repeat(value, size).ToArray());
-    public static MemoryBuffer1D<float, Stride1D.Dense> MakeTemp(int aidx, int size, float value) => MakeTemp(aidx, size, Enumerable.Repeat(value, size).ToArray());
+    public static MemoryBuffer1D<float, Stride1D.Dense> Make(int aidx, int size, float value) => Make(aidx, Enumerable.Repeat(value, size).ToArray());
+    public static MemoryBuffer1D<float, Stride1D.Dense> MakeTemp(int aidx, int size, float value) => MakeTemp(aidx, Enumerable.Repeat(value, size).ToArray());
     
     public static Value<T> CreateLike<T>(Value<T> a) where T : notnull => a.Create(Get(a.AcceleratorIndex, a.TotalSize), a.Shape);
     public static Value<T> CreateTempLike<T>(Value<T> a) where T : notnull => a.Create(GetTemp(a.AcceleratorIndex, a.TotalSize), a.Shape);
+
+    public static Value<T> Encase<T>(Value<T> alike, Action<MemoryBuffer1D<float, Stride1D.Dense>> compute) where T : notnull
+    {
+        var result = GetLike(alike);
+        compute(result);
+        return alike.Create(result, alike.Shape);
+    }
+
+    public static MemoryBuffer1D<float, Stride1D.Dense> Encase(MemoryBuffer1D<float, Stride1D.Dense> alike, Action<MemoryBuffer1D<float, Stride1D.Dense>> compute)
+    {
+        var result = GetLike(alike);
+        compute(result);
+        return alike;
+    }
+    public static MemoryBuffer1D<float, Stride1D.Dense> Encase(int aidx, int size, Action<MemoryBuffer1D<float, Stride1D.Dense>> compute) => Encase(Get(aidx, size), compute);
     #endregion
     #region Helpers
     public static int GetAcceleratorIndex(Accelerator accelerator) => Accelerators.IndexOf(accelerator);

@@ -99,6 +99,10 @@ public static class ValueTests
         Console.WriteLine($"tanh(a): {string.Join(',', tanhBuffer.GetAsArray1D())} vs {string.Join(',', realA.Select(x => (float)Math.Tanh(x)))}");
         Console.WriteLine($"ln(a): {string.Join(',', naturalLogBuffer.GetAsArray1D())} vs {string.Join(',', realA.Select(x => (float)Math.Log(x)))}");
         
+        var dot = realA.Select((x, i) => x * realB[i]).Sum();
+        using var dotBuffer = Compute.Dot(a, b);
+        Console.WriteLine($"dot(a, b): {dot} vs {dotBuffer.GetAsArray1D()[0]}");
+        
         Compute.ReleaseAccelerator(aidx);
     }
 }

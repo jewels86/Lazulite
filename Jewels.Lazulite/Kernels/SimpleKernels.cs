@@ -21,6 +21,8 @@ public static class SimpleKernels
         Index1D index,
         ArrayView1D<float, Stride1D.Dense> source,
         ArrayView1D<float, Stride1D.Dense> dest,
-        int offset) =>
-        dest[index] = source[index + offset];
+        int start, int end)
+    {
+        if (index >= start && index < end) dest[index - start] = source[index];
+    }
 }

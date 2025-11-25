@@ -18,6 +18,7 @@ public static partial class Compute
             GetStream(aidx),
             a.View, result.View);
     }
+    
 
     public static void Dot(
         MemoryBuffer1D<float, Stride1D.Dense> a, 
@@ -26,16 +27,20 @@ public static partial class Compute
     {
         var aidx = a.AcceleratorIndex();
         var blas = GetCuBlas(aidx);
-        if (blas is null || noCuBlas || a.Length < 1e4)
+        if (blas is null || noCuBlas || (a.Length < 1e4 && b.Length < 1e4))
         {
             var temp = GetLike(a);
-            Call(aidx, ElementwiseMultiplyKernels, result.IntExtent, a.View, b.View, temp.View);
+            Call(aidx, ElementwiseMultiplyKernels, a, b, temp);
             Sum(temp, result);
             Return(temp);
         }
         else
             blas.Dot(a.View.AsGeneral(), b.View.AsGeneral(), result.View.BaseView);
     }
+
+    public static MemoryBuffer1D<float, Stride1D.Dense> Dot(
+        MemoryBuffer1D<float, Stride1D.Dense> a,
+        MemoryBuffer1D<float, Stride1D.Dense> b, bool noCuBlas = false) => Encase(a, r => Dot(a, b, r, noCuBlas));
 
     public static void Axpy(
         float alpha,
@@ -81,13 +86,14 @@ public static partial class Compute
                 y.View.AsGeneral(),
                 result.View.BaseView, n);
     }
+    public static MemoryBuffer1D<float, Stride1D.Dense> OuterProduct(
+        MemoryBuffer1D<float, Stride1D.Dense> x,
+        MemoryBuffer1D<float, Stride1D.Dense> y,
+        int m, int n, float alpha = 1.0f, bool noCuBlas = false) => 
+        Encase(x.AcceleratorIndex(), m * n, r => OuterProduct(x, y, r, m, n, alpha, noCuBlas));
 
     public static MemoryBuffer1D<float, Stride1D.Dense> Concat(
         MemoryBuffer1D<float, Stride1D.Dense> a,
-        MemoryBuffer1D<float, Stride1D.Dense> b) // a is m, b is n, result is m + n
-    {
-        var result = Get(a.AcceleratorIndex(), (int)(a.Length + b.Length));
-        Call(a.AcceleratorIndex(), ConcatKernels, a, b, result);
-        return result;
-    }
+        MemoryBuffer1D<float, Stride1D.Dense> b) =>
+        Encase(a.AcceleratorIndex(), (int)(a.Length + b.Length), r => Call(a.AcceleratorIndex(), ConcatKernels, a, b, r));
 }
