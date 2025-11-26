@@ -12,7 +12,7 @@ public static class MatrixKernels
         ArrayView1D<float, Stride1D.Dense> result,
         int m, int k, int n,
         float alpha, float beta,
-        bool transposeA, bool transposeB) // a is m x k, b is k x n, result is m x n
+        int transposeA, int transposeB) // a is m x k, b is k x n, result is m x n
     {
         if (index >= m * n) return;
 
@@ -22,8 +22,8 @@ public static class MatrixKernels
         float sum = 0;
         for (int i = 0; i < k; i++)
         {
-            int aIdx = transposeA ? (i * m + row) : (row * k + i);
-            int bIdx = transposeB ? (col * k + i) : (i * n + col);
+            int aIdx = transposeA == 1 ? (i * m + row) : (row * k + i);
+            int bIdx = transposeB == 1 ? (col * k + i) : (i * n + col);
             sum += a[aIdx] * b[bIdx];
         }
     
@@ -37,9 +37,9 @@ public static class MatrixKernels
         ArrayView1D<float, Stride1D.Dense> vector,
         ArrayView1D<float, Stride1D.Dense> result,
         int m, int n,
-        float alpha, float beta, bool transposeMatrix) // matrix is m x n, vector is n (or m if transposed), result is m (or n if transposed)
+        float alpha, float beta, int transposeMatrix) // matrix is m x n, vector is n (or m if transposed), result is m (or n if transposed)
     {
-        if (transposeMatrix)
+        if (transposeMatrix == 1)
         {
             // matrix^T is n x m, vector is m, result is n
             int col = index.X;
