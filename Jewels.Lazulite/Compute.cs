@@ -1,4 +1,5 @@
-﻿using System.Linq.Expressions;
+﻿using System.Collections.Concurrent;
+using System.Linq.Expressions;
 using System.Reflection.Emit;
 using ILGPU;
 using ILGPU.IR.Transformations;
@@ -17,7 +18,7 @@ public static partial class Compute
     public static bool AllowGpu { get; set; } = true;
     public static bool GpuInUse { get; private set; } = false;
 
-    private static readonly List<List<MemoryBuffer1D<float, Stride1D.Dense>>> _deferred = [];
+    private static readonly List<ConcurrentQueue<MemoryBuffer1D<float, Stride1D.Dense>>> _deferred = [];
     private static readonly List<Dictionary<int, Stack<MemoryBuffer1D<float, Stride1D.Dense>>>> _pool = []; // aidx -> stack of buffers sorted by size
     #endregion
 
@@ -61,10 +62,11 @@ public static partial class Compute
     }
     public static void ClearAll()
     {
-        foreach (MemoryBuffer1D<float, Stride1D.Dense> b in _deferred.SelectMany(buffer => buffer)) Return(b);
-        foreach (Stack<MemoryBuffer1D<float, Stride1D.Dense>> stack in _pool.SelectMany(pool => pool.Values))
-            while (stack.Count > 0)
-                stack.Pop().Dispose();
+        // this method feels like it should not happen like this?
+        // we should just be able to syncrhonize all the accelerators then clear everything else
+        foreach (var b in _deferred.SelectMany(buffer => buffer)) Return(b);
+        foreach (var stack in _pool.SelectMany(pool => pool.Values))
+            while (stack.Count > 0) if(stack.TryPop(out var result)) result.Dispose();
         foreach (var deferred in _deferred) deferred.Clear();
         foreach (var pool in _pool) pool.Clear();
         CleanupCuBlas();
@@ -83,8 +85,7 @@ public static partial class Compute
 
     public static void Flush(int aidx)
     {
-        foreach (var deferred in _deferred[aidx]) Return(deferred);
-        _deferred[aidx].Clear();
+        while (_deferred[aidx].TryDequeue(out var buffer)) Return(buffer);
     }
 
     public static void FlushAll()
@@ -117,14 +118,17 @@ public static partial class Compute
         if (!GpuInUse || !IsGpuAccelerator(buffer.AcceleratorIndex())) { buffer.Dispose(); return; }
         int size = (int)buffer.Length;
         if (_pool[GetAcceleratorIndex(buffer.Accelerator)].TryGetValue(size, out var stack)) stack.Push(buffer);
-        else _pool[GetAcceleratorIndex(buffer.Accelerator)][size] = new Stack<MemoryBuffer1D<float, Stride1D.Dense>>([buffer]);
+        else _pool[GetAcceleratorIndex(buffer.Accelerator)][size] = new([buffer]);
     }
     public static void Return(params MemoryBuffer1D<float, Stride1D.Dense>[] buffers)
     {
         foreach (var buffer in buffers) Return(buffer);
     } 
-    public static void DeferReturn(MemoryBuffer1D<float, Stride1D.Dense> buffer) => _deferred[buffer.AcceleratorIndex()].Add(buffer);
-    public static void DeferReturn(params MemoryBuffer1D<float, Stride1D.Dense>[] buffers) => _deferred[buffers[0].AcceleratorIndex()].AddRange(buffers);
+    public static void DeferReturn(MemoryBuffer1D<float, Stride1D.Dense> buffer) => _deferred[buffer.AcceleratorIndex()].Enqueue(buffer);
+    public static void DeferReturn(params MemoryBuffer1D<float, Stride1D.Dense>[] buffers)
+    {
+        foreach (var buffer in buffers) _deferred[buffers[0].AcceleratorIndex()].Enqueue(buffer);
+    }
     #endregion
     #region Gets
     public static MemoryBuffer1D<float, Stride1D.Dense> Get(int aidx, int size) => TryGetFrom(aidx, size);
@@ -346,9 +350,10 @@ public static partial class Compute
         var pool = _pool[aidx];
         MemoryBuffer1D<float, Stride1D.Dense> buffer;
         
-        if (pool.TryGetValue(size, out var stack) && stack.Count > 0 && !IsGpuAccelerator(aidx)) buffer = stack.Pop();
+        if (pool.TryGetValue(size, out var stack) && stack.Count > 0 && !IsGpuAccelerator(aidx)) 
+            buffer = stack.TryPop(out var result) ? result : Allocate(aidx, size);
         else buffer = Allocate(aidx, size);
-        
+
         Call(buffer.AcceleratorIndex(), FillKernels, buffer.View, 0);
         return buffer;
     }
