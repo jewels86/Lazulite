@@ -11,21 +11,22 @@ public static partial class Compute
         MemoryBuffer1D<float, Stride1D.Dense> b,
         MemoryBuffer1D<float, Stride1D.Dense> result,
         int m, int k, int n, bool noCuBlas = false,
+        float alpha = 1.0f, float beta = 0.0f,
         bool transposeA = false, bool transposeB = false)
     {
         int aidx = a.AcceleratorIndex();
         var blas = GetCuBlas(aidx);
         if (blas is null || noCuBlas || result.Length < 1e6)
-            Call(aidx, MatrixMultiplyKernels, result.IntExtent, a.View, b.View, result.View, m, k, n);
+            Call(aidx, MatrixMultiplyKernels, a.IntExtent, a.View, b.View, result.View, m, k, n, alpha, beta, transposeA, transposeB);
         else
             blas.Gemm(
                 transposeA ? CuBlasOperation.Transpose : CuBlasOperation.NonTranspose,
                 transposeB ? CuBlasOperation.Transpose : CuBlasOperation.NonTranspose,
                 n, m, k,
-                1.0f,
+                alpha,
                 b.View.BaseView, n,
                 a.View.BaseView, k,
-                0.0f,
+                beta,
                 result.View.BaseView, n);
     }
 
@@ -33,17 +34,17 @@ public static partial class Compute
         MemoryBuffer1D<float, Stride1D.Dense> matrix,
         MemoryBuffer1D<float, Stride1D.Dense> vector,
         MemoryBuffer1D<float, Stride1D.Dense> result,
-        int m, int n, float alpha = 1.0f, float beta = 0.0f, 
-        bool noCuBlas = false) // matrix is m x n, vector is n, result is m
+        int m, int n, float alpha = 1.0f, float beta = 0.0f,
+        bool transposeMatrix = false, bool noCuBlas = false) // matrix is m x n, vector is n, result is m
     {
         var aidx = matrix.AcceleratorIndex();
         var blas = GetCuBlas(aidx);
 
         if (blas is null || noCuBlas || matrix.Length < 1e5)
-            Call(aidx, MatrixVectorMultiplyKernels, m, matrix.View, vector.View, result.View, m, n);
+            Call(aidx, MatrixVectorMultiplyKernels, m, matrix.View, vector.View, result.View, m, n, alpha, beta, transposeMatrix);
         else
             blas.Gemv(
-            CuBlasOperation.NonTranspose,
+            transposeMatrix ? CuBlasOperation.Transpose : CuBlasOperation.NonTranspose,
             m, n, alpha,
             matrix.View.BaseView, n,
             vector.View.AsGeneral(), beta,

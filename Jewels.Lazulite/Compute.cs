@@ -84,6 +84,7 @@ public static partial class Compute
     public static void Flush(int aidx)
     {
         foreach (var deferred in _deferred[aidx]) Return(deferred);
+        _deferred[aidx].Clear();
     }
 
     public static void FlushAll()
@@ -186,6 +187,14 @@ public static partial class Compute
         kernels[aidx](a, b, c, d, e, f);
     public static void Call<T1, T2, T3, T4, T5, T6, T7>(int aidx, List<Action<T1, T2, T3, T4, T5, T6, T7>> kernels, T1 a, T2 b, T3 c, T4 d, T5 e, T6 f, T7 g) =>
         kernels[aidx](a, b, c, d, e, f, g);
+    public static void Call<T1, T2, T3, T4, T5, T6, T7, T8>(int aidx, List<Action<T1, T2, T3, T4, T5, T6, T7, T8>> kernels, T1 a, T2 b, T3 c, T4 d, T5 e, T6 f, T7 g, T8 h) =>
+        kernels[aidx](a, b, c, d, e, f, g, h);
+    public static void Call<T1, T2, T3, T4, T5, T6, T7, T8, T9>(int aidx, List<Action<T1, T2, T3, T4, T5, T6, T7, T8, T9>> kernels, T1 a, T2 b, T3 c, T4 d, T5 e, T6 f, T7 g, T8 h, T9 i) =>
+        kernels[aidx](a, b, c, d, e, f, g, h, i);
+    public static void Call<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(int aidx, List<Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>> kernels, T1 a, T2 b, T3 c, T4 d, T5 e, T6 f, T7 g, T8 h, T9 i, T10 j) =>
+        kernels[aidx](a, b, c, d, e, f, g, h, i, j);
+    public static void Call<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(int aidx, List<Action<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>> kernels, T1 a, T2 b, T3 c, T4 d, T5 e, T6 f, T7 g, T8 h, T9 i, T10 j, T11 k) =>
+        kernels[aidx](a, b, c, d, e, f, g, h, i, j, k);
     public static void Call(int aidx, List<Action<Index1D, ArrayView1D<float, Stride1D.Dense>>> kernels, ArrayView1D<float, Stride1D.Dense> view) => 
         kernels[aidx](view.IntExtent, view);
     public static void Call<T>(

@@ -21,24 +21,26 @@ public static class SimpleTests
         Console.WriteLine(Compute.IsGpuAccelerator(_aidx) ? "GPU accelerator" : "CPU accelerator");
         Stopwatch sw = new();
 
+        var (n, size) = (20000, 5000);
+
         sw.Start();
-        for (int i = 0; i < 20000; i++)
+        for (int i = 0; i < n; i++)
         {
-            var buffer = Compute.GetTemp(_aidx, 5000);
+            var buffer = Compute.GetTemp(_aidx, size);
             Compute.Call(_aidx, Compute.FillKernels, buffer.View, 1);
         }
         sw.Stop();
         Compute.Synchronize(_aidx);
-        Console.WriteLine(sw.ElapsedMilliseconds);
+        Console.WriteLine($"Filled {n} vectors of size {size} in {sw.ElapsedMilliseconds} (no pre-allocations - {n * size} elements) where allocations are done in-loop.");
 
         sw.Restart();
-        for (int i = 0; i < 20000; i++)
+        for (int i = 0; i < n; i++)
         {
-            var buffer = Compute.GetTemp(_aidx, 5000);
+            var buffer = Compute.GetTemp(_aidx, size);
             Compute.Call(_aidx, Compute.FillKernels, buffer.View, 1);
         }
         sw.Stop();
-        Console.WriteLine(sw.ElapsedMilliseconds);
+        Console.WriteLine($"Filled {n} vectors of size {size} in {sw.ElapsedMilliseconds} (pre-allocations - {n * size} elements) where allocations are done in-loop.");
         Compute.Synchronize(_aidx);
         Compute.ReleaseAccelerator(_aidx);
     }
@@ -48,23 +50,25 @@ public static class SimpleTests
         _aidx = Compute.RequestAccelerator(gpu);
         Console.WriteLine(Compute.IsGpuAccelerator(_aidx) ? "GPU accelerator" : "CPU accelerator");
         Stopwatch sw = new();
+        
+        var (n, size) = (200, 1000);
 
-        float[][,] matrices = new float[200][,];
-        for (int i = 0; i < 200; i++)
+        float[][,] matrices = new float[n][,];
+        for (int i = 0; i < n; i++)
         {
-            float[,] matrix = new float[1000, 1000];
-            for (int j = 0; j < 1000; j++) 
-            for (int k = 0; k < 1000; k++) matrix[j, k] = j + k;
+            float[,] matrix = new float[size, size];
+            for (int j = 0; j < size; j++) 
+            for (int k = 0; k < size; k++) matrix[j, k] = j + k;
             matrices[i] = matrix;
         }
 
-        MatrixValue[] buffers = new MatrixValue[200];
-        MatrixValue[] results = new MatrixValue[200];
-        for (int i = 0; i < 200; i++) buffers[i] = new(matrices[i], _aidx);
-        for (int i = 0; i < 200; i++) results[i] = new(new float[1000, 1000], _aidx);
+        MatrixValue[] buffers = new MatrixValue[n];
+        MatrixValue[] results = new MatrixValue[n];
+        for (int i = 0; i < n; i++) buffers[i] = new(matrices[i], _aidx);
+        for (int i = 0; i < n; i++) results[i] = new(new float[size, size], _aidx);
 
         sw.Start();
-        for (int i = 0; i < 200; i++) 
+        for (int i = 0; i < n; i++) 
             Compute.Call(_aidx, Compute.ElementwiseMultiplyKernels, buffers[i].Data.View, buffers[i].Data.View, results[i].Data.View);
         Compute.Synchronize(_aidx);
         sw.Stop();
@@ -72,7 +76,7 @@ public static class SimpleTests
         Compute.ClearAll();
         Compute.ReleaseAccelerator(_aidx);
         
-        Console.WriteLine(sw.ElapsedMilliseconds);
+        Console.WriteLine($"Squared each element of {n} {size}x{size} matrices ({size * size * n} elements) in {sw.ElapsedMilliseconds} ms.");
     }
 
     public static void ScalarTest(bool gpu)
@@ -248,7 +252,7 @@ public static class SimpleTests
         Compute.Synchronize(aidx);
         sw.Stop();
         
-        Console.WriteLine($"Total time: {sw.ElapsedMilliseconds} ms.");
+        Console.WriteLine($"Processed {totalBatches} batches of {m}x{k}x{n} matrix multiplies in: {sw.ElapsedMilliseconds} ms.");
         
         Compute.Return(results.ToArray());
         Compute.ClearAll();
@@ -295,7 +299,7 @@ public static class SimpleTests
         Compute.ClearAll();
         Compute.ReleaseAccelerator(aidx);
         results.Clear();
-        Console.WriteLine($"Total time: {sw.ElapsedMilliseconds} ms.");
+        Console.WriteLine($"Processed {totalBatches} batches of {m}x{k}x{n} matrix multiplies in: {sw.ElapsedMilliseconds} ms.");
     }
 
     public static void BigMatMulTest(bool gpu)
@@ -326,7 +330,7 @@ public static class SimpleTests
         Compute.Synchronize(_aidx);
         sw.Stop();
         
-        Console.WriteLine($"Total time: {sw.ElapsedMilliseconds} ms.");
+        Console.WriteLine($"{m}x{k}x{n} matrix multiply finished in: {sw.ElapsedMilliseconds} ms.");
     }
     
     public static float[,] RandomMatrix(int rows, int cols)

@@ -63,9 +63,9 @@ public static partial class Compute
     #endregion
     #region Matrix Kernels
     public static List<Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, 
-        ArrayView1D<float, Stride1D.Dense>, int, int, int>> MatrixMultiplyKernels { get; } = [];
+        ArrayView1D<float, Stride1D.Dense>, int, int, int, float, float, bool, bool>> MatrixMultiplyKernels { get; } = [];
     public static List<Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, 
-        ArrayView1D<float, Stride1D.Dense>, int, int>> MatrixVectorMultiplyKernels { get; } = [];
+        ArrayView1D<float, Stride1D.Dense>, int, int, float, float, bool>> MatrixVectorMultiplyKernels { get; } = [];
     #endregion
     #region Vector Kernels
     public static List<Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, 
@@ -110,9 +110,9 @@ public static partial class Compute
                 ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>(ElementwiseScalarDivideKernel));
             
             MatrixMultiplyKernels.Add(accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
-                ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, int, int, int>(MatrixMultiplyKernel));
+                ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, int, int, int, float, float, bool, bool>(MatrixMultiplyKernel));
             MatrixVectorMultiplyKernels.Add(accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>, 
-                ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, int, int>(MatrixVectorMultiplyKernel));
+                ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, int, int, float, float, bool>(MatrixVectorMultiplyKernel));
             
             OuterProductKernels.Add(accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>, 
                 ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, int, int>(OuterProductKernel));

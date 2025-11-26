@@ -10,37 +10,53 @@ public static class MatrixKernels
         ArrayView1D<float, Stride1D.Dense> a,
         ArrayView1D<float, Stride1D.Dense> b,
         ArrayView1D<float, Stride1D.Dense> result,
-        int m, int k, int n) // a is m x k, b is k x n, result is m x n
+        int m, int k, int n,
+        float alpha, float beta,
+        bool transposeA, bool transposeB) // a is m x k, b is k x n, result is m x n
     {
         if (index >= m * n) return;
-    
+
         int row = index / n;
         int col = index % n;
-    
+
         float sum = 0;
         for (int i = 0; i < k; i++)
         {
-            sum += a[row * k + i] * b[i * n + col];
+            int aIdx = transposeA ? (i * m + row) : (row * k + i);
+            int bIdx = transposeB ? (col * k + i) : (i * n + col);
+            sum += a[aIdx] * b[bIdx];
         }
     
-        result[row * n + col] = sum;
+        int resultIdx = row * n + col;
+        result[resultIdx] = alpha * sum + beta * result[resultIdx];
     }
-    
+
     public static void MatrixVectorMultiplyKernel(
         Index1D index,
-        ArrayView1D<float, Stride1D.Dense> matrix, 
+        ArrayView1D<float, Stride1D.Dense> matrix,
         ArrayView1D<float, Stride1D.Dense> vector,
         ArrayView1D<float, Stride1D.Dense> result,
-        int m, int n) // matrix is m x n, vector is n, result is m
+        int m, int n,
+        float alpha, float beta, bool transposeMatrix) // matrix is m x n, vector is n (or m if transposed), result is m (or n if transposed)
     {
-        int row = index.X;
-        if (row >= m) return;
-    
-        float sum = 0;
-        for (int col = 0; col < n; col++)
+        if (transposeMatrix)
         {
-            sum += matrix[row * n + col] * vector[col];
+            // matrix^T is n x m, vector is m, result is n
+            int col = index.X;
+            if (col >= n) return;
+
+            float sum = 0;
+            for (int row = 0; row < m; row++) sum += matrix[row * n + col] * vector[row];
+            result[col] = alpha * sum + beta * result[col];
         }
-        result[row] = sum;
+        else
+        {
+            int row = index.X;
+            if (row >= m) return;
+
+            float sum = 0;
+            for (int col = 0; col < n; col++) sum += matrix[row * n + col] * vector[col];
+            result[row] = alpha * sum + beta * result[row];
+        }
     }
 }

@@ -11,19 +11,19 @@ class Program
         Compute.InitializeExtraKernels();
         
         //SimpleTests.FillTest(false);
-        //SimpleTests.FillTest(true);
+        SimpleTests.FillTest(true);
         
         //SimpleTests.SimpleMathTest(false);
-        //SimpleTests.SimpleMathTest(true);
+        SimpleTests.SimpleMathTest(true);
         
         //SimpleTests.ScalarTest(true);
-        //SimpleTests.PhysicsTest(true);
-        //SimpleTests.ParallelProcessingTest(true, true);
+        SimpleTests.PhysicsTest(true);
+        SimpleTests.ParallelProcessingTest(true, true);
         //SimpleTests.ParallelProcessingTest(true, false);
-        //SimpleTests.BigMatMulTest(true);
+        SimpleTests.BigMatMulTest(true);
         //ValueTests.MathTest(true);
-        ValueTests.OpsTest(true);
-        ValueTests.MemoryTest(true);
+        //ValueTests.OpsTest(true);
+        //ValueTests.MemoryTest(true);
         
         Compute.ClearAll();
     }
