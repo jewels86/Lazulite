@@ -112,7 +112,7 @@ public static partial class Compute
     #region Returns
     public static void Return(MemoryBuffer1D<float, Stride1D.Dense> buffer)
     {
-        if (!GpuInUse) buffer.Dispose();
+        if (!GpuInUse) { buffer.Dispose(); return; }
         int size = (int)buffer.Length;
         if (_pool[GetAcceleratorIndex(buffer.Accelerator)].TryGetValue(size, out var stack)) stack.Push(buffer);
         else _pool[GetAcceleratorIndex(buffer.Accelerator)][size] = new Stack<MemoryBuffer1D<float, Stride1D.Dense>>([buffer]);
@@ -207,6 +207,12 @@ public static partial class Compute
     public static void Call<T1, T2, T3>(int aidx, List<Action<Index1D, ArrayView1D<float, Stride1D.Dense>, T1, T2, T3>> kernels,
         ArrayView1D<float, Stride1D.Dense> a, T1 b, T2 c, T3 d) => 
         kernels[aidx](a.IntExtent, a, b, c, d);
+    public static void Call<T1, T2, T3, T4>(int aidx, List<Action<Index1D, ArrayView1D<float, Stride1D.Dense>, T1, T2, T3, T4>> kernels,
+        ArrayView1D<float, Stride1D.Dense> a, T1 b, T2 c, T3 d, T4 e) => 
+        kernels[aidx](a.IntExtent, a, b, c, d, e);
+    public static void Call<T1, T2, T3, T4, T5>(int aidx, List<Action<Index1D, ArrayView1D<float, Stride1D.Dense>, T1, T2, T3, T4, T5>> kernels,
+        ArrayView1D<float, Stride1D.Dense> a, T1 b, T2 c, T3 d, T4 e, T5 f) => 
+        kernels[aidx](a.IntExtent, a, b, c, d, e, f);
     #endregion
     
     #region Binary Calls
