@@ -97,9 +97,11 @@ public static partial class Compute
     {
         Accelerator accelerator;
         var available = InUse.Select((b, i) => (b, i)).Where(t => !t.b).Select((b, i) => i).ToList();
+        
         if (available.Count == 0) throw new Exception("No accelerators available.");
         if (gpu) accelerator = Accelerators.FirstOrDefault(a => a is CudaAccelerator) ?? Accelerators[available[0]];
         else accelerator = Accelerators[available[0]];
+        
         var aidx = GetAcceleratorIndex(accelerator);
         InUse[aidx] = true;
         return aidx;
@@ -112,7 +114,7 @@ public static partial class Compute
     #region Returns
     public static void Return(MemoryBuffer1D<float, Stride1D.Dense> buffer)
     {
-        if (!GpuInUse) { buffer.Dispose(); return; }
+        if (!GpuInUse || !IsGpuAccelerator(buffer.AcceleratorIndex())) { buffer.Dispose(); return; }
         int size = (int)buffer.Length;
         if (_pool[GetAcceleratorIndex(buffer.Accelerator)].TryGetValue(size, out var stack)) stack.Push(buffer);
         else _pool[GetAcceleratorIndex(buffer.Accelerator)][size] = new Stack<MemoryBuffer1D<float, Stride1D.Dense>>([buffer]);
@@ -344,7 +346,7 @@ public static partial class Compute
         var pool = _pool[aidx];
         MemoryBuffer1D<float, Stride1D.Dense> buffer;
         
-        if (pool.TryGetValue(size, out var stack) && stack.Count > 0) buffer = stack.Pop();
+        if (pool.TryGetValue(size, out var stack) && stack.Count > 0 && !IsGpuAccelerator(aidx)) buffer = stack.Pop();
         else buffer = Allocate(aidx, size);
         
         Call(buffer.AcceleratorIndex(), FillKernels, buffer.View, 0);
