@@ -7,15 +7,15 @@ using ILGPU.Runtime.Cuda;
 
 namespace Jewels.Lazulite;
 
-public static partial class Compute
+public  partial class Compute
 {
-    private static readonly Dictionary<int, CuBlas?> _cublasHandles = [];
+    private readonly Dictionary<int, CuBlas?> _cublasHandles = [];
     
-    public static Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, float>[] ApxyKernels { get; private set; } = [];
+    public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, float>[] ApxyKernels { get; private set; } = [];
 
-    public static void InitializeCuBlas()
+    public void InitializeCuBlas()
     {
-        foreach (var accelerator in Accelerators.Values) GetCuBlas(accelerator.AcceleratorIndex());
+        foreach (var aidx in Accelerators.Keys) GetCuBlas(aidx);
         ApxyKernels = Load((
             Index1D i,
             ArrayView1D<float, Stride1D.Dense> x,
@@ -23,13 +23,13 @@ public static partial class Compute
             float alpha) => y[i] = alpha * x[i] + y[i]);
     }
 
-    public static void CleanupCuBlas()
+    public void CleanupCuBlas()
     {
         foreach (var handle in _cublasHandles) handle.Value?.Dispose();
         _cublasHandles.Clear();
     }
 
-    public static CuBlas? GetCuBlas(int aidx)
+    public CuBlas? GetCuBlas(int aidx)
     {
         if (_cublasHandles.TryGetValue(aidx, out var blas) || Accelerators[aidx] is not CudaAccelerator cudaAccelerator) return blas;
         try

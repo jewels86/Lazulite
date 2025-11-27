@@ -1,9 +1,5 @@
-﻿using System.Collections.Concurrent;
-using ILGPU;
-using ILGPU.Algorithms;
-using ILGPU.Algorithms.ScanReduceOperations;
+﻿using ILGPU;
 using ILGPU.Runtime;
-using Jewels.Lazulite.Kernels;
 using static Jewels.Lazulite.Kernels.SimpleKernels;
 using static Jewels.Lazulite.Kernels.ElementwiseKernels;
 using static Jewels.Lazulite.Kernels.MatrixKernels;
@@ -11,70 +7,71 @@ using static Jewels.Lazulite.Kernels.VectorKernels;
 
 namespace Jewels.Lazulite;
 
-public static partial class Compute
+public partial class Compute
 {
     #region Simple Kernels
-    public static Action<Index1D, ArrayView1D<float, Stride1D.Dense>, float>[] FillKernels { get; private set; } = [];
-    public static Action<Index1D, ArrayView1D<float, Stride1D.Dense>>[] ZeroKernels { get; private set; } = [];
-    public static Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[] CopyKernels { get; private set; } = [];
-    public static Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, 
+    public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, float>[] FillKernels { get; private set; } = [];
+    public Action<Index1D, ArrayView1D<float, Stride1D.Dense>>[] ZeroKernels { get; private set; } = [];
+    public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[] CopyKernels { get; private set; } = [];
+    public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, 
         ArrayView1D<float, Stride1D.Dense>>[] ConcatKernels { get; private set; } = [];
-    public static Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, int, int>[] SliceKernels { get; private set; } = []; 
+    public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, int, int>[] SliceKernels { get; private set; } = []; 
     #endregion
     #region Elementwise Kernels
     #region Binary
-    public static Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>,
+    public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>,
         ArrayView1D<float, Stride1D.Dense>>[] ElementwiseAddKernels { get; private set; } = [];
-    public static Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>,
+    public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>,
         ArrayView1D<float, Stride1D.Dense>>[] ElementwiseSubtractKernels { get; private set; } = [];
-    public static Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>,
+    public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>,
         ArrayView1D<float, Stride1D.Dense>>[] ElementwiseMultiplyKernels { get; private set; } = [];
-    public static Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>,
+    public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>,
         ArrayView1D<float, Stride1D.Dense>>[] ElementwiseDivideKernels { get; private set; } = [];
-    public static Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>,
+    public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>,
         ArrayView1D<float, Stride1D.Dense>>[] ElementwiseModuloKernels { get; private set; } = [];
-    public static Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>,
+    public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>,
         ArrayView1D<float, Stride1D.Dense>>[] ElementwisePowerKernels { get; private set; } = [];
-    public static Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>,
+    public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>,
         ArrayView1D<float, Stride1D.Dense>>[] ElementwiseMaxKernels { get; private set; } = [];
     #endregion
     #region Unary
-    public static Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[] ElementwiseExpKernels { get; private set; } = [];
-    public static Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[] ElementwiseLogKernels { get; private set; } = [];
-    public static Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[] ElementwiseSqrtKernels { get; private set; } = [];
-    public static Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[] ElementwiseAbsKernels { get; private set; } = [];
-    public static Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[] ElementwiseNegateKernels { get; private set; } = [];
-    public static Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[] ElementwiseTanhKernels { get; private set; } = [];
-    public static Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[] ElementwiseNaturalLogKernels { get; private set; } = [];
+    public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[] ElementwiseExpKernels { get; private set; } = [];
+    public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[] ElementwiseLogKernels { get; private set; } = [];
+    public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[] ElementwiseSqrtKernels { get; private set; } = [];
+    public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[] ElementwiseAbsKernels { get; private set; } = [];
+    public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[] ElementwiseNegateKernels { get; private set; } = [];
+    public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[] ElementwiseTanhKernels { get; private set; } = [];
+    public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[] ElementwiseNaturalLogKernels { get; private set; } = [];
     #endregion
-    public static Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>,
+    public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>,
         ArrayView1D<float, Stride1D.Dense>>[] ElementwiseScalarPowerKernels { get; private set; } = [];
-    public static Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>,
+    public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>,
         ArrayView1D<float, Stride1D.Dense>>[] ElementwiseScalarMultiplyKernels { get; private set; } = [];
-    public static Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>,
+    public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>,
         ArrayView1D<float, Stride1D.Dense>>[] ElementwiseScalarDivideKernels { get; private set; } = [];
-    public static Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, 
+    public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, 
         ArrayView1D<float, Stride1D.Dense>>[] ElementwiseScalarMaxKernels { get; private set; } = [];
-    public static Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, float>[] ElementwiseFloatPowerKernels = [];
-    public static Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, float>[] ElementwiseFloatMultiplyKernels = [];
-    public static Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, float>[] ElementwiseFloatMaxKernels = [];
+    public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, float>[] ElementwiseFloatPowerKernels = [];
+    public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, float>[] ElementwiseFloatMultiplyKernels = [];
+    public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, float>[] ElementwiseFloatMaxKernels = [];
     #endregion
     #region Matrix Kernels
-    public static Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, 
+    public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, 
         ArrayView1D<float, Stride1D.Dense>, int, int, int, float, float, int, int>[] MatrixMultiplyKernels { get; private set; } = [];
-    public static Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, 
+    public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, 
         ArrayView1D<float, Stride1D.Dense>, int, int, float, float, int>[] MatrixVectorMultiplyKernels { get; private set; } = [];
     #endregion
     #region Vector Kernels
-    public static Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, 
+    public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, 
         ArrayView1D<float, Stride1D.Dense>, int, int>[] OuterProductKernels { get; private set; } = [];
     #endregion
 
-    private static bool _coreInitialized;
-    private static bool _extraScalarInitialized;
-    private static bool _extraElementwiseInitialized;
+    private bool _coreInitialized;
+    private bool _extraScalarInitialized;
+    private bool _extraElementwiseInitialized;
 
-    public static void InitializeCoreKernels(bool warmup = true)
+    #region Initializers
+    public void InitializeCoreKernels(bool warmup = true)
     {
         if (_coreInitialized) return;
         FillKernels = new Action<Index1D, ArrayView1D<float, Stride1D.Dense>, float>[Accelerators.Count];
@@ -154,7 +151,7 @@ public static partial class Compute
         _coreInitialized = true;
     }
 
-    public static void InitializeExtraScalarKernels(bool warmup = true)
+    public void InitializeExtraScalarKernels(bool warmup = true)
     {
         if (_extraScalarInitialized) return;
         
@@ -181,7 +178,7 @@ public static partial class Compute
         _extraScalarInitialized = true;
     }
 
-    public static void InitializeExtraElementwiseKernels(bool warmup = true)
+    public void InitializeExtraElementwiseKernels(bool warmup = true)
     {
         if (_extraElementwiseInitialized) return;
         
@@ -223,8 +220,9 @@ public static partial class Compute
         if (warmup) WarmupExtraElementwiseKernels();
         _extraElementwiseInitialized = true;
     }
-    
-    public static void WarmupCoreKernels()
+    #endregion
+    #region Warmups
+    public void WarmupCoreKernels()
     {
         for (int i = 0; i < Accelerators.Count; i++)
         {
@@ -249,7 +247,7 @@ public static partial class Compute
         }
     }
 
-    public static void WarmupExtraScalarKernels()
+    public void WarmupExtraScalarKernels()
     {
         for (int i = 0; i < Accelerators.Count; i++)
         {
@@ -262,7 +260,7 @@ public static partial class Compute
         }
     }
 
-    public static void WarmupExtraElementwiseKernels()
+    public void WarmupExtraElementwiseKernels()
     {
         for (int i = 0; i < Accelerators.Count; i++)
         {
@@ -279,8 +277,9 @@ public static partial class Compute
             Call(ElementwiseNaturalLogKernels, dummy, dummy);
         }
     }
+    #endregion
 
-    public static void InitializeExtraKernels(bool warmup = true)
+    public void InitializeExtraKernels(bool warmup = true)
     {
         InitializeExtraScalarKernels(warmup);
         InitializeExtraElementwiseKernels(warmup);

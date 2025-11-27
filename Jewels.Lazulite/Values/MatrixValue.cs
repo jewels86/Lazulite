@@ -6,7 +6,7 @@ namespace Jewels.Lazulite;
 public class MatrixValue : Value<float[,]>
 {
     public MatrixValue(float[,] value, int aidx) : base(
-        Compute.Get(aidx, value.GetLength(0) * value.GetLength(1)),
+        Compute.Instance.Get(aidx, value.GetLength(0) * value.GetLength(1)),
         [value.GetLength(0), value.GetLength(1)]) => FromHost(value);
     public MatrixValue(MemoryBuffer1D<float, Stride1D.Dense> buffer, int[] shape) : base(buffer, shape) { }
     
@@ -16,27 +16,25 @@ public class MatrixValue : Value<float[,]>
     public override MatrixValue Create(MemoryBuffer1D<float, Stride1D.Dense> buffer, int[] shape) => new(buffer, shape);
     public override MatrixProxy ToProxy() => new(this);
     
-    public static MatrixValue operator +(MatrixValue a, MatrixValue b) => Compute.BinaryCall(Compute.ElementwiseAddKernels, a, b).AsMatrix();
-    public static MatrixValue operator -(MatrixValue a, MatrixValue b) => Compute.BinaryCall(Compute.ElementwiseSubtractKernels, a, b).AsMatrix();
-    public static MatrixValue operator *(MatrixValue a, MatrixValue b) => Compute.BinaryCall(Compute.ElementwiseMultiplyKernels, a, b).AsMatrix();
-    public static MatrixValue operator /(MatrixValue a, MatrixValue b) => Compute.BinaryCall(Compute.ElementwiseDivideKernels, a, b).AsMatrix();
-    public static MatrixValue operator -(MatrixValue a) => Compute.UnaryCall(Compute.ElementwiseNegateKernels, a).AsMatrix();
-    public static MatrixValue operator %(MatrixValue a, MatrixValue b) => Compute.BinaryCall(Compute.ElementwiseModuloKernels, a, b).AsMatrix();
+    public static MatrixValue operator +(MatrixValue a, MatrixValue b) => Compute.Instance.BinaryCall(Compute.Instance.ElementwiseAddKernels, a, b).AsMatrix();
+    public static MatrixValue operator -(MatrixValue a, MatrixValue b) => Compute.Instance.BinaryCall(Compute.Instance.ElementwiseSubtractKernels, a, b).AsMatrix();
+    public static MatrixValue operator *(MatrixValue a, MatrixValue b) => Compute.Instance.BinaryCall(Compute.Instance.ElementwiseMultiplyKernels, a, b).AsMatrix();
+    public static MatrixValue operator /(MatrixValue a, MatrixValue b) => Compute.Instance.BinaryCall(Compute.Instance.ElementwiseDivideKernels, a, b).AsMatrix();
+    public static MatrixValue operator -(MatrixValue a) => Compute.Instance.UnaryCall(Compute.Instance.ElementwiseNegateKernels, a).AsMatrix();
+    public static MatrixValue operator %(MatrixValue a, MatrixValue b) => Compute.Instance.BinaryCall(Compute.Instance.ElementwiseModuloKernels, a, b).AsMatrix();
 
     public MatrixValue MatrixMultiply(MatrixValue other)
     {
         // this should be m * k, they should be k * n
         if (Shape[1] != other.Shape[0]) throw new InvalidOperationException("Matrix dimensions are not compatible.");
-        var result = Compute.Get(AcceleratorIndex, Shape[0] * other.Shape[1]);
-        Compute.MatrixMultiply(this, other, result, Shape[0], Shape[1], other.Shape[1]);
+        var result = Compute.Instance.Get(AcceleratorIndex, Shape[0] * other.Shape[1]);
+        Compute.Instance.MatrixMultiply(this, other, result, Shape[0], Shape[1], other.Shape[1]);
         return new(result, [Shape[0], other.Shape[1]]);
     }
 }
 
-public class MatrixProxy : ValueProxy<float[,]>
+public class MatrixProxy(Value<float[,]> value) : ValueProxy<float[,]>(value)
 {
-    public MatrixProxy(Value<float[,]> value) : base(value) { }
-
     public float this[int i, int j] => FlatData[IndexOf(i, j, Shape[1])];
     public override float Get(int[] index) => this[index[0], index[1]];
     public override float[,] ToHost() => Unroll(FlatData, Shape[1]);

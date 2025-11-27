@@ -8,12 +8,13 @@ namespace Testing;
 
 public static class ValueTests
 {
+    private static Compute _compute => Compute.Instance;
     private static int _aidx = -1;
     
     public static void MathTest(bool gpu)
     {
-        _aidx = Compute.RequestAccelerator(gpu);
-        Console.WriteLine(Compute.IsGpuAccelerator(_aidx) ? $"GPU accelerator {_aidx}" : $"CPU accelerator {_aidx}");
+        _aidx = _compute.RequestAccelerator(gpu);
+        Console.WriteLine(_compute.IsGpuAccelerator(_aidx) ? $"GPU accelerator {_aidx}" : $"CPU accelerator {_aidx}");
         Stopwatch sw = new();
 
         using MatrixValue a = new(SimpleTests.RandomMatrix(10000, 10000), _aidx);
@@ -33,37 +34,37 @@ public static class ValueTests
         Console.WriteLine($"ToProxy elapsed time: {sw.ElapsedMilliseconds}");
         Console.WriteLine($"Matrix sum at (0, 0): {proxy[0, 0]}");
         
-        Compute.ReleaseAccelerator(_aidx);
+        _compute.ReleaseAccelerator(_aidx);
     }
 
     public static void OpsTest(bool gpu)
     {
-        int aidx = Compute.RequestAccelerator(gpu);
+        int aidx = _compute.RequestAccelerator(gpu);
         
-        var a = Compute.Get(aidx, 4);
-        var b = Compute.Get(aidx, 4);
+        var a = _compute.Get(aidx, 4);
+        var b = _compute.Get(aidx, 4);
         float[] realA = [1, 2, 3, 4];
         float[] realB = [3, 4, 5, 6];
         a.CopyFromCPU(realA);
         b.CopyFromCPU(realB);
         
-        using var addBuffer = Compute.Get(aidx, 4);
-        using var subBuffer = Compute.Get(aidx, 4);
-        using var mulBuffer = Compute.Get(aidx, 4);
-        using var divBuffer = Compute.Get(aidx, 4);
-        using var modBuffer = Compute.Get(aidx, 4);
-        using var powBuffer = Compute.Get(aidx, 4);
-        using var maxBuffer = Compute.Get(aidx, 4);
+        using var addBuffer = _compute.Get(aidx, 4);
+        using var subBuffer = _compute.Get(aidx, 4);
+        using var mulBuffer = _compute.Get(aidx, 4);
+        using var divBuffer = _compute.Get(aidx, 4);
+        using var modBuffer = _compute.Get(aidx, 4);
+        using var powBuffer = _compute.Get(aidx, 4);
+        using var maxBuffer = _compute.Get(aidx, 4);
         
-        Compute.Call(Compute.ElementwiseAddKernels, a.View, b.View, addBuffer.View);
-        Compute.Call(Compute.ElementwiseSubtractKernels, a.View, b.View, subBuffer.View);
-        Compute.Call(Compute.ElementwiseMultiplyKernels, a.View, b.View, mulBuffer.View);
-        Compute.Call(Compute.ElementwiseDivideKernels, a.View, b, divBuffer);
-        Compute.Call(Compute.ElementwiseModuloKernels, a.View, b, modBuffer);
-        Compute.Call(Compute.ElementwisePowerKernels, a.View, b, powBuffer);
-        Compute.Call(Compute.ElementwiseMaxKernels, a.View, b, maxBuffer);
+        _compute.Call(_compute.ElementwiseAddKernels, a.View, b.View, addBuffer.View);
+        _compute.Call(_compute.ElementwiseSubtractKernels, a.View, b.View, subBuffer.View);
+        _compute.Call(_compute.ElementwiseMultiplyKernels, a.View, b.View, mulBuffer.View);
+        _compute.Call(_compute.ElementwiseDivideKernels, a.View, b, divBuffer);
+        _compute.Call(_compute.ElementwiseModuloKernels, a.View, b, modBuffer);
+        _compute.Call(_compute.ElementwisePowerKernels, a.View, b, powBuffer);
+        _compute.Call(_compute.ElementwiseMaxKernels, a.View, b, maxBuffer);
         
-        Compute.Synchronize(aidx);
+        _compute.Synchronize(aidx);
         
         Console.WriteLine($"a + b: {string.Join(',', addBuffer.GetAsArray1D())} vs {string.Join(',', realA.Select((x, i) => x + realB[i]))}");
         Console.WriteLine($"a - b: {string.Join(',', subBuffer.GetAsArray1D())} vs {string.Join(',', realA.Select((x, i) => x - realB[i]))}");
@@ -73,24 +74,24 @@ public static class ValueTests
         Console.WriteLine($"a ^ b: {string.Join(',', powBuffer.GetAsArray1D())} vs {string.Join(',', realA.Select((x, i) => (float)Math.Pow(x, realB[i])))}");
         Console.WriteLine($"max(a, b): {string.Join(',', maxBuffer.GetAsArray1D())} vs {string.Join(',', realA.Select((x, i) => (float)Math.Max(x, realB[i])))}");
 
-        using var expBuffer = Compute.Get(aidx, 4);
-        using var logBuffer = Compute.Get(aidx, 4);
-        using var sqrtBuffer = Compute.Get(aidx, 4);
-        using var absBuffer = Compute.Get(aidx, 4);
-        using var negateBuffer = Compute.Get(aidx, 4);
-        using var tanhBuffer = Compute.Get(aidx, 4);
-        using var sech2Buffer = Compute.Get(aidx, 4);
-        using var naturalLogBuffer = Compute.Get(aidx, 4);
+        using var expBuffer = _compute.Get(aidx, 4);
+        using var logBuffer = _compute.Get(aidx, 4);
+        using var sqrtBuffer = _compute.Get(aidx, 4);
+        using var absBuffer = _compute.Get(aidx, 4);
+        using var negateBuffer = _compute.Get(aidx, 4);
+        using var tanhBuffer = _compute.Get(aidx, 4);
+        using var sech2Buffer = _compute.Get(aidx, 4);
+        using var naturalLogBuffer = _compute.Get(aidx, 4);
         
-        Compute.Call(Compute.ElementwiseExpKernels, a.View, expBuffer.View);
-        Compute.Call(Compute.ElementwiseLogKernels, a.View, logBuffer.View);
-        Compute.Call(Compute.ElementwiseSqrtKernels, a.View, sqrtBuffer.View);
-        Compute.Call(Compute.ElementwiseAbsKernels, a.View, absBuffer.View);
-        Compute.Call(Compute.ElementwiseNegateKernels, a.View, negateBuffer.View);
-        Compute.Call(Compute.ElementwiseTanhKernels, a.View, tanhBuffer.View);
-        Compute.Call(Compute.ElementwiseNaturalLogKernels, a.View, naturalLogBuffer.View);
+        _compute.Call(_compute.ElementwiseExpKernels, a.View, expBuffer.View);
+        _compute.Call(_compute.ElementwiseLogKernels, a.View, logBuffer.View);
+        _compute.Call(_compute.ElementwiseSqrtKernels, a.View, sqrtBuffer.View);
+        _compute.Call(_compute.ElementwiseAbsKernels, a.View, absBuffer.View);
+        _compute.Call(_compute.ElementwiseNegateKernels, a.View, negateBuffer.View);
+        _compute.Call(_compute.ElementwiseTanhKernels, a.View, tanhBuffer.View);
+        _compute.Call(_compute.ElementwiseNaturalLogKernels, a.View, naturalLogBuffer.View);
         
-        Compute.Synchronize(aidx);
+        _compute.Synchronize(aidx);
         Console.WriteLine($"exp(a): {string.Join(',', expBuffer.GetAsArray1D())} vs {string.Join(',', realA.Select(x => (float)Math.Exp(x)))}");
         Console.WriteLine($"log(a): {string.Join(',', logBuffer.GetAsArray1D())} vs {string.Join(',', realA.Select(x => (float)Math.Log(x)))}");
         Console.WriteLine($"sqrt(a): {string.Join(',', sqrtBuffer.GetAsArray1D())} vs {string.Join(',', realA.Select(x => (float)Math.Sqrt(x)))}");
@@ -100,16 +101,16 @@ public static class ValueTests
         Console.WriteLine($"ln(a): {string.Join(',', naturalLogBuffer.GetAsArray1D())} vs {string.Join(',', realA.Select(x => (float)Math.Log(x)))}");
         
         var dot = realA.Select((x, i) => x * realB[i]).Sum();
-        using var dotBuffer = Compute.Dot(a, b);
-        Compute.Synchronize(aidx);
+        using var dotBuffer = _compute.Dot(a, b);
+        _compute.Synchronize(aidx);
         Console.WriteLine($"dot(a, b): {dot} vs {dotBuffer.GetAsArray1D()[0]}");
         
-        Compute.ReleaseAccelerator(aidx);
+        _compute.ReleaseAccelerator(aidx);
     }
 
     public static void MemoryTest(bool gpu)
     {
-        int aidx = Compute.RequestAccelerator(gpu);
+        int aidx = _compute.RequestAccelerator(gpu);
         
         var a = new ScalarValue(1, aidx);
         var b = new ScalarValue(2, aidx);
@@ -120,7 +121,7 @@ public static class ValueTests
         a.Dispose();
         b.Dispose();
         c.Dispose();
-        Compute.Synchronize(aidx);
+        _compute.Synchronize(aidx);
 
         var d = new ScalarValue(3, aidx);
         var e = d * c;
@@ -128,12 +129,12 @@ public static class ValueTests
         Console.WriteLine(e.Data.GetHashCode());
         d.Dispose();
         e.Dispose();
-        Compute.Synchronize(aidx);
+        _compute.Synchronize(aidx);
 
-        var f = Compute.Get(aidx, 1);
+        var f = _compute.Get(aidx, 1);
         Console.WriteLine(f.GetAsArray1D()[0]);
         Console.WriteLine(f.GetHashCode());
         
-        Compute.ReleaseAccelerator(aidx);
+        _compute.ReleaseAccelerator(aidx);
     }
 }

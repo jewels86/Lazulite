@@ -14,25 +14,25 @@ public static class DisposableExtensions
 
 public static class MemoryBufferExtensions
 {
-    public static int AcceleratorIndex(this MemoryBuffer1D<float, Stride1D.Dense> buffer) => Compute.GetAcceleratorIndex(buffer.Accelerator);
-    public static AcceleratorStream GetStream(this MemoryBuffer1D<float, Stride1D.Dense> buffer) => Compute.GetStream(buffer.Accelerator);
-    public static void Return(this MemoryBuffer1D<float, Stride1D.Dense> buffer) => Compute.Return(buffer);
+    public static int AcceleratorIndex(this MemoryBuffer1D<float, Stride1D.Dense> buffer) => Compute.Instance.GetAcceleratorIndex(buffer.Accelerator);
+    public static AcceleratorStream GetStream(this MemoryBuffer1D<float, Stride1D.Dense> buffer) => Compute.Instance.GetStream(buffer.Accelerator);
+    public static void Return(this MemoryBuffer1D<float, Stride1D.Dense> buffer) => Compute.Instance.Return(buffer);
 
     public static MemoryBuffer1D<float, Stride1D.Dense> DeferReturn(this MemoryBuffer1D<float, Stride1D.Dense> buffer)
     {
-        Compute.DeferReturn(buffer);
+        Compute.Instance.DeferReturn(buffer);
         return buffer;
     }
 }
 
 public static class ArrayViewExtensions
 {
-    public static int AcceleratorIndex(this ArrayView1D<float, Stride1D.Dense> view) => Compute.GetAcceleratorIndex(view.GetAccelerator());
+    public static int AcceleratorIndex(this ArrayView1D<float, Stride1D.Dense> view) => Compute.Instance.GetAcceleratorIndex(view.GetAccelerator());
 }
 
 public static class AcceleratorExtensions
 {
-    public static int AcceleratorIndex(this Accelerator accelerator) => Compute.GetAcceleratorIndex(accelerator);
+    public static int AcceleratorIndex(this Accelerator accelerator) => Compute.Instance.GetAcceleratorIndex(accelerator);
 }
 
 public static class ValueExtensions

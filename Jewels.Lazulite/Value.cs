@@ -25,15 +25,17 @@ public interface IValue : IDisposable
 public abstract class Value<T>(MemoryBuffer1D<float, Stride1D.Dense> data, int[] shape) : IValue
     where T : notnull
 {
+    private Compute _compute => Compute.Instance;
+    
     public MemoryBuffer1D<float, Stride1D.Dense> Data { get; set; } = data;
     public int[] Shape { get; } = shape;
     public int TotalSize => (int)Data.Length;
-    public int AcceleratorIndex => Compute.GetAcceleratorIndex(Data.Accelerator);
+    public int AcceleratorIndex => _compute.GetAcceleratorIndex(Data.Accelerator);
     public bool IsValid { get; private set; } = true; // this may be false if the buffer was deferred but wasn't returned yet- it can still be used during that iteration
     
     public T ToHost()
     {
-        Compute.Synchronize(AcceleratorIndex);
+        _compute.Synchronize(AcceleratorIndex);
         return Unroll(Data.View.GetAsArray1D());
     }
     public void FromHost(T value) => Data.CopyFromCPU(Roll(value));
@@ -45,11 +47,11 @@ public abstract class Value<T>(MemoryBuffer1D<float, Stride1D.Dense> data, int[]
     public void Dispose()
     {
         if (!IsValid) return;
-        Compute.DeferReturn(Data);
+        _compute.DeferReturn(Data);
         IsValid = false;
     }
 
-    public Value<T> Zeros() => Create(Compute.GetLike(this), Shape);
+    public Value<T> Zeros() => Create(_compute.GetLike(this), Shape);
     public Value<T> CreateAlike(MemoryBuffer1D<float, Stride1D.Dense> buffer) => Create(buffer, Shape);
 
     public abstract T Unroll(float[] rolled);

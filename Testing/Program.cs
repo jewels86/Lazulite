@@ -7,9 +7,9 @@ class Program
 {
     public static void Main(string[] args)
     {
-        using var scope = new ComputeContext();
-        Compute.InitializeCoreKernels();
-        Compute.InitializeExtraKernels();
+        using var _compute = Compute.Instance;
+        _compute.InitializeCoreKernels();
+        _compute.InitializeExtraKernels();
         
         //SimpleTests.FillTest(false);
         SimpleTests.FillTest(true);
@@ -20,12 +20,10 @@ class Program
         //SimpleTests.ScalarTest(true);
         SimpleTests.PhysicsTest(true);
         SimpleTests.ParallelProcessingTest(true, true);
-        //SimpleTests.ParallelProcessingTest(true, false);
+        SimpleTests.ParallelProcessingTest(true, false);
         SimpleTests.BigMatMulTest(true);
         //ValueTests.MathTest(true);
         //ValueTests.OpsTest(true);
         //ValueTests.MemoryTest(true);
-        
-        Compute.ClearAll();
     }
 }
