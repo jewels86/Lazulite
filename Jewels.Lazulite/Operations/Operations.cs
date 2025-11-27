@@ -10,10 +10,12 @@ namespace Jewels.Lazulite;
 public static partial class Compute
 {
     private static readonly Dictionary<int, CuBlas?> _cublasHandles = [];
+    
+    public static Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, float>[] ApxyKernels { get; private set; } = [];
 
     public static void InitializeCuBlas()
     {
-        foreach (var accelerator in Accelerators) GetCuBlas(accelerator.AcceleratorIndex());
+        foreach (var accelerator in Accelerators.Values) GetCuBlas(accelerator.AcceleratorIndex());
         ApxyKernels = Load((
             Index1D i,
             ArrayView1D<float, Stride1D.Dense> x,

@@ -55,13 +55,13 @@ public static class ValueTests
         using var powBuffer = Compute.Get(aidx, 4);
         using var maxBuffer = Compute.Get(aidx, 4);
         
-        Compute.Call(aidx, Compute.ElementwiseAddKernels, a.View, b.View, addBuffer.View);
-        Compute.Call(aidx, Compute.ElementwiseSubtractKernels, a.View, b.View, subBuffer.View);
-        Compute.Call(aidx, Compute.ElementwiseMultiplyKernels, a.View, b.View, mulBuffer.View);
-        Compute.Call(aidx, Compute.ElementwiseDivideKernels, a.View, b, divBuffer);
-        Compute.Call(aidx, Compute.ElementwiseModuloKernels, a.View, b, modBuffer);
-        Compute.Call(aidx, Compute.ElementwisePowerKernels, a.View, b, powBuffer);
-        Compute.Call(aidx, Compute.ElementwiseMaxKernels, a.View, b, maxBuffer);
+        Compute.Call(Compute.ElementwiseAddKernels, a.View, b.View, addBuffer.View);
+        Compute.Call(Compute.ElementwiseSubtractKernels, a.View, b.View, subBuffer.View);
+        Compute.Call(Compute.ElementwiseMultiplyKernels, a.View, b.View, mulBuffer.View);
+        Compute.Call(Compute.ElementwiseDivideKernels, a.View, b, divBuffer);
+        Compute.Call(Compute.ElementwiseModuloKernels, a.View, b, modBuffer);
+        Compute.Call(Compute.ElementwisePowerKernels, a.View, b, powBuffer);
+        Compute.Call(Compute.ElementwiseMaxKernels, a.View, b, maxBuffer);
         
         Compute.Synchronize(aidx);
         
@@ -82,13 +82,13 @@ public static class ValueTests
         using var sech2Buffer = Compute.Get(aidx, 4);
         using var naturalLogBuffer = Compute.Get(aidx, 4);
         
-        Compute.Call(aidx, Compute.ElementwiseExpKernels, a.View, expBuffer.View);
-        Compute.Call(aidx, Compute.ElementwiseLogKernels, a.View, logBuffer.View);
-        Compute.Call(aidx, Compute.ElementwiseSqrtKernels, a.View, sqrtBuffer.View);
-        Compute.Call(aidx, Compute.ElementwiseAbsKernels, a.View, absBuffer.View);
-        Compute.Call(aidx, Compute.ElementwiseNegateKernels, a.View, negateBuffer.View);
-        Compute.Call(aidx, Compute.ElementwiseTanhKernels, a.View, tanhBuffer.View);
-        Compute.Call(aidx, Compute.ElementwiseNaturalLogKernels, a.View, naturalLogBuffer.View);
+        Compute.Call(Compute.ElementwiseExpKernels, a.View, expBuffer.View);
+        Compute.Call(Compute.ElementwiseLogKernels, a.View, logBuffer.View);
+        Compute.Call(Compute.ElementwiseSqrtKernels, a.View, sqrtBuffer.View);
+        Compute.Call(Compute.ElementwiseAbsKernels, a.View, absBuffer.View);
+        Compute.Call(Compute.ElementwiseNegateKernels, a.View, negateBuffer.View);
+        Compute.Call(Compute.ElementwiseTanhKernels, a.View, tanhBuffer.View);
+        Compute.Call(Compute.ElementwiseNaturalLogKernels, a.View, naturalLogBuffer.View);
         
         Compute.Synchronize(aidx);
         Console.WriteLine($"exp(a): {string.Join(',', expBuffer.GetAsArray1D())} vs {string.Join(',', realA.Select(x => (float)Math.Exp(x)))}");
@@ -100,7 +100,7 @@ public static class ValueTests
         Console.WriteLine($"ln(a): {string.Join(',', naturalLogBuffer.GetAsArray1D())} vs {string.Join(',', realA.Select(x => (float)Math.Log(x)))}");
         
         var dot = realA.Select((x, i) => x * realB[i]).Sum();
-        using var dotBuffer = Compute.Dot(a, b); //= Compute.Get(aidx, 1); 
+        using var dotBuffer = Compute.Dot(a, b);
         Compute.Synchronize(aidx);
         Console.WriteLine($"dot(a, b): {dot} vs {dotBuffer.GetAsArray1D()[0]}");
         

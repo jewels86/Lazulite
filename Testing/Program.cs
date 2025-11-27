@@ -7,7 +7,8 @@ class Program
 {
     public static void Main(string[] args)
     {
-        using var scope = new ComputeScope();
+        using var scope = new ComputeContext();
+        Compute.InitializeCoreKernels();
         Compute.InitializeExtraKernels();
         
         //SimpleTests.FillTest(false);

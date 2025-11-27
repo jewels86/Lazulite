@@ -27,7 +27,7 @@ public static class SimpleTests
         for (int i = 0; i < n; i++)
         {
             var buffer = Compute.GetTemp(_aidx, size);
-            Compute.Call(_aidx, Compute.FillKernels, buffer.View, 1);
+            Compute.Call(Compute.FillKernels, buffer.View, 1);
         }
         sw.Stop();
         Compute.Synchronize(_aidx);
@@ -37,7 +37,7 @@ public static class SimpleTests
         for (int i = 0; i < n; i++)
         {
             var buffer = Compute.GetTemp(_aidx, size);
-            Compute.Call(_aidx, Compute.FillKernels, buffer.View, 1);
+            Compute.Call(Compute.FillKernels, buffer.View, 1);
         }
         sw.Stop();
         Console.WriteLine($"Filled {n} vectors of size {size} in {sw.ElapsedMilliseconds} (pre-allocations - {n * size} elements) where allocations are done in-loop.");
@@ -69,7 +69,7 @@ public static class SimpleTests
 
         sw.Start();
         for (int i = 0; i < n; i++) 
-            Compute.Call(_aidx, Compute.ElementwiseMultiplyKernels, buffers[i].Data.View, buffers[i].Data.View, results[i].Data.View);
+            Compute.Call(Compute.ElementwiseMultiplyKernels, buffers[i].Data.View, buffers[i].Data.View, results[i].Data.View);
         Compute.Synchronize(_aidx);
         sw.Stop();
         
@@ -256,7 +256,7 @@ public static class SimpleTests
         Compute.ReleaseAccelerator(aidx);
         results.Clear();
         
-        var gpuIndices = Compute.Accelerators
+        var gpuIndices = Compute.Accelerators.Values
             .Select((acc, idx) => (acc, idx))
             .Where(x => x.acc.AcceleratorType != AcceleratorType.CPU)
             .Select(x => x.idx)
