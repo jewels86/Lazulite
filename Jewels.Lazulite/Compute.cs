@@ -18,15 +18,15 @@ public static partial class Compute
     public static bool AllowGpu { get; set; } = true;
     public static bool GpuInUse { get; private set; } = false;
 
-    private static readonly List<ConcurrentQueue<MemoryBuffer1D<float, Stride1D.Dense>>> _deferred = [];
-    private static readonly List<Dictionary<int, Stack<MemoryBuffer1D<float, Stride1D.Dense>>>> _pool = []; // aidx -> stack of buffers sorted by size
+    private static readonly ConcurrentDictionary<int, ConcurrentQueue<MemoryBuffer1D<float, Stride1D.Dense>>> _deferred = [];
+    private static readonly ConcurrentDictionary<int, ConcurrentDictionary<int, ConcurrentStack<MemoryBuffer1D<float, Stride1D.Dense>>>> _pool = []; // _pool[aidx] -> stacks[size] -> buffers
     #endregion
 
     static Compute()
     {
         Context = Context.CreateDefault();
         RefreshDevices();
-        InitializeCoreKernels();
+        InitializeCoreKernels(); // this is the bottleneck- it takes like 10 seconds cause we do it for all of them
     }
 
     #region Management
@@ -50,8 +50,8 @@ public static partial class Compute
             if (!seen.Add((device.AcceleratorType, device.Name, device.MemorySize))) continue;
             Accelerators.Add(device.CreateAccelerator(Context));
             InUse.Add(false);
-            _pool.Add([]);
-            _deferred.Add([]);
+            _pool[aidx] = [];
+            _deferred[aidx] = [];
             if (device is CudaDevice)
             {
                 GpuInUse = true;
@@ -62,14 +62,22 @@ public static partial class Compute
     }
     public static void ClearAll()
     {
-        // this method feels like it should not happen like this?
-        // we should just be able to syncrhonize all the accelerators then clear everything else
-        foreach (var b in _deferred.SelectMany(buffer => buffer)) Return(b);
-        foreach (var stack in _pool.SelectMany(pool => pool.Values))
-            while (stack.Count > 0) if(stack.TryPop(out var result)) result.Dispose();
-        foreach (var deferred in _deferred) deferred.Clear();
-        foreach (var pool in _pool) pool.Clear();
+        SynchronizeAll();
+        foreach (var (_, pool) in _pool) 
+        foreach (var (_, stack) in pool) 
+        foreach (var buffer in stack) buffer.Dispose();
+        foreach (var (_, deferred) in _deferred) deferred.Clear();
         CleanupCuBlas();
+    }
+
+    public static void Clear(int aidx)
+    {
+        Synchronize(aidx);
+        foreach (var (_, stack) in _pool[aidx]) 
+        foreach (var buffer in stack) buffer.Dispose();
+        foreach (var deferred in _deferred[aidx]) deferred.Dispose();
+        _deferred[aidx].Clear();
+        _pool[aidx].Clear();
     }
     #region Synchronization
     public static void Synchronize(int aidx)
@@ -77,17 +85,14 @@ public static partial class Compute
         Flush(aidx);
         Accelerators[aidx].Synchronize();
     }
-
     public static void SynchronizeAll()
     {
         for (int i = 0; i < Accelerators.Count; i++) Synchronize(i);
     }
-
     public static void Flush(int aidx)
     {
         while (_deferred[aidx].TryDequeue(out var buffer)) Return(buffer);
     }
-
     public static void FlushAll()
     {
         for (int i = 0; i < Accelerators.Count; i++) Flush(i);
@@ -107,7 +112,6 @@ public static partial class Compute
         InUse[aidx] = true;
         return aidx;
     }
-
     public static void ReleaseAccelerator(int aidx) => InUse[aidx] = false;
     #endregion
     #endregion
@@ -115,10 +119,11 @@ public static partial class Compute
     #region Returns
     public static void Return(MemoryBuffer1D<float, Stride1D.Dense> buffer)
     {
-        if (!GpuInUse || !IsGpuAccelerator(buffer.AcceleratorIndex())) { buffer.Dispose(); return; }
+        int aidx = buffer.AcceleratorIndex();
         int size = (int)buffer.Length;
-        if (_pool[GetAcceleratorIndex(buffer.Accelerator)].TryGetValue(size, out var stack)) stack.Push(buffer);
-        else _pool[GetAcceleratorIndex(buffer.Accelerator)][size] = new([buffer]);
+        
+        if (_pool[aidx].TryGetValue(size, out var stack)) stack.Push(buffer);
+        else _pool[aidx][size] = new([buffer]);
     }
     public static void Return(params MemoryBuffer1D<float, Stride1D.Dense>[] buffers)
     {
@@ -127,7 +132,7 @@ public static partial class Compute
     public static void DeferReturn(MemoryBuffer1D<float, Stride1D.Dense> buffer) => _deferred[buffer.AcceleratorIndex()].Enqueue(buffer);
     public static void DeferReturn(params MemoryBuffer1D<float, Stride1D.Dense>[] buffers)
     {
-        foreach (var buffer in buffers) _deferred[buffers[0].AcceleratorIndex()].Enqueue(buffer);
+        foreach (var buffer in buffers) DeferReturn(buffer);
     }
     #endregion
     #region Gets
@@ -342,19 +347,17 @@ public static partial class Compute
             ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>> kernel) =>
         Accelerators.Select(a => a.LoadAutoGroupedStreamKernel(kernel)).ToList();
     #endregion
-    
+
     public static MemoryBuffer1D<float, Stride1D.Dense> Allocate(int aidx, int size) => Accelerators[aidx].Allocate1D<float>(size);
     private static MemoryBuffer1D<float, Stride1D.Dense> TryGetFrom(int aidx, int size)
     {
-        if (size <= 0) throw new ArgumentException("Size must be positive", nameof(size));
-        var pool = _pool[aidx];
         MemoryBuffer1D<float, Stride1D.Dense> buffer;
         
-        if (pool.TryGetValue(size, out var stack) && stack.Count > 0 && !IsGpuAccelerator(aidx)) 
+        if (_pool[aidx].TryGetValue(size, out var stack)) 
             buffer = stack.TryPop(out var result) ? result : Allocate(aidx, size);
         else buffer = Allocate(aidx, size);
-
-        Call(buffer.AcceleratorIndex(), FillKernels, buffer.View, 0);
+        
+        Call(aidx, FillKernels, buffer, 0f);
         return buffer;
     }
     #endregion

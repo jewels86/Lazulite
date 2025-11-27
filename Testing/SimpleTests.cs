@@ -73,7 +73,6 @@ public static class SimpleTests
         Compute.Synchronize(_aidx);
         sw.Stop();
         
-        Compute.ClearAll();
         Compute.ReleaseAccelerator(_aidx);
         
         Console.WriteLine($"Squared each element of {n} {size}x{size} matrices ({size * size * n} elements) in {sw.ElapsedMilliseconds} ms.");
@@ -109,7 +108,6 @@ public static class SimpleTests
         Console.WriteLine(f);
         
         Compute.Synchronize(_aidx);
-        Compute.ClearAll();
         Compute.ReleaseAccelerator(_aidx);
     }
     
@@ -205,7 +203,6 @@ public static class SimpleTests
         Compute.Synchronize(_aidx);
         sw.Stop();
         
-        Compute.ClearAll();
         Compute.ReleaseAccelerator(_aidx);
         
         Console.WriteLine($"Total timesteps: {finalT / dt}");
@@ -255,7 +252,7 @@ public static class SimpleTests
         Console.WriteLine($"Processed {totalBatches} batches of {m}x{k}x{n} matrix multiplies in: {sw.ElapsedMilliseconds} ms.");
         
         Compute.Return(results.ToArray());
-        Compute.ClearAll();
+        Compute.Clear(aidx);
         Compute.ReleaseAccelerator(aidx);
         results.Clear();
         
@@ -296,7 +293,6 @@ public static class SimpleTests
         sw.Stop();
         
         Compute.Return(results.ToArray());
-        Compute.ClearAll();
         Compute.ReleaseAccelerator(aidx);
         results.Clear();
         Console.WriteLine($"Processed {totalBatches} batches of {m}x{k}x{n} matrix multiplies in: {sw.ElapsedMilliseconds} ms.");
