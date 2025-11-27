@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
 using System.Diagnostics;
-using System.Formats.Tar;
-using System.Xml;
 using ILGPU;
 using ILGPU.Runtime;
 using Jewels.Lazulite;
@@ -154,42 +150,42 @@ public static class SimpleTests
             {
                 int i = index.X;
                 var (fx, fy, fz) = (0f, 0f, 0f);
-                var (rx, ry, rz) = KernelProgramming.GetVector3(rs, i);
+                var (rx, ry, rz) = KernelProgramming.Vector3Get(rs, i);
 
                 for (int j = 0; j < total; j++)
                 {
                     if (i == j) continue;
                     
-                    var (jrx, jry, jrz) = KernelProgramming.GetVector3(rs, j);
-                    var (dx, dy, dz) = KernelProgramming.SubtractVector3((jrx, jry, jrz), (rx, ry, rz));
+                    var (jrx, jry, jrz) = KernelProgramming.Vector3Get(rs, j);
+                    var (dx, dy, dz) = KernelProgramming.Vector3Subtract((jrx, jry, jrz), (rx, ry, rz));
 
-                    var r2 = KernelProgramming.Magnitude2Vector3((dx, dy, dz));
+                    var r2 = KernelProgramming.Vector3Magnitude2((dx, dy, dz));
                     var f = g * ms[i] * ms[j] / r2;
 
-                    var (dfx, dfy, dfz) = KernelProgramming.MultiplyVector3((dx, dy, dz), f);
-                    (fx, fy, fz) = KernelProgramming.AddVector3((fx, fy, fz), (dfx, dfy, dfz));
+                    var (dfx, dfy, dfz) = KernelProgramming.Vector3Multiply((dx, dy, dz), f);
+                    (fx, fy, fz) = KernelProgramming.Vector3Add((fx, fy, fz), (dfx, dfy, dfz));
                 }
 
-                (fx, fy, fz) = KernelProgramming.DivideVector3((fx, fy, fz), ms[i]);
-                KernelProgramming.SetVector3(fs, i, (fx, fy, fz));
+                (fx, fy, fz) = KernelProgramming.Vector3Divide((fx, fy, fz), ms[i]);
+                KernelProgramming.Vector3Set(fs, i, (fx, fy, fz));
             };
         Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, float>
             eulerKernel =
                 (index, rs, vs, fs, ms, dt_) =>
                 {
                     int i = index.X;
-                    var (x, y, z) = KernelProgramming.GetVector3(rs, i);
-                    var (vx, vy, vz) = KernelProgramming.GetVector3(vs, i);
-                    var (fx, fy, fz) = KernelProgramming.GetVector3(fs, i);
+                    var (x, y, z) = KernelProgramming.Vector3Get(rs, i);
+                    var (vx, vy, vz) = KernelProgramming.Vector3Get(vs, i);
+                    var (fx, fy, fz) = KernelProgramming.Vector3Get(fs, i);
 
-                    var (ax, ay, az) = KernelProgramming.DivideVector3((fx, fy, fz), ms[i]);
-                    var (dvx, dvy, dvz) = KernelProgramming.MultiplyVector3((ax, ay, az), dt_);
-                    var (vx2, vy2, vz2) = KernelProgramming.AddVector3((vx, vy, vz), (dvx, dvy, dvz));
-                    KernelProgramming.SetVector3(vs, i, (vx2, vy2, vz2));
+                    var (ax, ay, az) = KernelProgramming.Vector3Divide((fx, fy, fz), ms[i]);
+                    var (dvx, dvy, dvz) = KernelProgramming.Vector3Multiply((ax, ay, az), dt_);
+                    var (vx2, vy2, vz2) = KernelProgramming.Vector3Add((vx, vy, vz), (dvx, dvy, dvz));
+                    KernelProgramming.Vector3Set(vs, i, (vx2, vy2, vz2));
 
-                    var (drx, dry, drz) = KernelProgramming.MultiplyVector3((vx2, vy2, vz2), dt_);
-                    var (x2, y2, z2) = KernelProgramming.AddVector3((x, y, z), (drx, dry, drz));
-                    KernelProgramming.SetVector3(rs, i, (x2, y2, z2));
+                    var (drx, dry, drz) = KernelProgramming.Vector3Multiply((vx2, vy2, vz2), dt_);
+                    var (x2, y2, z2) = KernelProgramming.Vector3Add((x, y, z), (drx, dry, drz));
+                    KernelProgramming.Vector3Set(rs, i, (x2, y2, z2));
                 };
 
         var gravityKernels = _compute.Load(gravityKernel);

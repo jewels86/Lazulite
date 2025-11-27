@@ -1,5 +1,4 @@
-﻿using ILGPU.Runtime.Cuda;
-using Jewels.Lazulite;
+﻿using Jewels.Lazulite;
 
 namespace Testing;
 
@@ -8,8 +7,8 @@ class Program
     public static void Main(string[] args)
     {
         using var _compute = Compute.Instance;
-        _compute.InitializeCoreKernels();
-        _compute.InitializeExtraKernels();
+        _compute.InitializeKernelsAsync();
+        _compute.WaitForInitializationAsync();
         
         //SimpleTests.FillTest(false);
         SimpleTests.FillTest(true);

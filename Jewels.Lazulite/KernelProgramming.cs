@@ -5,14 +5,22 @@ namespace Jewels.Lazulite;
 
 public static class KernelProgramming
 {
-    public static (float x, float y, float z) GetVector3(ArrayView1D<float, Stride1D.Dense> array, int i) => (array[i * 3], array[i * 3 + 1], array[i * 3 + 2]);
-    public static void SetVector3(ArrayView1D<float, Stride1D.Dense> array, int i, (float x, float y, float z) value) => (array[i * 3], array[i * 3 + 1], array[i * 3 + 2]) = value;
+    public static (float x, float y, float z) Vector3Get(ArrayView1D<float, Stride1D.Dense> array, int i)
+    {
+        int start = i * 3;
+        return (array[start], array[start + 1], array[start + 2]);
+    }
+    public static void Vector3Set(ArrayView1D<float, Stride1D.Dense> array, int i, (float x, float y, float z) value)
+    {
+        int start = i * 3;
+        (array[start], array[start + 1], array[start + 2]) = value;
+    }
 
-    public static (float x, float y, float z) AddVector3((float x, float y, float z) a, (float x, float y, float z) b) => (a.x + b.x, a.y + b.y, a.z + b.z);
-    public static (float x, float y, float z) SubtractVector3((float x, float y, float z) a, (float x, float y, float z) b) => (a.x - b.x, a.y - b.y, a.z - b.z);
-    public static (float x, float y, float z) MultiplyVector3((float x, float y, float z) a, float b) => (a.x * b, a.y * b, a.z * b);
-    public static (float x, float y, float z) DivideVector3((float x, float y, float z) a, float b) => (a.x / b, a.y / b, a.z / b);
-    public static float Magnitude2Vector3((float x, float y, float z) a) => a.x * a.x + a.y * a.y + a.z * a.z;
-    public static (float x, float y, float z) NegateVector3((float x, float y, float z) a) => (-a.x, -a.y, -a.z);
+    public static (float x, float y, float z) Vector3Add((float x, float y, float z) a, (float x, float y, float z) b) => (a.x + b.x, a.y + b.y, a.z + b.z);
+    public static (float x, float y, float z) Vector3Subtract((float x, float y, float z) a, (float x, float y, float z) b) => (a.x - b.x, a.y - b.y, a.z - b.z);
+    public static (float x, float y, float z) Vector3Multiply((float x, float y, float z) a, float b) => (a.x * b, a.y * b, a.z * b);
+    public static (float x, float y, float z) Vector3Divide((float x, float y, float z) a, float b) => (a.x / b, a.y / b, a.z / b);
+    public static float Vector3Magnitude2((float x, float y, float z) a) => a.x * a.x + a.y * a.y + a.z * a.z;
+    public static (float x, float y, float z) Vector3Negate((float x, float y, float z) a) => (-a.x, -a.y, -a.z);
     
 }

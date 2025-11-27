@@ -66,17 +66,35 @@ public partial class Compute
         ArrayView1D<float, Stride1D.Dense>, int, int>[] OuterProductKernels { get; private set; } = [];
     #endregion
 
+    private bool _initialized;
     private bool _coreInitialized;
     private bool _extraScalarInitialized;
     private bool _extraElementwiseInitialized;
+    
+    private Task? _initializeCoreTask;
+    private Task? _initializeExtraScalarTask;
+    private Task? _initializeExtraElementwiseTask;
 
     #region Initializers
-    public void InitializeCoreKernels(bool warmup = true)
+    private void InitializeBootstrapKernels()
     {
-        if (_coreInitialized) return;
+        if (_initialized) return;
         FillKernels = new Action<Index1D, ArrayView1D<float, Stride1D.Dense>, float>[Accelerators.Count];
         ZeroKernels = new Action<Index1D, ArrayView1D<float, Stride1D.Dense>>[Accelerators.Count];
         CopyKernels = new Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[Accelerators.Count];
+
+        foreach (var kvp in Accelerators)
+        {
+            var (aidx, accelerator) = kvp;
+            FillKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>, float>(FillKernel);
+            ZeroKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>>(ZeroKernel);
+            CopyKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>(CopyKernel);
+        }
+        _initialized = true;
+    }
+    public void InitializeCoreKernels(bool warmup = true)
+    {
+        if (_coreInitialized) return;
         ConcatKernels = new Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, 
             ArrayView1D<float, Stride1D.Dense>>[Accelerators.Count];
         SliceKernels = new Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, int, int>[Accelerators.Count];
@@ -110,41 +128,38 @@ public partial class Compute
         foreach (var kvp in Accelerators)
         {
             var (aidx, accelerator) = kvp;
-            FillKernels[aidx] = (accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>, float>(FillKernel));
-            ZeroKernels[aidx] = (accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>>(ZeroKernel));
-            CopyKernels[aidx] = (accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>(CopyKernel));
-            ConcatKernels[aidx] = (accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>,
-                ArrayView1D<float, Stride1D.Dense>>(ConcatKernel));
-            SliceKernels[aidx] = (accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, int, int>(SliceKernel));
+            ConcatKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>,
+                ArrayView1D<float, Stride1D.Dense>>(ConcatKernel);
+            SliceKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, int, int>(SliceKernel);
 
-            ElementwiseAddKernels[aidx] = (accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
-                ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>(ElementwiseAddKernel));
-            ElementwiseSubtractKernels[aidx] = (accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
-                ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>(ElementwiseSubtractKernel));
-            ElementwiseMultiplyKernels[aidx] = (accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
-                ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>(ElementwiseMultiplyKernel));
-            ElementwiseDivideKernels[aidx] = (accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
-                ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>(ElementwiseDivideKernel));
+            ElementwiseAddKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
+                ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>(ElementwiseAddKernel);
+            ElementwiseSubtractKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
+                ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>(ElementwiseSubtractKernel);
+            ElementwiseMultiplyKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
+                ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>(ElementwiseMultiplyKernel);
+            ElementwiseDivideKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
+                ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>(ElementwiseDivideKernel);
 
-            ElementwiseSqrtKernels[aidx] = (accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
-                ArrayView1D<float, Stride1D.Dense>>(ElementwiseSqrtKernel));
-            ElementwiseNegateKernels[aidx] = (accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
-                ArrayView1D<float, Stride1D.Dense>>(ElementwiseNegateKernel));
+            ElementwiseSqrtKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
+                ArrayView1D<float, Stride1D.Dense>>(ElementwiseSqrtKernel);
+            ElementwiseNegateKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
+                ArrayView1D<float, Stride1D.Dense>>(ElementwiseNegateKernel);
 
-            ElementwiseScalarPowerKernels[aidx] = (accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
-                ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>(ElementwiseScalarPowerKernel));
-            ElementwiseScalarMultiplyKernels[aidx] = (accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
-                ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>(ElementwiseScalarMultiplyKernel));
-            ElementwiseScalarDivideKernels[aidx] = (accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
-                ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>(ElementwiseScalarDivideKernel));
+            ElementwiseScalarPowerKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
+                ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>(ElementwiseScalarPowerKernel);
+            ElementwiseScalarMultiplyKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
+                ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>(ElementwiseScalarMultiplyKernel);
+            ElementwiseScalarDivideKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
+                ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>(ElementwiseScalarDivideKernel);
 
-            MatrixMultiplyKernels[aidx] = (accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
-                ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, int, int, int, float, float, int, int>(MatrixMultiplyKernel));
-            MatrixVectorMultiplyKernels[aidx] = (accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
-                ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, int, int, float, float, int>(MatrixVectorMultiplyKernel));
+            MatrixMultiplyKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
+                ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, int, int, int, float, float, int, int>(MatrixMultiplyKernel);
+            MatrixVectorMultiplyKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
+                ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, int, int, float, float, int>(MatrixVectorMultiplyKernel);
 
-            OuterProductKernels[aidx] = (accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
-                ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, int, int>(OuterProductKernel));
+            OuterProductKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
+                ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, int, int>(OuterProductKernel);
         }
         
         if (warmup) WarmupCoreKernels();
@@ -164,14 +179,14 @@ public partial class Compute
         foreach (var kvp in Accelerators)
         {
             var (aidx, accelerator) = kvp;
-            ElementwiseScalarMaxKernels[aidx] = (accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
-                ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>(ElementwiseScalarMaxKernel));
-            ElementwiseFloatPowerKernels[aidx] = (accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
-                ArrayView1D<float, Stride1D.Dense>, float>(ElementwiseFloatPowerKernel));
-            ElementwiseFloatMultiplyKernels[aidx] = (accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
-                ArrayView1D<float, Stride1D.Dense>, float>(ElementwiseFloatMultiplyKernel));
-            ElementwiseFloatMaxKernels[aidx] = (accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
-                ArrayView1D<float, Stride1D.Dense>, float>(ElementwiseFloatMaxKernel));
+            ElementwiseScalarMaxKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
+                ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>(ElementwiseScalarMaxKernel);
+            ElementwiseFloatPowerKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
+                ArrayView1D<float, Stride1D.Dense>, float>(ElementwiseFloatPowerKernel);
+            ElementwiseFloatMultiplyKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
+                ArrayView1D<float, Stride1D.Dense>, float>(ElementwiseFloatMultiplyKernel);
+            ElementwiseFloatMaxKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
+                ArrayView1D<float, Stride1D.Dense>, float>(ElementwiseFloatMaxKernel);
         }
         
         if (warmup) WarmupExtraScalarKernels();
@@ -198,23 +213,23 @@ public partial class Compute
         foreach (var kvp in Accelerators)
         {
             var (aidx, accelerator) = kvp;
-            ElementwiseModuloKernels[aidx] = (accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
-                ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>(ElementwiseModuloKernel));
-            ElementwisePowerKernels[aidx] = (accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
-                ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>(ElementwisePowerKernel));
-            ElementwiseMaxKernels[aidx] = (accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
-                ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>(ElementwiseMaxKernel));
+            ElementwiseModuloKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
+                ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>(ElementwiseModuloKernel);
+            ElementwisePowerKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
+                ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>(ElementwisePowerKernel);
+            ElementwiseMaxKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
+                ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>(ElementwiseMaxKernel);
 
-            ElementwiseExpKernels[aidx] = (accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
-                ArrayView1D<float, Stride1D.Dense>>(ElementwiseExpKernel));
-            ElementwiseLogKernels[aidx] = (accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
-                ArrayView1D<float, Stride1D.Dense>>(ElementwiseLogKernel));
-            ElementwiseAbsKernels[aidx] = (accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
-                ArrayView1D<float, Stride1D.Dense>>(ElementwiseAbsKernel));
-            ElementwiseTanhKernels[aidx] = (accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
-                ArrayView1D<float, Stride1D.Dense>>(ElementwiseTanhKernel));
-            ElementwiseNaturalLogKernels[aidx] = (accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
-                ArrayView1D<float, Stride1D.Dense>>(ElementwiseNaturalLogKernel));
+            ElementwiseExpKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
+                ArrayView1D<float, Stride1D.Dense>>(ElementwiseExpKernel);
+            ElementwiseLogKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
+                ArrayView1D<float, Stride1D.Dense>>(ElementwiseLogKernel);
+            ElementwiseAbsKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
+                ArrayView1D<float, Stride1D.Dense>>(ElementwiseAbsKernel);
+            ElementwiseTanhKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
+                ArrayView1D<float, Stride1D.Dense>>(ElementwiseTanhKernel);
+            ElementwiseNaturalLogKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
+                ArrayView1D<float, Stride1D.Dense>>(ElementwiseNaturalLogKernel);
         }
         
         if (warmup) WarmupExtraElementwiseKernels();
@@ -278,10 +293,40 @@ public partial class Compute
         }
     }
     #endregion
+    #region Async Initialization
+    public void InitializeCoreKernelsAsync(bool warmup = true) => _initializeCoreTask = Task.Run(() =>
+    {
+        InitializeCoreKernels(warmup);
+    });
+    public void InitializeExtraScalarKernelsAsync(bool warmup = true) => _initializeExtraScalarTask = Task.Run(() => InitializeExtraScalarKernels(warmup));
+    public void InitializeExtraElementwiseKernelsAsync(bool warmup = true) => _initializeExtraElementwiseTask = Task.Run(() => InitializeExtraElementwiseKernels(warmup));
+    public void InitializeExtraKernelsAsync(bool warmup = true)
+    {
+        InitializeExtraScalarKernelsAsync(warmup);
+        InitializeExtraElementwiseKernelsAsync(warmup);
+    }
+    public void InitializeKernelsAsync(bool warmup = true)
+    {
+        InitializeCoreKernelsAsync(warmup);
+        InitializeExtraKernelsAsync(warmup);
+    }
+    
+    public void WaitForInitializationAsync()
+    {
+        _initializeCoreTask?.Wait();
+        _initializeExtraScalarTask?.Wait();
+        _initializeExtraElementwiseTask?.Wait();
+    }
+    #endregion
 
     public void InitializeExtraKernels(bool warmup = true)
     {
         InitializeExtraScalarKernels(warmup);
         InitializeExtraElementwiseKernels(warmup);
+    }
+    public void InitializeKernels(bool warmup = true)
+    {
+        InitializeCoreKernels(warmup);
+        InitializeExtraKernels(warmup);
     }
 }

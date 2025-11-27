@@ -3,15 +3,6 @@ using ILGPU.Runtime;
 
 namespace Jewels.Lazulite;
 
-public static class DisposableExtensions
-{
-    public static T Defer<T>(this T disposable) where T : IDisposable
-    {
-        disposable.Dispose();
-        return disposable;
-    }
-}
-
 public static class MemoryBufferExtensions
 {
     public static int AcceleratorIndex(this MemoryBuffer1D<float, Stride1D.Dense> buffer) => Compute.Instance.GetAcceleratorIndex(buffer.Accelerator);

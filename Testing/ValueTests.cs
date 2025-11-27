@@ -1,6 +1,4 @@
-﻿using System.Data.Common;
-using System.Diagnostics;
-using ILGPU;
+﻿using System.Diagnostics;
 using ILGPU.Runtime;
 using Jewels.Lazulite;
 

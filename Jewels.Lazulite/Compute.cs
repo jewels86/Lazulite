@@ -26,6 +26,7 @@ public partial class Compute : IDisposable
     {
         Context = Context.CreateDefault();
         RefreshDevices();
+        InitializeBootstrapKernels();
     }
 
     #region Management
@@ -227,7 +228,7 @@ public partial class Compute : IDisposable
     
     public void Call(Action<Index1D, ArrayView1D<float, Stride1D.Dense>>[] kernels, ArrayView1D<float, Stride1D.Dense> view) => 
         kernels[view.AcceleratorIndex()](view.IntExtent, view);
-    public void Call<T>(Action<Index1D, ArrayView1D<float, Stride1D.Dense>, T>[] kernels, ArrayView1D<float, Stride1D.Dense> a, T b) => 
+    public void Call<T>(Action<Index1D, ArrayView1D<float, Stride1D.Dense>, T>[] kernels, ArrayView1D<float, Stride1D.Dense> a, T b) =>
         kernels[a.AcceleratorIndex()](a.IntExtent, a, b);
     public void Call<T1, T2>(Action<Index1D, ArrayView1D<float, Stride1D.Dense>, T1, T2>[] kernels, ArrayView1D<float, Stride1D.Dense> a, T1 b, T2 c) => 
         kernels[a.AcceleratorIndex()](a.IntExtent, a, b, c);

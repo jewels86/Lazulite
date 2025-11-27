@@ -4,9 +4,9 @@ using ILGPU.Runtime.Cuda;
 
 namespace Jewels.Lazulite;
 
-public  partial class Compute
+public partial class Compute
 {
-    public  void MatrixMultiply(
+    public void MatrixMultiply(
         MemoryBuffer1D<float, Stride1D.Dense> a,
         MemoryBuffer1D<float, Stride1D.Dense> b,
         MemoryBuffer1D<float, Stride1D.Dense> result,
@@ -30,7 +30,7 @@ public  partial class Compute
                 result.View.BaseView, n);
     }
 
-    public  void MatrixVectorMultiply(
+    public void MatrixVectorMultiply(
         MemoryBuffer1D<float, Stride1D.Dense> matrix,
         MemoryBuffer1D<float, Stride1D.Dense> vector,
         MemoryBuffer1D<float, Stride1D.Dense> result,

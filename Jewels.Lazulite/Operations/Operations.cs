@@ -1,13 +1,10 @@
-﻿using System.Linq.Expressions;
-using System.Reflection.Emit;
-using ILGPU;
-using ILGPU.Algorithms;
+﻿using ILGPU;
 using ILGPU.Runtime;
 using ILGPU.Runtime.Cuda;
 
 namespace Jewels.Lazulite;
 
-public  partial class Compute
+public partial class Compute
 {
     private readonly Dictionary<int, CuBlas?> _cublasHandles = [];
     
