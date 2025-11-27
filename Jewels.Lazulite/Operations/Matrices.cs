@@ -16,7 +16,7 @@ public partial class Compute
     {
         int aidx = a.AcceleratorIndex();
         var blas = GetCuBlas(aidx);
-        if (blas is null || noCuBlas || result.Length < 1e6)
+        if (blas is null || noCuBlas || result.Length < 1e3)
             Call(aidx, MatrixMultiplyKernels, a.IntExtent, a.View, b.View, result.View, m, k, n, alpha, beta, transposeA ? 1 : 0, transposeB ? 1 : 0);
         else
             blas.Gemm(
@@ -41,7 +41,7 @@ public partial class Compute
         var blas = GetCuBlas(aidx);
         int resultSize = transposeMatrix ? n : m;
 
-        if (blas is null || noCuBlas || matrix.Length < 1e5)
+        if (blas is null || noCuBlas || matrix.Length < 1e3)
             Call(aidx, MatrixVectorMultiplyKernels, resultSize, matrix.View, vector.View, result.View, m, n, alpha, beta, transposeMatrix ? 1 : 0);
         else
             blas.Gemv(

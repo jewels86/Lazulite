@@ -23,7 +23,7 @@ public partial class Compute
     {
         var aidx = a.AcceleratorIndex();
         var blas = GetCuBlas(aidx);
-        if (blas is null || noCuBlas || (a.Length < 1e4 && b.Length < 1e4))
+        if (blas is null || noCuBlas || result.Length < 1e3)
         {
             var temp = GetLike(a);
             Call(ElementwiseMultiplyKernels, a, b, temp);
@@ -47,7 +47,7 @@ public partial class Compute
         var aidx = x.AcceleratorIndex();
         var blas = GetCuBlas(aidx);
 
-        if (blas is null || noCuBlas || x.Length < 1e5) Call(ApxyKernels, x.View, y.View, alpha);
+        if (blas is null || noCuBlas || x.Length < 1e3) Call(ApxyKernels, x.View, y.View, alpha);
         else blas.Axpy(alpha, x.View.AsGeneral(), y.View.AsGeneral());
     }
 
@@ -58,7 +58,7 @@ public partial class Compute
     {
         var aidx = x.AcceleratorIndex();
         var blas = GetCuBlas(aidx);
-        if (blas is null || noCuBlas || x.Length < 1e5)
+        if (blas is null || noCuBlas || x.Length < 1e3)
             Call(ElementwiseFloatMultiplyKernels, x, x, alpha);
         else blas.Scal(alpha, x.View.AsGeneral());
     }
@@ -73,7 +73,7 @@ public partial class Compute
         var aidx = x.AcceleratorIndex();
         var blas = GetCuBlas(aidx);
 
-        if (blas is null || noCuBlas || m * n < 1e4)
+        if (blas is null || noCuBlas || result.Length < 1e3)
             Call(aidx, OuterProductKernels, result.IntExtent, x.View, y.View, result.View, m, n);
         else
             blas.Ger(
