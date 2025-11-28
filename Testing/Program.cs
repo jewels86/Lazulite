@@ -17,7 +17,7 @@ class Program
         //SimpleTests.SimpleMathTest(true);
         
         //SimpleTests.ScalarTest(true);
-        //SimpleTests.PhysicsTest(true);
+        SimpleTests.PhysicsTest(true);
         //SimpleTests.ParallelProcessingTest(true, true);
         //SimpleTests.ParallelProcessingTest(true, false);
         //SimpleTests.BigMatMulTest(true);
@@ -28,6 +28,6 @@ class Program
         //Benchmarks.SquareBenchmark1(true);
         //Benchmarks.SquareBenchmark2(true);
         //Benchmarks.MatMulBenchmark(true);
-        Benchmarks.MatMulBenchmark(true, 10000, 10000, 10000, 1);
+        //Benchmarks.MatMulBenchmark(true, 10000, 10000, 10000, 1);
     }
 }

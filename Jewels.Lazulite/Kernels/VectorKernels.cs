@@ -20,6 +20,4 @@ public static class VectorKernels
     
         result[index] = x[row] * y[col];
     }
-    
-    
 }
