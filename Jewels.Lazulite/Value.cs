@@ -12,10 +12,12 @@ public interface IValue : IDisposable
     public int TotalSize { get; }
     public int AcceleratorIndex { get; }
     public bool WasDisposed { get; }
+    public bool Disposable { get; set; }
     
     // these are used for creating new values from existing ones without knowing the host type
     // you can safely cast these to Value<T>s- Value<T> is the only class that implements IValue and it will always return the correct type
-    // if for some reason they can't be casted, the object is not a Value<T>
+    // unless of course the implementation is not Value<T>
+    // then you're just doing something wrong and should probably fix it
     public IValue Zeros();
     public IValue CreateAlike(MemoryBuffer1D<float, Stride1D.Dense> buffer);
     public IValue Create(MemoryBuffer1D<float, Stride1D.Dense> buffer, int[] shape);
@@ -33,7 +35,8 @@ public abstract class Value<T>(MemoryBuffer1D<float, Stride1D.Dense> data, int[]
 
     public int AcceleratorIndex { get; } = data.AcceleratorIndex();
 
-    public bool WasDisposed { get; private set; } = true; // this may be false if the buffer was deferred but wasn't returned yet- it can still be used during that iteration
+    public bool WasDisposed { get; private set; }
+    public bool Disposable { get; set; }
     
     public T ToHost()
     {
@@ -48,9 +51,16 @@ public abstract class Value<T>(MemoryBuffer1D<float, Stride1D.Dense> data, int[]
 
     public void Dispose()
     {
-        if (!WasDisposed) return;
+        if (WasDisposed || !Disposable) return;
         _compute.DeferReturn(Data);
-        WasDisposed = false;
+        WasDisposed = true;
+    }
+
+    public void FinalDispose()
+    {
+        if (WasDisposed) return;
+        _compute.DeferReturn(Data);
+        WasDisposed = true;
     }
 
     public Value<T> Zeros() => Create(_compute.GetLike(this), Shape);
@@ -71,7 +81,7 @@ public abstract class Value<T>(MemoryBuffer1D<float, Stride1D.Dense> data, int[]
     IValue IValue.Create(MemoryBuffer1D<float, Stride1D.Dense> buffer, int[] shape) => Create(buffer, shape);
     void IValue.UpdateWith(IValue other) => UpdateWith((Value<T>)other);
     
-    ~Value() => Dispose();
+    ~Value() => FinalDispose();
 }
 
 public interface IValueProxy
