@@ -28,4 +28,10 @@ public static class ValueExtensions
     public static VectorValue AsVector(this Value<float[]> value) => new(value.Data);
     public static MatrixValue AsMatrix(this Value<float[,]> value) => new(value.Data, value.Shape);
     public static TensorValue3 AsTensorValue3(this Value<float[,,]> value) => new(value.Data, value.Shape);
+
+    public static Value<T> NonDisposable<T>(this Value<T> value) where T : notnull
+    {
+        value.Disposable = false;
+        return value;
+    }
 }
