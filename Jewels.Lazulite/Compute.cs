@@ -5,7 +5,7 @@ using ILGPU.Runtime.Cuda;
 
 namespace Jewels.Lazulite;
 
-public partial class Compute : IDisposable
+public sealed partial class Compute : IDisposable
 {
     #region Properties
     public ConcurrentDictionary<int, Accelerator> Accelerators { get; } = [];
@@ -98,8 +98,9 @@ public partial class Compute : IDisposable
         foreach (var accelerator in Accelerators.Values) accelerator.Dispose();
         foreach (var blas in _cublasHandles.Values) blas?.Dispose();
         CleanupCuBlas();
-        GC.SuppressFinalize(this);
     }
+    
+    ~Compute() => Dispose();
     #endregion
     #region Accelerator Management
     public int RequestAccelerator(bool gpu = true)
