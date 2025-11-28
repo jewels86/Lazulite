@@ -25,7 +25,7 @@ class Program
         //ValueTests.OpsTest(true);
         //ValueTests.MemoryTest(true);
         
-        //Benchmarks.SquareBenchmark1(true);
+        Benchmarks.SquareBenchmark1(true);
         Benchmarks.SquareBenchmark2(true);
         //Benchmarks.MatMulBenchmark(true);
         //Benchmarks.MatMulBenchmark(true, 10000, 10000, 10000, 1);

@@ -11,7 +11,7 @@ public interface IValue : IDisposable
     public int[] Shape { get; }
     public int TotalSize { get; }
     public int AcceleratorIndex { get; }
-    public bool IsValid { get; }
+    public bool WasDisposed { get; }
     
     // these are used for creating new values from existing ones without knowing the host type
     // you can safely cast these to Value<T>s- Value<T> is the only class that implements IValue and it will always return the correct type
@@ -24,14 +24,16 @@ public interface IValue : IDisposable
 
 public abstract class Value<T>(MemoryBuffer1D<float, Stride1D.Dense> data, int[] shape) : IValue
     where T : notnull
-{
-    private Compute _compute => Compute.Instance;
-    
-    public MemoryBuffer1D<float, Stride1D.Dense> Data { get; set; } = data;
+{ 
+    private readonly Compute _compute = Compute.Instance;
+
+    public MemoryBuffer1D<float, Stride1D.Dense> Data { get; } = data;
     public int[] Shape { get; } = shape;
-    public int TotalSize => (int)Data.Length;
-    public int AcceleratorIndex => _compute.GetAcceleratorIndex(Data.Accelerator);
-    public bool IsValid { get; private set; } = true; // this may be false if the buffer was deferred but wasn't returned yet- it can still be used during that iteration
+    public int TotalSize { get; } = (int)data.Length;
+
+    public int AcceleratorIndex { get; } = data.AcceleratorIndex();
+
+    public bool WasDisposed { get; private set; } = true; // this may be false if the buffer was deferred but wasn't returned yet- it can still be used during that iteration
     
     public T ToHost()
     {
@@ -46,9 +48,9 @@ public abstract class Value<T>(MemoryBuffer1D<float, Stride1D.Dense> data, int[]
 
     public void Dispose()
     {
-        if (!IsValid) return;
+        if (!WasDisposed) return;
         _compute.DeferReturn(Data);
-        IsValid = false;
+        WasDisposed = false;
     }
 
     public Value<T> Zeros() => Create(_compute.GetLike(this), Shape);
@@ -68,6 +70,8 @@ public abstract class Value<T>(MemoryBuffer1D<float, Stride1D.Dense> data, int[]
     IValue IValue.CreateAlike(MemoryBuffer1D<float, Stride1D.Dense> buffer) => CreateAlike(buffer);
     IValue IValue.Create(MemoryBuffer1D<float, Stride1D.Dense> buffer, int[] shape) => Create(buffer, shape);
     void IValue.UpdateWith(IValue other) => UpdateWith((Value<T>)other);
+    
+    ~Value() => Dispose();
 }
 
 public interface IValueProxy
@@ -76,9 +80,7 @@ public interface IValueProxy
     public float[] FlatData { get; }
     public int[] Shape { get; }
     
-    // these should not be used unless you are confident in the host type
     public float Get(int[] index);
-    public object ToHost();
 }
 
 public abstract class ValueProxy<T>(float[] flatData, int[] shape) : IValueProxy
@@ -91,6 +93,4 @@ public abstract class ValueProxy<T>(float[] flatData, int[] shape) : IValueProxy
 
     public abstract float Get(int[] index);
     public abstract T ToHost();
-    
-    object IValueProxy.ToHost() => ToHost();
 }
