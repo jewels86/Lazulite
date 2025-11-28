@@ -391,7 +391,7 @@ public partial class Compute : IDisposable
             buffer = stack.TryPop(out var result) ? result : Allocate(aidx, size);
         else buffer = Allocate(aidx, size);
         
-        Call(FillKernels, buffer, 0f);
+        Call(FillKernels, buffer, 0);
         return buffer;
     }
     #endregion
