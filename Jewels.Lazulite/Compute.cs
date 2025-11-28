@@ -65,9 +65,12 @@ public sealed partial class Compute : IDisposable
     public void Clear(int aidx)
     {
         Synchronize(aidx);
-        foreach (var (_, stack) in _pool[aidx]) 
-        foreach (var buffer in stack) buffer.Dispose();
-        foreach (var deferred in _deferred[aidx]) deferred.Dispose();
+        foreach (var kvp in _pool[aidx])
+        {
+            while (kvp.Value.TryPop(out var buffer)) buffer.Dispose();
+            _pool[aidx].TryRemove(kvp);
+        }
+        while (_deferred[aidx].TryDequeue(out var buffer)) buffer.Dispose();
         _deferred[aidx].Clear();
         _pool[aidx].Clear();
     }

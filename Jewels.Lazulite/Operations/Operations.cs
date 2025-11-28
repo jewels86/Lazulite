@@ -22,7 +22,7 @@ public partial class Compute
 
     public void CleanupCuBlas()
     {
-        foreach (var handle in _cublasHandles) handle.Value?.Dispose();
+        foreach (var handle in _cublasHandles.Values) handle?.Dispose();
         _cublasHandles.Clear();
     }
 

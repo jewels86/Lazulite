@@ -3,16 +3,6 @@ using ILGPU.Runtime;
 
 namespace Jewels.Lazulite;
 
-public static class DisposableExtensions
-{
-    public static T Defer<T>(this T disposable)
-        where T : IDisposable
-    {
-        disposable.Dispose();
-        return disposable;
-    }
-}
-
 public static class MemoryBufferExtensions
 {
     public static int AcceleratorIndex(this MemoryBuffer1D<float, Stride1D.Dense> buffer) => Compute.Instance.GetAcceleratorIndex(buffer.Accelerator);
@@ -31,14 +21,10 @@ public static class ArrayViewExtensions
     public static int AcceleratorIndex(this ArrayView1D<float, Stride1D.Dense> view) => Compute.Instance.GetAcceleratorIndex(view.GetAccelerator());
 }
 
-public static class AcceleratorExtensions
-{
-    public static int AcceleratorIndex(this Accelerator accelerator) => Compute.Instance.GetAcceleratorIndex(accelerator);
-}
-
 public static class ValueExtensions
 {
     public static ScalarValue AsScalar(this Value<float> value) => new(value.Data);
+    public static VectorValue AsVector(this Value<float> value) => new(value.Data);
     public static VectorValue AsVector(this Value<float[]> value) => new(value.Data);
     public static MatrixValue AsMatrix(this Value<float[,]> value) => new(value.Data, value.Shape);
     public static TensorValue3 AsTensorValue3(this Value<float[,,]> value) => new(value.Data, value.Shape);
