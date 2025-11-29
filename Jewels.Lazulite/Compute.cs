@@ -12,8 +12,6 @@ public sealed partial class Compute : IDisposable
     public ConcurrentDictionary<string, int> AcceleratorIndices { get; } = [];
     public ConcurrentDictionary<int, bool> InUse { get; } = [];
     public Context Context { get; private set; }
-    public bool AllowGpu { get; set; } = true;
-    public bool GpuInUse { get; private set; }
     public static Compute Instance => _lazyInstance.Value;
 
     private readonly ConcurrentDictionary<int, ConcurrentQueue<MemoryBuffer1D<float, Stride1D.Dense>>> _deferred = []; // _deferred[aidx] -> buffers
@@ -24,19 +22,6 @@ public sealed partial class Compute : IDisposable
 
     private Compute()
     {
-        Context = Context.CreateDefault();
-        RefreshDevices();
-        InitializeBootstrapKernels();
-    }
-
-    #region Management
-    public void RefreshDevices()
-    {
-        ClearAll();
-        foreach (Accelerator accelerator in Accelerators.Values) accelerator.Dispose();
-        
-        Accelerators.Clear();
-        Context.Dispose();
         Context = Context.Create(b => b
             .Default()
             .EnableAlgorithms()
@@ -45,19 +30,22 @@ public sealed partial class Compute : IDisposable
         HashSet<(AcceleratorType, string, long)> seen = [];
 
         int aidx = 0;
-        foreach (Device device in Context.Devices.Where(device => device is not CudaDevice || AllowGpu))
+        foreach (Device device in Context.Devices.Where(device => seen.Add((device.AcceleratorType, device.Name, device.MemorySize))))
         {
-            if (!seen.Add((device.AcceleratorType, device.Name, device.MemorySize))) continue;
             Accelerators[aidx] = device.CreateAccelerator(Context);
             AcceleratorIndices[Accelerators[aidx].Name] = aidx;
+            
             InUse[aidx] = false;
             _pool[aidx] = [];
             _deferred[aidx] = [];
-            if (device is CudaDevice) GpuInUse = true;
+            
             aidx++;
         }
         InitializeCuBlas();
+        InitializeBootstrapKernels();
     }
+
+    #region Management
     public void ClearAll()
     {
         for (int i = 0; i < Accelerators.Count; i++) Clear(i);
@@ -399,7 +387,7 @@ public sealed partial class Compute : IDisposable
         if (_pool[aidx].TryGetValue(size, out var stack))
             buffer = stack.TryPop(out var result) ? result : Allocate(aidx, size);
         else buffer = Allocate(aidx, size);
-        
+
         Call(FillKernels, buffer, 0);
         return buffer;
     }

@@ -329,4 +329,47 @@ public partial class Compute
         InitializeCoreKernels(warmup);
         InitializeExtraKernels(warmup);
     }
+
+    public void ClearKernels()
+    {
+        _coreInitialized = false;
+        _extraScalarInitialized = false;
+        _extraElementwiseInitialized = false;
+        
+        ZeroKernels = [];
+        FillKernels = [];
+        CopyKernels = [];
+        ConcatKernels = [];
+        SliceKernels = [];
+        
+        ElementwiseAddKernels = [];
+        ElementwiseSubtractKernels = [];
+        ElementwiseMultiplyKernels = [];
+        ElementwiseDivideKernels = [];
+        ElementwiseSqrtKernels = [];
+        ElementwiseNegateKernels = [];
+        
+        ElementwiseScalarPowerKernels = [];
+        ElementwiseScalarMultiplyKernels = [];
+        ElementwiseScalarDivideKernels = [];
+        
+        MatrixMultiplyKernels = [];
+        MatrixVectorMultiplyKernels = [];
+        OuterProductKernels = [];
+        
+        ElementwiseScalarMaxKernels = [];
+        ElementwiseFloatPowerKernels = [];
+        ElementwiseFloatMultiplyKernels = [];
+        ElementwiseFloatMaxKernels = [];
+        
+        ElementwiseModuloKernels = [];
+        ElementwisePowerKernels = [];
+        ElementwiseMaxKernels = [];
+        
+        ElementwiseExpKernels = [];
+        ElementwiseLogKernels = [];
+        ElementwiseAbsKernels = [];
+        ElementwiseTanhKernels = [];
+        ElementwiseNaturalLogKernels = [];
+    }
 }

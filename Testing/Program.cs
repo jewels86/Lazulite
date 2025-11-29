@@ -6,9 +6,9 @@ class Program
 {
     public static void Main(string[] args)
     {
-        using var _compute = Compute.Instance;
-        _compute.InitializeKernelsAsync();
-        _compute.WaitForInitializationAsync();
+        using var compute = Compute.Instance;
+        compute.InitializeKernelsAsync();
+        compute.WaitForInitializationAsync();
         
         //SimpleTests.FillTest(false);
         SimpleTests.FillTest(true);
