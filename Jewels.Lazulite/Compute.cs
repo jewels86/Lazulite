@@ -74,12 +74,7 @@ public sealed partial class Compute : IDisposable
     }
     public void Flush(int aidx)
     {
-        HashSet<long> seen = [];
-        while (_deferred[aidx].TryDequeue(out var buffer))
-        {
-            if (seen.Add(buffer.NativePtr)) Return(buffer);
-            else buffer.Dispose();
-        }
+        while (_deferred[aidx].TryDequeue(out var buffer)) Return(buffer);
     }
     public void FlushAll()
     {
