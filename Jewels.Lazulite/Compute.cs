@@ -86,7 +86,12 @@ public sealed partial class Compute : IDisposable
     }
     public void Flush(int aidx)
     {
-        while (_deferred[aidx].TryDequeue(out var buffer)) Return(buffer);
+        HashSet<long> seen = [];
+        while (_deferred[aidx].TryDequeue(out var buffer))
+        {
+            if (seen.Add(buffer.NativePtr)) Return(buffer);
+            else buffer.Dispose();
+        }
     }
     public void FlushAll()
     {
@@ -391,7 +396,7 @@ public sealed partial class Compute : IDisposable
     {
         MemoryBuffer1D<float, Stride1D.Dense> buffer;
         
-        if (_pool[aidx].TryGetValue(size, out var stack)) 
+        if (_pool[aidx].TryGetValue(size, out var stack))
             buffer = stack.TryPop(out var result) ? result : Allocate(aidx, size);
         else buffer = Allocate(aidx, size);
         

@@ -327,6 +327,33 @@ public static class SimpleTests
         _compute.Return(resultBuffer, aBuffer, bBuffer);
         _compute.ReleaseAccelerator(_aidx);
     }
+
+    public static void PoolTest(bool gpu)
+    {
+        _aidx = _compute.RequestAccelerator(gpu);
+        Console.WriteLine(_compute.IsGpuAccelerator(_aidx) ? $"GPU accelerator {_aidx}" : "CPU accelerator");
+        Stopwatch sw = new();
+
+        var (n, size) = (1000, 10000);
+        var kernels = _compute.Load((i, a, b, r) => r[i] += (a[i] * a[i] - b[i] * b[i]) / (a[i] * a[i] + b[i] * b[i]));
+        var result = _compute.Get(_aidx, size);
+        
+        sw.Start();
+        for (int i = 0; i < n; i++)
+        {
+            var bufferA = _compute.GetTemp(_aidx, size).Set(RandomVector(size));
+            var bufferB = _compute.GetTemp(_aidx, size).Set(RandomVector(size));
+            
+            _compute.Call(kernels, bufferA, bufferB, result);
+            _compute.Flush(_aidx);
+        }
+        _compute.Synchronize(_aidx);
+        sw.Stop();
+        
+        Console.WriteLine($"Processed {n} batches in {sw.ElapsedMilliseconds} ms.");
+        _compute.Return(result);
+        _compute.ReleaseAccelerator(_aidx);
+    }
     
     public static float[,] RandomMatrix(int rows, int cols)
     {
@@ -336,5 +363,12 @@ public static class SimpleTests
             for (int j = 0; j < cols; j++) matrix[i, j] = (float)_random.NextDouble();
         });
         return matrix;
+    }
+
+    public static float[] RandomVector(int size)
+    {
+        float[] vector = new float[size];
+        for (int i = 0; i < size; i++) vector[i] = (float)_random.NextDouble();
+        return vector;
     }
 }

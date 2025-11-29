@@ -9,6 +9,12 @@ public static class MemoryBufferExtensions
     public static AcceleratorStream GetStream(this MemoryBuffer1D<float, Stride1D.Dense> buffer) => Compute.Instance.GetStream(buffer.Accelerator);
     public static void Return(this MemoryBuffer1D<float, Stride1D.Dense> buffer) => Compute.Instance.Return(buffer);
 
+    public static MemoryBuffer1D<float, Stride1D.Dense> Set(this MemoryBuffer1D<float, Stride1D.Dense> buffer, float[] value)
+    {
+        buffer.CopyFromCPU(value);
+        return buffer;
+    }
+
     public static MemoryBuffer1D<float, Stride1D.Dense> DeferReturn(this MemoryBuffer1D<float, Stride1D.Dense> buffer)
     {
         Compute.Instance.DeferReturn(buffer);
@@ -32,6 +38,18 @@ public static class ValueExtensions
     public static Value<T> NonDisposable<T>(this Value<T> value) where T : notnull
     {
         value.Disposable = false;
+        return value;
+    }
+
+    public static Value<T> Disposable<T>(this Value<T> value) where T : IDisposable
+    {
+        value.Disposable = true;
+        return value;
+    }
+    
+    public static Value<T> Set<T>(this Value<T> value, Value<T> data) where T : notnull
+    {
+        value.UpdateWith(data);
         return value;
     }
 }

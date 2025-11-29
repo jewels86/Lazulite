@@ -36,7 +36,7 @@ public abstract class Value<T>(MemoryBuffer1D<float, Stride1D.Dense> data, int[]
     public int AcceleratorIndex { get; } = data.AcceleratorIndex();
 
     public bool WasDisposed { get; private set; }
-    public bool Disposable { get; set; }
+    public bool Disposable { get; set; } = true;
     
     public T ToHost()
     {
@@ -71,7 +71,6 @@ public abstract class Value<T>(MemoryBuffer1D<float, Stride1D.Dense> data, int[]
     public abstract Value<T> Create(MemoryBuffer1D<float, Stride1D.Dense> buffer, int[] shape);
     public abstract ValueProxy<T> ToProxy();
     
-    public static implicit operator T(Value<T> value) => value.ToHost();
     public static implicit operator MemoryBuffer1D<float, Stride1D.Dense>(Value<T> value) => value.Data;
     public static implicit operator ValueProxy<T>(Value<T> value) => value.ToProxy();
     public static implicit operator ArrayView1D<float, Stride1D.Dense>(Value<T> value) => value.Data.View;
