@@ -7,16 +7,14 @@ namespace Jewels.Lazulite;
 
 public sealed partial class Compute : IDisposable
 {
-    #region Properties
+    #region Properties & Fields
     public ConcurrentDictionary<int, Accelerator> Accelerators { get; } = [];
     public ConcurrentDictionary<string, int> AcceleratorIndices { get; } = [];
     public ConcurrentDictionary<int, bool> InUse { get; } = [];
     public Context Context { get; private set; }
     public static Compute Instance => _lazyInstance.Value;
 
-    private readonly ConcurrentDictionary<int, ConcurrentQueue<MemoryBuffer1D<float, Stride1D.Dense>>> _deferred = []; // _deferred[aidx] -> buffers
     private readonly ConcurrentDictionary<int, ConcurrentDictionary<int, ConcurrentStack<MemoryBuffer1D<float, Stride1D.Dense>>>> _pool = []; // _pool[aidx] -> stacks[size] -> buffers
-
     private static readonly Lazy<Compute> _lazyInstance = new(() => new Compute());
     #endregion
 
@@ -37,7 +35,6 @@ public sealed partial class Compute : IDisposable
             
             InUse[aidx] = false;
             _pool[aidx] = [];
-            _deferred[aidx] = [];
             
             aidx++;
         }
@@ -58,27 +55,14 @@ public sealed partial class Compute : IDisposable
             while (kvp.Value.TryPop(out var buffer)) buffer.Dispose();
             _pool[aidx].TryRemove(kvp);
         }
-        while (_deferred[aidx].TryDequeue(out var buffer)) buffer.Dispose();
-        _deferred[aidx].Clear();
         _pool[aidx].Clear();
     }
     #region Synchronization
-    public void Synchronize(int aidx)
-    {
-        Flush(aidx);
-        Accelerators[aidx].Synchronize();
-    }
+    public void Synchronize(int aidx) => Accelerators[aidx].Synchronize();
+
     public void SynchronizeAll()
     {
         for (int i = 0; i < Accelerators.Count; i++) Synchronize(i);
-    }
-    public void Flush(int aidx)
-    {
-        while (_deferred[aidx].TryDequeue(out var buffer)) Return(buffer);
-    }
-    public void FlushAll()
-    {
-        for (int i = 0; i < Accelerators.Count; i++) Flush(i);
     }
 
     public void Dispose()
@@ -90,8 +74,6 @@ public sealed partial class Compute : IDisposable
         foreach (var blas in _cublasHandles.Values) blas?.Dispose();
         CleanupCuBlas();
     }
-    
-    ~Compute() => Dispose();
     #endregion
     #region Accelerator Management
     public int RequestAccelerator(bool gpu = true)
@@ -122,36 +104,27 @@ public sealed partial class Compute : IDisposable
         int aidx = buffer.AcceleratorIndex();
         int size = (int)buffer.Length;
         
-        if (_pool[aidx].TryGetValue(size, out var stack)) stack.Push(buffer);
+        if (_pool[aidx].TryGetValue(size, out var stack))
+        {
+            if (stack.Contains(buffer)) throw new Exception("Buffer already returned.");
+            stack.Push(buffer);
+        }
         else _pool[aidx][size] = new([buffer]);
     }
     public void Return(params MemoryBuffer1D<float, Stride1D.Dense>[] buffers)
     {
         foreach (var buffer in buffers) Return(buffer);
     } 
-    public void DeferReturn(MemoryBuffer1D<float, Stride1D.Dense> buffer) => _deferred[buffer.AcceleratorIndex()].Enqueue(buffer);
-    public void DeferReturn(params MemoryBuffer1D<float, Stride1D.Dense>[] buffers)
-    {
-        foreach (var buffer in buffers) DeferReturn(buffer);
-    }
     #endregion
     #region Gets, Makes, & Encases
     public MemoryBuffer1D<float, Stride1D.Dense> Get(int aidx, int size) => TryGetFrom(aidx, size);
-    public MemoryBuffer1D<float, Stride1D.Dense> GetTemp(int aidx, int size) => TryGetFrom(aidx, size).DeferReturn();
     public MemoryBuffer1D<float, Stride1D.Dense>[] Get(int aidx, int count, int size)
     {
         var result = new MemoryBuffer1D<float, Stride1D.Dense>[count];
         for (int i = 0; i < count; i++) result[i] = Get(aidx, size);
         return result;
     }
-    public MemoryBuffer1D<float, Stride1D.Dense>[] GetTemps(int aidx, int count, int size)
-    {
-        var result = new MemoryBuffer1D<float, Stride1D.Dense>[count];
-        for (int i = 0; i < count; i++) result[i] = GetTemp(aidx, size);
-        return result;
-    }
     public MemoryBuffer1D<float, Stride1D.Dense> GetLike(MemoryBuffer1D<float, Stride1D.Dense> a) => Get(a.AcceleratorIndex(), (int)a.Length);
-    public MemoryBuffer1D<float, Stride1D.Dense> GetTempLike(MemoryBuffer1D<float, Stride1D.Dense> a) => GetTemp(a.AcceleratorIndex(), (int)a.Length);
 
     public MemoryBuffer1D<float, Stride1D.Dense> Make(int aidx, float[] values)
     {
@@ -159,17 +132,9 @@ public sealed partial class Compute : IDisposable
         result.CopyFromCPU(values);
         return result;
     }
-    public MemoryBuffer1D<float, Stride1D.Dense> MakeTemp(int aidx, float[] values)
-    {
-        var result = GetTemp(aidx, values.Length);
-        result.CopyFromCPU(values);
-        return result;
-    }
     public MemoryBuffer1D<float, Stride1D.Dense> Make(int aidx, int size, float value) => Make(aidx, Enumerable.Repeat(value, size).ToArray());
-    public MemoryBuffer1D<float, Stride1D.Dense> MakeTemp(int aidx, int size, float value) => MakeTemp(aidx, Enumerable.Repeat(value, size).ToArray());
     
     public Value<T> CreateLike<T>(Value<T> a) where T : notnull => a.Create(Get(a.AcceleratorIndex, a.TotalSize), a.Shape);
-    public Value<T> CreateTempLike<T>(Value<T> a) where T : notnull => a.Create(GetTemp(a.AcceleratorIndex, a.TotalSize), a.Shape);
 
     public Value<T> Encase<T>(Value<T> alike, Action<MemoryBuffer1D<float, Stride1D.Dense>> compute) where T : notnull
     {
@@ -383,7 +348,7 @@ public sealed partial class Compute : IDisposable
             buffer = stack.TryPop(out var result) ? result : Allocate(aidx, size);
         else buffer = Allocate(aidx, size);
 
-        Call(FillKernels, buffer, 0);
+        Call(aidx, FillKernels, buffer.IntExtent, buffer, 0);
         return buffer;
     }
     #endregion

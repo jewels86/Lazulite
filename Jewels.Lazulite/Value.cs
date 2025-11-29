@@ -52,14 +52,7 @@ public abstract class Value<T>(MemoryBuffer1D<float, Stride1D.Dense> data, int[]
     public void Dispose()
     {
         if (WasDisposed || !Disposable) return;
-        _compute.DeferReturn(Data);
-        WasDisposed = true;
-    }
-
-    public void FinalDispose()
-    {
-        if (WasDisposed) return;
-        _compute.DeferReturn(Data);
+        _compute.Return(Data);
         WasDisposed = true;
     }
 
@@ -79,8 +72,6 @@ public abstract class Value<T>(MemoryBuffer1D<float, Stride1D.Dense> data, int[]
     IValue IValue.CreateAlike(MemoryBuffer1D<float, Stride1D.Dense> buffer) => CreateAlike(buffer);
     IValue IValue.Create(MemoryBuffer1D<float, Stride1D.Dense> buffer, int[] shape) => Create(buffer, shape);
     void IValue.UpdateWith(IValue other) => UpdateWith((Value<T>)other);
-    
-    ~Value() => FinalDispose();
 }
 
 public interface IValueProxy

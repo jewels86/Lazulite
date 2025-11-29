@@ -23,8 +23,9 @@ public static class SimpleTests
         sw.Start();
         for (int i = 0; i < n; i++)
         {
-            var buffer = _compute.GetTemp(_aidx, size);
+            var buffer = _compute.Get(_aidx, size);
             _compute.Call(_compute.FillKernels, buffer.View, 1);
+            _compute.Return(buffer);
         }
         sw.Stop();
         _compute.Synchronize(_aidx);
@@ -33,8 +34,9 @@ public static class SimpleTests
         sw.Restart();
         for (int i = 0; i < n; i++)
         {
-            var buffer = _compute.GetTemp(_aidx, size);
+            var buffer = _compute.Get(_aidx, size);
             _compute.Call(_compute.FillKernels, buffer.View, 1);
+            _compute.Return(buffer);
         }
         sw.Stop();
         Console.WriteLine($"Filled {n} vectors of size {size} in {sw.ElapsedMilliseconds} (pre-allocations - {n * size} elements) where allocations are done in-loop.");
@@ -135,10 +137,10 @@ public static class SimpleTests
             (forces[i * 3], forces[i * 3 + 1], forces[i * 3 + 2]) = (0, 0, 0);
         }
 
-        MemoryBuffer1D<float, Stride1D.Dense> positionsBuffer = _compute.GetTemp(_aidx, n * 3);
-        MemoryBuffer1D<float, Stride1D.Dense> velocitiesBuffer = _compute.GetTemp(_aidx, n * 3);
-        MemoryBuffer1D<float, Stride1D.Dense> massesBuffer = _compute.GetTemp(_aidx, n);
-        MemoryBuffer1D<float, Stride1D.Dense> forcesBuffer = _compute.GetTemp(_aidx, n * 3);
+        MemoryBuffer1D<float, Stride1D.Dense> positionsBuffer = _compute.Get(_aidx, n * 3);
+        MemoryBuffer1D<float, Stride1D.Dense> velocitiesBuffer = _compute.Get(_aidx, n * 3);
+        MemoryBuffer1D<float, Stride1D.Dense> massesBuffer = _compute.Get(_aidx, n);
+        MemoryBuffer1D<float, Stride1D.Dense> forcesBuffer = _compute.Get(_aidx, n * 3);
         positionsBuffer.CopyFromCPU(positions);
         velocitiesBuffer.CopyFromCPU(velocities);
         massesBuffer.CopyFromCPU(masses);
@@ -200,6 +202,8 @@ public static class SimpleTests
         _compute.Synchronize(_aidx);
         sw.Stop();
         
+        _compute.Return(positionsBuffer, velocitiesBuffer, massesBuffer, forcesBuffer);
+        
         _compute.ReleaseAccelerator(_aidx);
         
         Console.WriteLine($"Total timesteps: {finalT / dt}");
@@ -234,14 +238,14 @@ public static class SimpleTests
         sw.Start();
         foreach (var (a, b) in workQueue)
         {
-            var aBuffer = _compute.GetTemp(aidx, mk);
-            var bBuffer = _compute.GetTemp(aidx, kn);
+            var aBuffer = _compute.Get(aidx, mk);
+            var bBuffer = _compute.Get(aidx, kn);
             var resultBuffer = _compute.Get(aidx, mn);
             aBuffer.CopyFromCPU(a);
             bBuffer.CopyFromCPU(b);
             _compute.MatrixMultiply(aBuffer, bBuffer, resultBuffer, m, k, n, !cublas);
             results.Add(resultBuffer);
-            _compute.Flush(aidx);
+            _compute.Return(aBuffer, bBuffer);
         }
         _compute.Synchronize(aidx);
         sw.Stop();
@@ -271,8 +275,8 @@ public static class SimpleTests
             {
                 while (workQueue.TryDequeue(out var tuple))
                 {
-                    var aBuffer = _compute.GetTemp(aidx_, mk);
-                    var bBuffer = _compute.GetTemp(aidx_, kn);
+                    var aBuffer = _compute.Get(aidx_, mk);
+                    var bBuffer = _compute.Get(aidx_, kn);
                     var resultBuffer = _compute.Get(aidx_, mn);
         
                     aBuffer.CopyFromCPU(tuple.a);
@@ -280,7 +284,7 @@ public static class SimpleTests
                     _compute.MatrixMultiply(aBuffer, bBuffer, resultBuffer, m, k, n, !cublas);
         
                     results.Add(resultBuffer);
-                    _compute.Flush(aidx_);
+                    _compute.Return(aBuffer, bBuffer);
                 }
                 _compute.Synchronize(aidx_);
                 Console.WriteLine($"{aidx_} finished processing!");
@@ -341,11 +345,11 @@ public static class SimpleTests
         sw.Start();
         for (int i = 0; i < n; i++)
         {
-            var bufferA = _compute.GetTemp(_aidx, size).Set(RandomVector(size));
-            var bufferB = _compute.GetTemp(_aidx, size).Set(RandomVector(size));
+            var bufferA = _compute.Get(_aidx, size).Set(RandomVector(size));
+            var bufferB = _compute.Get(_aidx, size).Set(RandomVector(size));
             
             _compute.Call(kernels, bufferA, bufferB, result);
-            _compute.Flush(_aidx);
+            _compute.Return(bufferA, bufferB);
         }
         _compute.Synchronize(_aidx);
         sw.Stop();

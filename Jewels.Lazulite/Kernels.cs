@@ -241,7 +241,7 @@ public partial class Compute
     {
         for (int i = 0; i < Accelerators.Count; i++)
         {
-            var dummy = GetTemp(i, 10);
+            using var dummy = Get(i, 10);
 
             Call(ZeroKernels, dummy);
             Call(FillKernels, dummy, 1.0f);
@@ -266,12 +266,13 @@ public partial class Compute
     {
         for (int i = 0; i < Accelerators.Count; i++)
         {
-            var dummy = GetTemp(i, 10);
+            using var dummy = Get(i, 10);
 
             Call(ElementwiseScalarMaxKernels, dummy, dummy, dummy);
             Call(ElementwiseFloatPowerKernels, dummy, dummy, 1.0f);
             Call(ElementwiseFloatMultiplyKernels, dummy, dummy, 1.0f);
             Call(ElementwiseFloatMaxKernels, dummy, dummy, 1.0f);
+            Synchronize(i);
         }
     }
 
@@ -279,7 +280,7 @@ public partial class Compute
     {
         for (int i = 0; i < Accelerators.Count; i++)
         {
-            var dummy = GetTemp(i, 10);
+            using var dummy = Get(i, 10);
 
             Call(ElementwiseModuloKernels, dummy, dummy, dummy);
             Call(ElementwisePowerKernels, dummy, dummy, dummy);
@@ -290,6 +291,7 @@ public partial class Compute
             Call(ElementwiseAbsKernels, dummy, dummy);
             Call(ElementwiseTanhKernels, dummy, dummy);
             Call(ElementwiseNaturalLogKernels, dummy, dummy);
+            Synchronize(i);
         }
     }
     #endregion

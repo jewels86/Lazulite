@@ -80,7 +80,7 @@ public static class Benchmarks
         
         Console.WriteLine($"Creating {totalBatches} matrices of size {m}x{k} and {k}x{n} ({totalBatches * m * k + totalBatches * k * n:E2} elements total).");
         MatrixValue[,] matrices = new MatrixValue[totalBatches, 2];
-        var results = compute.GetTemps(aidx, totalBatches, m * n);
+        var results = compute.Get(aidx, totalBatches, m * n);
         for (int i = 0; i < totalBatches; i++) matrices[i, 0] = new(RandomMatrix(m, k), aidx);
         for (int i = 0; i < totalBatches; i++) matrices[i, 1] = new(RandomMatrix(k, n), aidx);
         
@@ -96,6 +96,7 @@ public static class Benchmarks
         
         compute.ReleaseAccelerator(aidx);
         foreach (var matrix in matrices) matrix.Dispose();
+        foreach (var result in results) result.Dispose();
     }
     #endregion
 

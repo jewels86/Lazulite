@@ -14,12 +14,6 @@ public static class MemoryBufferExtensions
         buffer.CopyFromCPU(value);
         return buffer;
     }
-
-    public static MemoryBuffer1D<float, Stride1D.Dense> DeferReturn(this MemoryBuffer1D<float, Stride1D.Dense> buffer)
-    {
-        Compute.Instance.DeferReturn(buffer);
-        return buffer;
-    }
 }
 
 public static class ArrayViewExtensions
