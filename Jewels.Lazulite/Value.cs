@@ -21,6 +21,7 @@ public interface IValue : IDisposable
     public IValue Zeros();
     public IValue CreateAlike(MemoryBuffer1D<float, Stride1D.Dense> buffer);
     public IValue Create(MemoryBuffer1D<float, Stride1D.Dense> buffer, int[] shape);
+    public IValueProxy ToProxy();
     public void UpdateWith(IValue other);
 }
 
@@ -71,6 +72,7 @@ public abstract class Value<T>(MemoryBuffer1D<float, Stride1D.Dense> data, int[]
     IValue IValue.Zeros() => Zeros();
     IValue IValue.CreateAlike(MemoryBuffer1D<float, Stride1D.Dense> buffer) => CreateAlike(buffer);
     IValue IValue.Create(MemoryBuffer1D<float, Stride1D.Dense> buffer, int[] shape) => Create(buffer, shape);
+    IValueProxy IValue.ToProxy() => ToProxy();
     void IValue.UpdateWith(IValue other) => UpdateWith((Value<T>)other);
 }
 
