@@ -22,8 +22,8 @@ public static class MatrixKernels
         float sum = 0;
         for (int i = 0; i < k; i++)
         {
-            int aIdx = transposeA == 1 ? (i * m + row) : (row * k + i);
-            int bIdx = transposeB == 1 ? (col * k + i) : (i * n + col);
+            int aIdx = transposeA == 1 ? (i * k + row) : (row * k + i);
+            int bIdx = transposeB == 1 ? (col * n + i) : (i * n + col);
             sum += a[aIdx] * b[bIdx];
         }
     

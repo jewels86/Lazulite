@@ -25,8 +25,8 @@ public partial class Compute
                 transposeB ? CuBlasOperation.Transpose : CuBlasOperation.NonTranspose,
                 m, n, k,
                 alpha,
-                a.View.BaseView, transposeA ? m : k,
-                b.View.BaseView, transposeB ? k : n,
+                a.View.BaseView, k,
+                b.View.BaseView, n,
                 beta,
                 result.View.BaseView, n);
     }
