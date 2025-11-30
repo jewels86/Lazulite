@@ -21,12 +21,12 @@ public partial class Compute
             Call(aidx, MatrixMultiplyKernels, result.IntExtent, a.View, b.View, result.View, m, k, n, alpha, beta, transposeA ? 1 : 0, transposeB ? 1 : 0);
         else
             blas.Gemm(
-                transposeA ? CuBlasOperation.Transpose : CuBlasOperation.NonTranspose,
-                transposeB ? CuBlasOperation.Transpose : CuBlasOperation.NonTranspose,
-                m, n, k,
+                transposeB ? CuBlasOperation.NonTranspose : CuBlasOperation.Transpose,
+                transposeA ? CuBlasOperation.NonTranspose : CuBlasOperation.Transpose,
+                n, m, k,
                 alpha,
-                a.View.BaseView, k,
                 b.View.BaseView, n,
+                a.View.BaseView, k,
                 beta,
                 result.View.BaseView, n);
     }
