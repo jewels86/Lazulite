@@ -77,9 +77,9 @@ public partial class Compute
             Call(aidx, OuterProductKernels, result.IntExtent, x.View, y.View, result.View, m, n);
         else
             blas.Ger(
-                m, n, alpha,
-                x.View.AsGeneral(),
+                n, m, alpha,
                 y.View.AsGeneral(),
+                x.View.AsGeneral(),
                 result.View.BaseView, n);
     }
     public MemoryBuffer1D<float, Stride1D.Dense> OuterProduct(
