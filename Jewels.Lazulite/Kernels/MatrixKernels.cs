@@ -59,4 +59,18 @@ public static class MatrixKernels
             result[row] = alpha * sum + beta * result[row];
         }
     }
+
+    public static void TransposeKernel(
+        Index1D index,
+        ArrayView1D<float, Stride1D.Dense> matrix,
+        ArrayView1D<float, Stride1D.Dense> result,
+        int m, int n) // matrix is m x n, result is n x m 
+    {
+        if (index >= m * n) return;
+    
+        int row = index / n;
+        int col = index % n;
+    
+        result[col * m + row] = matrix[row * n + col];
+    }
 }

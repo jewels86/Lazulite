@@ -23,7 +23,7 @@ class Program
         //SimpleTests.BigMatMulTest(true);
         SimpleTests.PoolTest(true);
         //ValueTests.MathTest(true);
-        //ValueTests.OpsTest(true);
+        ValueTests.OpsTest(true);
         //ValueTests.MemoryTest(true);
         
         Benchmarks.SquareBenchmark1(true);

@@ -1,4 +1,5 @@
-﻿using ILGPU;
+﻿using System.Data;
+using ILGPU;
 using ILGPU.Runtime;
 using ILGPU.Runtime.Cuda;
 
@@ -17,7 +18,7 @@ public partial class Compute
         int aidx = a.AcceleratorIndex();
         var blas = GetCuBlas(aidx);
         if (blas is null || noCuBlas || result.Length < 1e3)
-            Call(aidx, MatrixMultiplyKernels, a.IntExtent, a.View, b.View, result.View, m, k, n, alpha, beta, transposeA ? 1 : 0, transposeB ? 1 : 0);
+            Call(aidx, MatrixMultiplyKernels, result.IntExtent, a.View, b.View, result.View, m, k, n, alpha, beta, transposeA ? 1 : 0, transposeB ? 1 : 0);
         else
             blas.Gemm(
                 transposeA ? CuBlasOperation.Transpose : CuBlasOperation.NonTranspose,
@@ -39,10 +40,9 @@ public partial class Compute
     {
         var aidx = matrix.AcceleratorIndex();
         var blas = GetCuBlas(aidx);
-        int resultSize = transposeMatrix ? n : m;
 
         if (blas is null || noCuBlas || matrix.Length < 1e3)
-            Call(aidx, MatrixVectorMultiplyKernels, resultSize, matrix.View, vector.View, result.View, m, n, alpha, beta, transposeMatrix ? 1 : 0);
+            Call(aidx, MatrixVectorMultiplyKernels, result.IntExtent, matrix.View, vector.View, result.View, m, n, alpha, beta, transposeMatrix ? 1 : 0);
         else
             blas.Gemv(
             transposeMatrix ? CuBlasOperation.Transpose : CuBlasOperation.NonTranspose,
@@ -51,5 +51,10 @@ public partial class Compute
             vector.View.AsGeneral(), beta,
             result.View.AsGeneral());
     }
-    
+
+    public void Transpose(
+        MemoryBuffer1D<float, Stride1D.Dense> matrix,
+        MemoryBuffer1D<float, Stride1D.Dense> result,
+        int m, int n) =>
+        Call(TransposeKernels, matrix.View, result.View, m, n);
 }

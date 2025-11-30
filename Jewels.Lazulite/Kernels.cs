@@ -60,6 +60,7 @@ public partial class Compute
         ArrayView1D<float, Stride1D.Dense>, int, int, int, float, float, int, int>[] MatrixMultiplyKernels { get; private set; } = [];
     public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, 
         ArrayView1D<float, Stride1D.Dense>, int, int, float, float, int>[] MatrixVectorMultiplyKernels { get; private set; } = [];
+    public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, int, int>[] TransposeKernels { get; private set; } = [];
     #endregion
     #region Vector Kernels
     public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, 
@@ -122,6 +123,7 @@ public partial class Compute
             ArrayView1D<float, Stride1D.Dense>, int, int, int, float, float, int, int>[Accelerators.Count];
         MatrixVectorMultiplyKernels = new Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, 
             ArrayView1D<float, Stride1D.Dense>, int, int, float, float, int>[Accelerators.Count];
+        TransposeKernels = new Action<Index1D,ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, int, int>[Accelerators.Count];
         OuterProductKernels = new Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, 
             ArrayView1D<float, Stride1D.Dense>, int, int>[Accelerators.Count];
 
@@ -157,6 +159,8 @@ public partial class Compute
                 ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, int, int, int, float, float, int, int>(MatrixMultiplyKernel);
             MatrixVectorMultiplyKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
                 ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, int, int, float, float, int>(MatrixVectorMultiplyKernel);
+            TransposeKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
+                ArrayView1D<float, Stride1D.Dense>, int, int>(TransposeKernel);
 
             OuterProductKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
                 ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, int, int>(OuterProductKernel);
