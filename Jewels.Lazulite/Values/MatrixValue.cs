@@ -22,15 +22,6 @@ public class MatrixValue : Value<float[,]>
     public static MatrixValue operator /(MatrixValue a, MatrixValue b) => Compute.Instance.BinaryCall(Compute.Instance.ElementwiseDivideKernels, a, b).AsMatrix();
     public static MatrixValue operator -(MatrixValue a) => Compute.Instance.UnaryCall(Compute.Instance.ElementwiseNegateKernels, a).AsMatrix();
     public static MatrixValue operator %(MatrixValue a, MatrixValue b) => Compute.Instance.BinaryCall(Compute.Instance.ElementwiseModuloKernels, a, b).AsMatrix();
-
-    public MatrixValue MatrixMultiply(MatrixValue other)
-    {
-        // this should be m * k, they should be k * n
-        if (Shape[1] != other.Shape[0]) throw new InvalidOperationException("Matrix dimensions are not compatible.");
-        var result = Compute.Instance.Get(AcceleratorIndex, Shape[0] * other.Shape[1]);
-        Compute.Instance.MatrixMultiply(this, other, result, Shape[0], Shape[1], other.Shape[1]);
-        return new(result, [Shape[0], other.Shape[1]]);
-    }
 }
 
 public class MatrixProxy(Value<float[,]> value) : ValueProxy<float[,]>(value)

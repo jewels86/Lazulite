@@ -57,7 +57,7 @@ public partial class Compute
     #endregion
     #region Matrix Kernels
     public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, 
-        ArrayView1D<float, Stride1D.Dense>, int, int, int, float, float, int, int>[] MatrixMultiplyKernels { get; private set; } = [];
+        ArrayView1D<float, Stride1D.Dense>, int, int, int, int, float, float, int, int>[] MatrixMultiplyKernels { get; private set; } = [];
     public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, 
         ArrayView1D<float, Stride1D.Dense>, int, int, float, float, int>[] MatrixVectorMultiplyKernels { get; private set; } = [];
     public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, int, int>[] TransposeKernels { get; private set; } = [];
@@ -120,7 +120,7 @@ public partial class Compute
             ArrayView1D<float, Stride1D.Dense>>[Accelerators.Count];
 
         MatrixMultiplyKernels = new Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, 
-            ArrayView1D<float, Stride1D.Dense>, int, int, int, float, float, int, int>[Accelerators.Count];
+            ArrayView1D<float, Stride1D.Dense>, int, int, int, int, float, float, int, int>[Accelerators.Count];
         MatrixVectorMultiplyKernels = new Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, 
             ArrayView1D<float, Stride1D.Dense>, int, int, float, float, int>[Accelerators.Count];
         TransposeKernels = new Action<Index1D,ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, int, int>[Accelerators.Count];
@@ -156,7 +156,7 @@ public partial class Compute
                 ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>(ElementwiseScalarDivideKernel);
 
             MatrixMultiplyKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
-                ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, int, int, int, float, float, int, int>(MatrixMultiplyKernel);
+                ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, int, int, int, int, float, float, int, int>(MatrixMultiplyKernel);
             MatrixVectorMultiplyKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
                 ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, int, int, float, float, int>(MatrixVectorMultiplyKernel);
             TransposeKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,

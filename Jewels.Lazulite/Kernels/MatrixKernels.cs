@@ -10,21 +10,25 @@ public static class MatrixKernels
         ArrayView1D<float, Stride1D.Dense> a,
         ArrayView1D<float, Stride1D.Dense> b,
         ArrayView1D<float, Stride1D.Dense> result,
-        int m, int k, int n,
+        int a0, int a1, int b0, int b1,
         float alpha, float beta,
         int transposeA, int transposeB)
     {
-        int row = index / n;
-        int col = index % n;
+        int m = transposeA == 1 ? a1 : a0;
+        int k = transposeA == 1 ? a0 : a1;
+        int n = transposeB == 1 ? b0 : b1;
+        var (row, col) = (index / n, index % n);
+
+        if (row >= m) return;
 
         float sum = 0;
         for (int i = 0; i < k; i++)
         {
-            int aIdx = transposeA == 1 ? (i * m + row) : (row * k + i);
-            int bIdx = transposeB == 1 ? (col * k + i) : (i * n + col);
+            int aIdx = transposeA == 1 ? (i * a0 + row) : (row * a1 + i);
+            int bIdx = transposeB == 1 ? (col * b1 + i) : (i * b1 + col);
             sum += a[aIdx] * b[bIdx];
         }
-    
+
         int resultIdx = row * n + col;
         result[resultIdx] = alpha * sum + beta * result[resultIdx];
     }

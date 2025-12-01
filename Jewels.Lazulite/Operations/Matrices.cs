@@ -11,25 +11,28 @@ public partial class Compute
         MemoryBuffer1D<float, Stride1D.Dense> a,
         MemoryBuffer1D<float, Stride1D.Dense> b,
         MemoryBuffer1D<float, Stride1D.Dense> result,
-        int m, int k, int n, bool noCuBlas = false,
+        int a0, int a1, int b0, int b1,
         float alpha = 1.0f, float beta = 0.0f,
-        bool transposeA = false, bool transposeB = false)
+        bool transposeA = false, bool transposeB = false,
+        bool noCuBlas = false)
     {
         int aidx = a.AcceleratorIndex();
         var blas = GetCuBlas(aidx);
         if (blas is null || noCuBlas || result.Length < 1e3)
-            Call(aidx, MatrixMultiplyKernels, result.IntExtent, a.View, b.View, result.View, m, k, n, alpha, beta, transposeA ? 1 : 0, transposeB ? 1 : 0);
+            Call(aidx, MatrixMultiplyKernels, result.IntExtent, a.View, b.View, result.View, a0, a1, b0, b1, alpha, beta, transposeA ? 1 : 0, transposeB ? 1 : 0);
         else
         {
-            int lda = transposeA ? m : k;
-            int ldb = transposeB ? k : n;
+            int m = transposeA ? a1 : a0;
+            int k = transposeA ? a0 : a1;
+            int n = transposeB ? b1 : b0;
+            
             blas.Gemm(
                 transposeB ? CuBlasOperation.NonTranspose : CuBlasOperation.Transpose,
                 transposeA ? CuBlasOperation.NonTranspose : CuBlasOperation.Transpose,
                 n, m, k,
                 alpha,
-                b.View.BaseView, ldb,
-                a.View.BaseView, lda,
+                b.View.BaseView, b1,
+                a.View.BaseView, a1,
                 beta,
                 result.View.BaseView, n);}
     }

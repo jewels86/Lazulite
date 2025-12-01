@@ -88,7 +88,7 @@ public static class Benchmarks
         Console.WriteLine($"Matrix multiplying {totalBatches} batches of matrices...");
         
         Stopwatch sw = Stopwatch.StartNew();
-        for (int i = 0; i < totalBatches; i++) compute.MatrixMultiply(matrices[i, 0], matrices[i, 1], results[i], m, k, n);
+        for (int i = 0; i < totalBatches; i++) compute.MatrixMultiply(matrices[i, 0], matrices[i, 1], results[i], m, k, k, n);
         compute.Synchronize(aidx);
         sw.Stop();
         
