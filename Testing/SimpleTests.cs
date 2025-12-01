@@ -101,7 +101,7 @@ public static class SimpleTests
         
         Console.WriteLine(f);
         
-        var addMultSub = _compute.Load((i, a_, b_, c_, r) => r[i] = ((a_[i] + b_[i]) * c_[i]) - a_[i]);
+        var addMultSub = _compute.Load((i, a_, b_, c_, r) => r[i] = (a_[i] + b_[i]) * c_[i] - a_[i]);
         _compute.Call(_aidx, addMultSub, a.Data.IntExtent, a.Data.View, b.Data.View, c.Data.View, f.Data.View);
         // this is even better- we only allocate 1 value, f, and we can fuse the operations into one kernel call
         Console.WriteLine(f);
@@ -208,8 +208,8 @@ public static class SimpleTests
         
         Console.WriteLine($"Total timesteps: {finalT / dt}");
         Console.WriteLine($"Total bodies: {n}");
-        Console.WriteLine($"Bodies processed per ms: {(finalT / dt) * n / sw.ElapsedMilliseconds:F2}");
-        Console.WriteLine($"Elapsed time: {sw.ElapsedMilliseconds} ms ({sw.ElapsedMilliseconds / (finalT/dt):F2} ms/timestep, or {(finalT/dt) / sw.ElapsedMilliseconds:F2} timesteps/ms)");
+        Console.WriteLine($"Bodies processed per ms: {finalT / dt * n / sw.ElapsedMilliseconds:F2}");
+        Console.WriteLine($"Elapsed time: {sw.ElapsedMilliseconds} ms ({sw.ElapsedMilliseconds / (finalT/dt):F2} ms/timestep, or {finalT/dt / sw.ElapsedMilliseconds:F2} timesteps/ms)");
     }
     
     public static void ParallelProcessingTest(bool gpu, bool cublas = true)

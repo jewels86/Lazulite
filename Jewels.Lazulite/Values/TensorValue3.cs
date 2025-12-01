@@ -48,7 +48,7 @@ public class TensorProxy3(TensorValue3 value) : ValueProxy<float[,,]>(value)
     }
     
     public static int IndexOf(int x, int y, int z, int d1, int d2) 
-        => x * (d1 * d2) + y * d2 + z;
+        => x * d1 * d2 + y * d2 + z;
     public static (int x, int y, int z) FromIndex(int index, int d1, int d2) 
-        => (index / (d1 * d2), (index / d2) % d1, index % d2);
+        => (index / (d1 * d2), index / d2 % d1, index % d2);
 }
