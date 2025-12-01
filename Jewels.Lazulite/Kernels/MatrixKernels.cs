@@ -12,18 +12,16 @@ public static class MatrixKernels
         ArrayView1D<float, Stride1D.Dense> result,
         int m, int k, int n,
         float alpha, float beta,
-        int transposeA, int transposeB) // a is m x k, b is k x n, result is m x n
+        int transposeA, int transposeB)
     {
-        if (index >= m * n) return;
-
         int row = index / n;
         int col = index % n;
 
         float sum = 0;
         for (int i = 0; i < k; i++)
         {
-            int aIdx = transposeA == 1 ? (i * k + row) : (row * k + i);
-            int bIdx = transposeB == 1 ? (col * n + i) : (i * n + col);
+            int aIdx = transposeA == 1 ? (i * m + row) : (row * k + i);
+            int bIdx = transposeB == 1 ? (col * k + i) : (i * n + col);
             sum += a[aIdx] * b[bIdx];
         }
     

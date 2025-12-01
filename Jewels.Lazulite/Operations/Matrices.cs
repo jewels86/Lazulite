@@ -20,15 +20,18 @@ public partial class Compute
         if (blas is null || noCuBlas || result.Length < 1e3)
             Call(aidx, MatrixMultiplyKernels, result.IntExtent, a.View, b.View, result.View, m, k, n, alpha, beta, transposeA ? 1 : 0, transposeB ? 1 : 0);
         else
+        {
+            int lda = transposeA ? m : k;
+            int ldb = transposeB ? k : n;
             blas.Gemm(
                 transposeB ? CuBlasOperation.NonTranspose : CuBlasOperation.Transpose,
                 transposeA ? CuBlasOperation.NonTranspose : CuBlasOperation.Transpose,
                 n, m, k,
                 alpha,
-                b.View.BaseView, n,
-                a.View.BaseView, k,
+                b.View.BaseView, ldb,
+                a.View.BaseView, lda,
                 beta,
-                result.View.BaseView, n);
+                result.View.BaseView, n);}
     }
 
     public void MatrixVectorMultiply(
@@ -46,7 +49,7 @@ public partial class Compute
         else
             blas.Gemv(
             transposeMatrix ? CuBlasOperation.Transpose : CuBlasOperation.NonTranspose,
-            m, n, alpha,
+            n, m, alpha,
             matrix.View.BaseView, n,
             vector.View.AsGeneral(), beta,
             result.View.AsGeneral());
