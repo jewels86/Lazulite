@@ -103,12 +103,8 @@ public sealed partial class Compute : IDisposable
     {
         int aidx = buffer.AcceleratorIndex();
         int size = (int)buffer.Length;
-        
-        if (_pool[aidx].TryGetValue(size, out var stack))
-        {
-            if (stack.Contains(buffer)) throw new Exception("Buffer already returned.");
-            stack.Push(buffer);
-        }
+
+        if (_pool[aidx].TryGetValue(size, out var stack)) stack.Push(buffer);
         else _pool[aidx][size] = new([buffer]);
     }
     public void Return(params MemoryBuffer1D<float, Stride1D.Dense>[] buffers)
@@ -133,8 +129,6 @@ public sealed partial class Compute : IDisposable
         return result;
     }
     public MemoryBuffer1D<float, Stride1D.Dense> Make(int aidx, int size, float value) => Make(aidx, Enumerable.Repeat(value, size).ToArray());
-    
-    public Value<T> CreateLike<T>(Value<T> a) where T : notnull => a.Create(Get(a.AcceleratorIndex, a.TotalSize), a.Shape);
 
     public Value<T> Encase<T>(Value<T> alike, Action<MemoryBuffer1D<float, Stride1D.Dense>> compute) where T : notnull
     {
@@ -314,6 +308,80 @@ public sealed partial class Compute : IDisposable
         where T4 : struct
         where T5 : struct
         where T6 : struct =>
+        Accelerators.Values.Select(a => a.LoadAutoGroupedStreamKernel(kernel)).ToArray();
+    public Action<Index1D, T1, T2, T3, T4, T5, T6, T7>[] Load<T1, T2, T3, T4, T5, T6, T7>(Action<Index1D, T1, T2, T3, T4, T5, T6, T7> kernel)
+        where T1 : struct
+        where T2 : struct
+        where T3 : struct
+        where T4 : struct
+        where T5 : struct
+        where T6 : struct
+        where T7 : struct =>
+        Accelerators.Values.Select(a => a.LoadAutoGroupedStreamKernel(kernel)).ToArray();
+    
+    public Action<Index1D, T1, T2, T3, T4, T5, T6, T7, T8>[] Load<T1, T2, T3, T4, T5, T6, T7, T8>(Action<Index1D, T1, T2, T3, T4, T5, T6, T7, T8> kernel)
+        where T1 : struct
+        where T2 : struct
+        where T3 : struct
+        where T4 : struct
+        where T5 : struct
+        where T6 : struct
+        where T7 : struct 
+        where T8 : struct =>
+        Accelerators.Values.Select(a => a.LoadAutoGroupedStreamKernel(kernel)).ToArray();
+    
+    public Action<Index1D, T1, T2, T3, T4, T5, T6, T7, T8, T9>[] Load<T1, T2, T3, T4, T5, T6, T7, T8, T9>(Action<Index1D, T1, T2, T3, T4, T5, T6, T7, T8, T9> kernel)
+        where T1 : struct
+        where T2 : struct
+        where T3 : struct
+        where T4 : struct
+        where T5 : struct
+        where T6 : struct
+        where T7 : struct 
+        where T8 : struct
+        where T9 : struct =>
+        Accelerators.Values.Select(a => a.LoadAutoGroupedStreamKernel(kernel)).ToArray();
+    
+    public Action<Index1D, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>[] Load<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>(Action<Index1D, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> kernel)
+        where T1 : struct
+        where T2 : struct
+        where T3 : struct
+        where T4 : struct
+        where T5 : struct
+        where T6 : struct
+        where T7 : struct 
+        where T8 : struct
+        where T9 : struct
+        where T10 : struct =>
+        Accelerators.Values.Select(a => a.LoadAutoGroupedStreamKernel(kernel)).ToArray();
+    
+    public Action<Index1D, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>[] Load<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11>(Action<Index1D, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11> kernel)
+        where T1 : struct
+        where T2 : struct
+        where T3 : struct
+        where T4 : struct
+        where T5 : struct
+        where T6 : struct
+        where T7 : struct 
+        where T8 : struct
+        where T9 : struct
+        where T10 : struct
+        where T11 : struct =>
+        Accelerators.Values.Select(a => a.LoadAutoGroupedStreamKernel(kernel)).ToArray();
+    
+    public Action<Index1D, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>[] Load<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12>(Action<Index1D, T1, T2, T3, T4, T5, T6, T7, T8, T9, T10, T11, T12> kernel)
+        where T1 : struct
+        where T2 : struct
+        where T3 : struct
+        where T4 : struct
+        where T5 : struct
+        where T6 : struct
+        where T7 : struct 
+        where T8 : struct
+        where T9 : struct
+        where T10 : struct
+        where T11 : struct
+        where T12 : struct =>
         Accelerators.Values.Select(a => a.LoadAutoGroupedStreamKernel(kernel)).ToArray();
     
     public Action<Index1D, ArrayView1D<float, Stride1D.Dense>>[] Load(Action<Index1D, ArrayView1D<float, Stride1D.Dense>> kernel) => 
