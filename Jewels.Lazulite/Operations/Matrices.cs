@@ -7,7 +7,7 @@ namespace Jewels.Lazulite;
 public partial class Compute
 {
     
-    public void MatrixMultiply(
+    public static void MatrixMultiply(
         ArrayView1D<float, Stride1D.Dense> result,
         ArrayView1D<float, Stride1D.Dense> a,
         ArrayView1D<float, Stride1D.Dense> b,
@@ -37,7 +37,7 @@ public partial class Compute
                 result.BaseView, n);}
     }
 
-    public void MatrixVectorMultiply(
+    public static void MatrixVectorMultiply(
         ArrayView1D<float, Stride1D.Dense> result,
         ArrayView1D<float, Stride1D.Dense> matrix,
         ArrayView1D<float, Stride1D.Dense> vector,
@@ -58,7 +58,7 @@ public partial class Compute
             result.AsGeneral());
     }
 
-    public void Transpose(
+    public static void Transpose(
         ArrayView1D<float, Stride1D.Dense> result,
         ArrayView1D<float, Stride1D.Dense> matrix,
         int m, int n) =>

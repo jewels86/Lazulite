@@ -7,7 +7,7 @@ namespace Jewels.Lazulite;
 
 public partial class Compute
 {
-    public void Sum(ArrayView1D<float, Stride1D.Dense> result, ArrayView1D<float, Stride1D.Dense> a)
+    public static void Sum(ArrayView1D<float, Stride1D.Dense> result, ArrayView1D<float, Stride1D.Dense> a)
     {
         var aidx = a.AcceleratorIndex();
         Accelerators[aidx].Reduce<float, AddFloat>(
@@ -16,7 +16,7 @@ public partial class Compute
     }
     
 
-    public void Dot(
+    public static void Dot(
         MemoryBuffer1D<float, Stride1D.Dense> result,
         MemoryBuffer1D<float, Stride1D.Dense> a, 
         MemoryBuffer1D<float, Stride1D.Dense> b, 
@@ -35,13 +35,13 @@ public partial class Compute
             blas.Dot(a.View.AsGeneral(), b.View.AsGeneral(), result.View.BaseView);
     }
 
-    public MemoryBuffer1D<float, Stride1D.Dense> Dot(
+    public static MemoryBuffer1D<float, Stride1D.Dense> Dot(
         MemoryBuffer1D<float, Stride1D.Dense> a,
         MemoryBuffer1D<float, Stride1D.Dense> b,
         bool noCuBlas = false) => 
         Encase(a.AcceleratorIndex(), 1, r => Dot(r, a, b, noCuBlas));
 
-    public void Axpy(
+    public static void Axpy(
         float alpha,
         ArrayView1D<float, Stride1D.Dense> x,
         ArrayView1D<float, Stride1D.Dense> y,
@@ -54,7 +54,7 @@ public partial class Compute
         else blas.Axpy(alpha, x.AsGeneral(), y.AsGeneral());
     }
 
-    public void Scale(
+    public static void Scale(
         float alpha,
         ArrayView1D<float, Stride1D.Dense> x,
         bool noCuBlas = false)
@@ -66,7 +66,7 @@ public partial class Compute
         else blas.Scal(alpha, x.AsGeneral());
     }
 
-    public void OuterProduct(
+    public static void OuterProduct(
         ArrayView1D<float, Stride1D.Dense> result,
         ArrayView1D<float, Stride1D.Dense> x,
         ArrayView1D<float, Stride1D.Dense> y,
@@ -85,13 +85,13 @@ public partial class Compute
                 y.AsGeneral(),
                 result.BaseView, m);
     }
-    public MemoryBuffer1D<float, Stride1D.Dense> OuterProduct(
+    public static MemoryBuffer1D<float, Stride1D.Dense> OuterProduct(
         MemoryBuffer1D<float, Stride1D.Dense> x,
         MemoryBuffer1D<float, Stride1D.Dense> y,
         int m, int n, float alpha = 1.0f, bool noCuBlas = false) => 
         Encase(x.AcceleratorIndex(), m * n, r => OuterProduct(r, x, y, m, n, alpha, noCuBlas));
 
-    public MemoryBuffer1D<float, Stride1D.Dense> Concat(
+    public static MemoryBuffer1D<float, Stride1D.Dense> Concat(
         MemoryBuffer1D<float, Stride1D.Dense> a,
         MemoryBuffer1D<float, Stride1D.Dense> b) =>
         Encase(a.AcceleratorIndex(), (int)(a.Length + b.Length), r => Call(ConcatKernels, r, a, b));

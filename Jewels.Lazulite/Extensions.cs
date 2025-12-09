@@ -5,9 +5,8 @@ namespace Jewels.Lazulite;
 
 public static class MemoryBufferExtensions
 {
-    public static int AcceleratorIndex(this MemoryBuffer1D<float, Stride1D.Dense> buffer) => Compute.Instance.GetAcceleratorIndex(buffer.Accelerator);
-    public static AcceleratorStream GetStream(this MemoryBuffer1D<float, Stride1D.Dense> buffer) => Compute.Instance.GetStream(buffer.Accelerator);
-    public static void Return(this MemoryBuffer1D<float, Stride1D.Dense> buffer) => Compute.Instance.Return(buffer);
+    public static int AcceleratorIndex(this MemoryBuffer1D<float, Stride1D.Dense> buffer) => Compute.GetAcceleratorIndex(buffer.Accelerator);
+    public static void Return(this MemoryBuffer1D<float, Stride1D.Dense> buffer) => Compute.Return(buffer);
 
     public static MemoryBuffer1D<float, Stride1D.Dense> Set(this MemoryBuffer1D<float, Stride1D.Dense> buffer, float[] value)
     {
@@ -18,7 +17,7 @@ public static class MemoryBufferExtensions
 
 public static class ArrayViewExtensions
 {
-    public static int AcceleratorIndex(this ArrayView1D<float, Stride1D.Dense> view) => Compute.Instance.GetAcceleratorIndex(view.GetAccelerator());
+    public static int AcceleratorIndex(this ArrayView1D<float, Stride1D.Dense> view) => Compute.GetAcceleratorIndex(view.GetAccelerator());
 }
 
 public static class ValueExtensions

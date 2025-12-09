@@ -6,7 +6,7 @@ namespace Jewels.Lazulite;
 
 public class ScalarValue : Value<float>
 {
-    public ScalarValue(float value, int aidx) : base(Compute.Instance.Get(aidx, 1), []) => FromHost(value);
+    public ScalarValue(float value, int aidx) : base(Compute.Get(aidx, 1), []) => FromHost(value);
     public ScalarValue(MemoryBuffer1D<float, Stride1D.Dense> buffer) : base(buffer, []) { }
     
     public override float Unroll(float[] rolled) => rolled[0];
@@ -14,11 +14,11 @@ public class ScalarValue : Value<float>
     public override ScalarValue Create(MemoryBuffer1D<float, Stride1D.Dense> buffer, int[] shape) => new(buffer);
     public override ScalarProxy ToProxy() => new(this);
     
-    public static ScalarValue operator +(ScalarValue a, ScalarValue b) => Compute.Instance.Add(a, b).AsScalar();
-    public static ScalarValue operator -(ScalarValue a, ScalarValue b) => Compute.Instance.Subtract(a, b).AsScalar();
-    public static ScalarValue operator *(ScalarValue a, ScalarValue b) => Compute.Instance.ElementwiseMultiply(a, b).AsScalar();
-    public static ScalarValue operator /(ScalarValue a, ScalarValue b) => Compute.Instance.Divide(a, b).AsScalar();
-    public static ScalarValue operator -(ScalarValue a) => Compute.Instance.Negate(a).AsScalar();
+    public static ScalarValue operator +(ScalarValue a, ScalarValue b) => Compute.Add(a, b).AsScalar();
+    public static ScalarValue operator -(ScalarValue a, ScalarValue b) => Compute.Subtract(a, b).AsScalar();
+    public static ScalarValue operator *(ScalarValue a, ScalarValue b) => Compute.ElementwiseMultiply(a, b).AsScalar();
+    public static ScalarValue operator /(ScalarValue a, ScalarValue b) => Compute.Divide(a, b).AsScalar();
+    public static ScalarValue operator -(ScalarValue a) => Compute.Negate(a).AsScalar();
 }
 
 public class ScalarProxy(ScalarValue value) : ValueProxy<float>(value)

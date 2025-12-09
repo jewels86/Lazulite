@@ -27,8 +27,7 @@ public interface IValue : IDisposable
 
 public abstract class Value<T>(MemoryBuffer1D<float, Stride1D.Dense> data, int[] shape) : IValue
     where T : notnull
-{ 
-    private readonly Compute _compute = Compute.Instance;
+{
 
     public MemoryBuffer1D<float, Stride1D.Dense> Data { get; } = data;
     public int[] Shape { get; } = shape;
@@ -41,7 +40,7 @@ public abstract class Value<T>(MemoryBuffer1D<float, Stride1D.Dense> data, int[]
     
     public T ToHost()
     {
-        _compute.Synchronize(AcceleratorIndex);
+        Compute.Synchronize(AcceleratorIndex);
         return Unroll(Data.View.GetAsArray1D());
     }
     public void FromHost(T value) => Data.CopyFromCPU(Roll(value));
@@ -53,11 +52,11 @@ public abstract class Value<T>(MemoryBuffer1D<float, Stride1D.Dense> data, int[]
     public void Dispose()
     {
         if (WasDisposed || !Disposable) return;
-        _compute.Return(Data);
+        Compute.Return(Data);
         WasDisposed = true;
     }
 
-    public Value<T> Zeros() => Create(_compute.GetLike(this), Shape);
+    public Value<T> Zeros() => Create(Compute.GetLike(this), Shape);
     public Value<T> CreateAlike(MemoryBuffer1D<float, Stride1D.Dense> buffer) => Create(buffer, Shape);
 
     public abstract T Unroll(float[] rolled);

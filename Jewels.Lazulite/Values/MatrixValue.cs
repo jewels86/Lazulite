@@ -6,7 +6,7 @@ namespace Jewels.Lazulite;
 public class MatrixValue : Value<float[,]>
 {
     public MatrixValue(float[,] value, int aidx) : base(
-        Compute.Instance.Get(aidx, value.GetLength(0) * value.GetLength(1)),
+        Compute.Get(aidx, value.GetLength(0) * value.GetLength(1)),
         [value.GetLength(0), value.GetLength(1)]) => FromHost(value);
     public MatrixValue(MemoryBuffer1D<float, Stride1D.Dense> buffer, int[] shape) : base(buffer, shape) { }
     
@@ -16,11 +16,11 @@ public class MatrixValue : Value<float[,]>
     public override MatrixValue Create(MemoryBuffer1D<float, Stride1D.Dense> buffer, int[] shape) => new(buffer, shape);
     public override MatrixProxy ToProxy() => new(this);
 
-    public static MatrixValue operator +(MatrixValue a, MatrixValue b) => Compute.Instance.Add(a, b).AsMatrix();
-    public static MatrixValue operator -(MatrixValue a, MatrixValue b) => Compute.Instance.Subtract(a, b).AsMatrix();
-    public static MatrixValue operator *(MatrixValue a, MatrixValue b) => Compute.Instance.ElementwiseMultiply(a, b).AsMatrix();
-    public static MatrixValue operator /(MatrixValue a, MatrixValue b) => Compute.Instance.Divide(a, b).AsMatrix();
-    public static MatrixValue operator -(MatrixValue a) => Compute.Instance.Negate(a).AsMatrix();
+    public static MatrixValue operator +(MatrixValue a, MatrixValue b) => Compute.Add(a, b).AsMatrix();
+    public static MatrixValue operator -(MatrixValue a, MatrixValue b) => Compute.Subtract(a, b).AsMatrix();
+    public static MatrixValue operator *(MatrixValue a, MatrixValue b) => Compute.ElementwiseMultiply(a, b).AsMatrix();
+    public static MatrixValue operator /(MatrixValue a, MatrixValue b) => Compute.Divide(a, b).AsMatrix();
+    public static MatrixValue operator -(MatrixValue a) => Compute.Negate(a).AsMatrix();
 }
 
 public class MatrixProxy(Value<float[,]> value) : ValueProxy<float[,]>(value)

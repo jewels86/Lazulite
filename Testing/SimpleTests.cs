@@ -8,14 +8,13 @@ namespace Testing;
 
 public static class SimpleTests
 {
-    private static Compute compute => Compute.Instance;
     private static int aidx = -1;
     private static Random random = new();
 
     public static void FillTest(bool gpu)
     {
-        aidx = compute.RequestAccelerator(gpu);
-        Console.WriteLine(compute.IsGpuAccelerator(aidx) ? "GPU accelerator" : "CPU accelerator");
+        aidx = Compute.RequestAccelerator(gpu);
+        Console.WriteLine(Compute.IsGpuAccelerator(aidx) ? "GPU accelerator" : "CPU accelerator");
         Stopwatch sw = new();
 
         var (n, size) = (20000, 5000);
@@ -23,31 +22,31 @@ public static class SimpleTests
         sw.Start();
         for (int i = 0; i < n; i++)
         {
-            var buffer = compute.Get(aidx, size);
-            compute.Fill(buffer, 1);
-            compute.Return(buffer);
+            var buffer = Compute.Get(aidx, size);
+            Compute.Fill(buffer, 1);
+            Compute.Return(buffer);
         }
         sw.Stop();
-        compute.Synchronize(aidx);
+        Compute.Synchronize(aidx);
         Console.WriteLine($"Filled {n} vectors of size {size} in {sw.ElapsedMilliseconds} (no pre-allocations - {n * size} elements) where allocations are done in-loop.");
 
         sw.Restart();
         for (int i = 0; i < n; i++)
         {
-            var buffer = compute.Get(aidx, size);
-            compute.Fill(buffer, 1);
-            compute.Return(buffer);
+            var buffer = Compute.Get(aidx, size);
+            Compute.Fill(buffer, 1);
+            Compute.Return(buffer);
         }
         sw.Stop();
         Console.WriteLine($"Filled {n} vectors of size {size} in {sw.ElapsedMilliseconds} (pre-allocations - {n * size} elements) where allocations are done in-loop.");
-        compute.Synchronize(aidx);
-        compute.ReleaseAccelerator(aidx);
+        Compute.Synchronize(aidx);
+        Compute.ReleaseAccelerator(aidx);
     }
     
     public static void SimpleMathTest(bool gpu)
     {
-        aidx = compute.RequestAccelerator(gpu);
-        Console.WriteLine(compute.IsGpuAccelerator(aidx) ? "GPU accelerator" : "CPU accelerator");
+        aidx = Compute.RequestAccelerator(gpu);
+        Console.WriteLine(Compute.IsGpuAccelerator(aidx) ? "GPU accelerator" : "CPU accelerator");
         Stopwatch sw = new();
         
         var (n, size) = (200, 1000);
@@ -68,19 +67,19 @@ public static class SimpleTests
 
         sw.Start();
         for (int i = 0; i < n; i++) 
-            compute.ElementwiseMultiply(results[i], buffers[i], buffers[i]);
-        compute.Synchronize(aidx);
+            Compute.ElementwiseMultiply(results[i], buffers[i], buffers[i]);
+        Compute.Synchronize(aidx);
         sw.Stop();
         
-        compute.ReleaseAccelerator(aidx);
+        Compute.ReleaseAccelerator(aidx);
         
         Console.WriteLine($"Squared each element of {n} {size}x{size} matrices ({size * size * n} elements) in {sw.ElapsedMilliseconds} ms.");
     }
 
     public static void ScalarTest(bool gpu)
     {
-        aidx = compute.RequestAccelerator(gpu);
-        Console.WriteLine(compute.IsGpuAccelerator(aidx) ? "GPU accelerator" : "CPU accelerator");
+        aidx = Compute.RequestAccelerator(gpu);
+        Console.WriteLine(Compute.IsGpuAccelerator(aidx) ? "GPU accelerator" : "CPU accelerator");
         
         ScalarValue a = new(1, aidx);
         ScalarValue b = new(2, aidx);
@@ -93,27 +92,19 @@ public static class SimpleTests
         
         Console.WriteLine(f);
         
-        f = compute.BinaryCallChain(a, 
-            (ElementwiseAddKernels: compute.AddKernels, b),
-            (compute.ElementwiseMultiplyKernels, c),
-            (ElementwiseSubtractKernels: compute.SubtractKernels, a)).AsScalar();
-        // this is much better- we only allocate 1 value, f
-        
+        var addMultSub = Compute.Load((i, r, a_, b_, c_) => r[i] = (a_[i] + b_[i]) * c_[i] - a_[i]);
+        Compute.Call(addMultSub, f.Data.View, a.Data.View, b.Data.View, c.Data.View);
+        // this is much better- we only allocate 1 value, f, and we can fuse the operations into one kernel call
         Console.WriteLine(f);
         
-        var addMultSub = compute.Load((i, r, a_, b_, c_) => r[i] = (a_[i] + b_[i]) * c_[i] - a_[i]);
-        compute.Call(addMultSub, f.Data.View, a.Data.View, b.Data.View, c.Data.View);
-        // this is even better- we only allocate 1 value, f, and we can fuse the operations into one kernel call
-        Console.WriteLine(f);
-        
-        compute.Synchronize(aidx);
-        compute.ReleaseAccelerator(aidx);
+        Compute.Synchronize(aidx);
+        Compute.ReleaseAccelerator(aidx);
     }
     
     public static void PhysicsTest(bool gpu)
     {
-        aidx = compute.RequestAccelerator(gpu);
-        Console.WriteLine(compute.IsGpuAccelerator(aidx) ? "GPU accelerator" : "CPU accelerator");
+        aidx = Compute.RequestAccelerator(gpu);
+        Console.WriteLine(Compute.IsGpuAccelerator(aidx) ? "GPU accelerator" : "CPU accelerator");
         Stopwatch sw = new();
 
         int finalT = 100; // end time
@@ -137,10 +128,10 @@ public static class SimpleTests
             (forces[i * 3], forces[i * 3 + 1], forces[i * 3 + 2]) = (0, 0, 0);
         }
 
-        MemoryBuffer1D<float, Stride1D.Dense> positionsBuffer = compute.Get(aidx, n * 3);
-        MemoryBuffer1D<float, Stride1D.Dense> velocitiesBuffer = compute.Get(aidx, n * 3);
-        MemoryBuffer1D<float, Stride1D.Dense> massesBuffer = compute.Get(aidx, n);
-        MemoryBuffer1D<float, Stride1D.Dense> forcesBuffer = compute.Get(aidx, n * 3);
+        MemoryBuffer1D<float, Stride1D.Dense> positionsBuffer = Compute.Get(aidx, n * 3);
+        MemoryBuffer1D<float, Stride1D.Dense> velocitiesBuffer = Compute.Get(aidx, n * 3);
+        MemoryBuffer1D<float, Stride1D.Dense> massesBuffer = Compute.Get(aidx, n);
+        MemoryBuffer1D<float, Stride1D.Dense> forcesBuffer = Compute.Get(aidx, n * 3);
         positionsBuffer.CopyFromCPU(positions);
         velocitiesBuffer.CopyFromCPU(velocities);
         massesBuffer.CopyFromCPU(masses);
@@ -188,21 +179,21 @@ public static class SimpleTests
             KernelProgramming.Vector3Set(rs, i, (x2, y2, z2));
         }
 
-        var gravityKernels = compute.Load((Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, float, int>)GravityKernel);
-        var eulerKernels = compute.Load((Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, float>)EulerKernel);
+        var gravityKernels = Compute.Load((Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, float, int>)GravityKernel);
+        var eulerKernels = Compute.Load((Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, float>)EulerKernel);
         
         sw.Start();
         for (float t = 0; t < finalT; t += dt)
         {
-            compute.Call(aidx, gravityKernels, extent, positionsBuffer.View, massesBuffer.View, forcesBuffer.View, G, n);
-            compute.Call(aidx, eulerKernels, extent, positionsBuffer.View, velocitiesBuffer.View, forcesBuffer.View, massesBuffer.View, dt);
+            Compute.Call(aidx, gravityKernels, extent, positionsBuffer.View, massesBuffer.View, forcesBuffer.View, G, n);
+            Compute.Call(aidx, eulerKernels, extent, positionsBuffer.View, velocitiesBuffer.View, forcesBuffer.View, massesBuffer.View, dt);
         }
-        compute.Synchronize(aidx);
+        Compute.Synchronize(aidx);
         sw.Stop();
         
-        compute.Return(positionsBuffer, velocitiesBuffer, massesBuffer, forcesBuffer);
+        Compute.Return(positionsBuffer, velocitiesBuffer, massesBuffer, forcesBuffer);
         
-        compute.ReleaseAccelerator(aidx);
+        Compute.ReleaseAccelerator(aidx);
         
         Console.WriteLine($"Total timesteps: {finalT / dt}");
         Console.WriteLine($"Total bodies: {n}");
@@ -230,33 +221,33 @@ public static class SimpleTests
             MatrixProxy.Roll(RandomMatrix(m, k)), 
             MatrixProxy.Roll(RandomMatrix(k, n))));
 
-        int aidx = compute.RequestAccelerator(gpu);
+        int aidx = Compute.RequestAccelerator(gpu);
         Stopwatch sw = new();
         
-        Console.WriteLine($"Starting processing on accelerator {aidx} ({compute.Accelerators[aidx].Name}).");
+        Console.WriteLine($"Starting processing on accelerator {aidx} ({Compute.Accelerators[aidx].Name}).");
         sw.Start();
         foreach (var (a, b) in workQueue)
         {
-            var aBuffer = compute.Get(aidx, mk);
-            var bBuffer = compute.Get(aidx, kn);
-            var resultBuffer = compute.Get(aidx, mn);
+            var aBuffer = Compute.Get(aidx, mk);
+            var bBuffer = Compute.Get(aidx, kn);
+            var resultBuffer = Compute.Get(aidx, mn);
             aBuffer.CopyFromCPU(a);
             bBuffer.CopyFromCPU(b);
-            compute.MatrixMultiply(aBuffer, bBuffer, resultBuffer, m, k, k, n, noCuBlas: !cublas);
+            Compute.MatrixMultiply(aBuffer, bBuffer, resultBuffer, m, k, k, n, noCuBlas: !cublas);
             results.Add(resultBuffer);
-            compute.Return(aBuffer, bBuffer);
+            Compute.Return(aBuffer, bBuffer);
         }
-        compute.Synchronize(aidx);
+        Compute.Synchronize(aidx);
         sw.Stop();
         
         Console.WriteLine($"Processed {totalBatches} batches of {m}x{k}x{n} matrix multiplies in: {sw.ElapsedMilliseconds} ms.");
         
-        compute.Return(results.ToArray());
-        compute.Clear(aidx);
-        compute.ReleaseAccelerator(aidx);
+        Compute.Return(results.ToArray());
+        Compute.Clear(aidx);
+        Compute.ReleaseAccelerator(aidx);
         results.Clear();
         
-        var gpuIndices = compute.Accelerators.Values
+        var gpuIndices = Compute.Accelerators.Values
             .Select((acc, idx) => (acc, idx))
             .Where(x => x.acc.AcceleratorType != AcceleratorType.CPU)
             .Select(x => x.idx)
@@ -269,31 +260,31 @@ public static class SimpleTests
         for (int i = 0; i < gpuIndices.Count; i++)
         {
             int aidx_ = gpuIndices[i];
-            Console.WriteLine($"Starting parallel processing on accelerator {aidx_} ({compute.Accelerators[aidx_].Name}).");
+            Console.WriteLine($"Starting parallel processing on accelerator {aidx_} ({Compute.Accelerators[aidx_].Name}).");
             tasks[i] = Task.Run(() =>
             {
                 while (workQueue.TryDequeue(out var tuple))
                 {
-                    var aBuffer = compute.Get(aidx_, mk);
-                    var bBuffer = compute.Get(aidx_, kn);
-                    var resultBuffer = compute.Get(aidx_, mn);
+                    var aBuffer = Compute.Get(aidx_, mk);
+                    var bBuffer = Compute.Get(aidx_, kn);
+                    var resultBuffer = Compute.Get(aidx_, mn);
         
                     aBuffer.CopyFromCPU(tuple.a);
                     bBuffer.CopyFromCPU(tuple.b);
-                    compute.MatrixMultiply(aBuffer, bBuffer, resultBuffer, m, k, k, n, noCuBlas:!cublas);
+                    Compute.MatrixMultiply(aBuffer, bBuffer, resultBuffer, m, k, k, n, noCuBlas:!cublas);
         
                     results.Add(resultBuffer);
-                    compute.Return(aBuffer, bBuffer);
+                    Compute.Return(aBuffer, bBuffer);
                 }
-                compute.Synchronize(aidx_);
+                Compute.Synchronize(aidx_);
                 Console.WriteLine($"{aidx_} finished processing!");
             });
         }
         Task.WaitAll(tasks);
         sw.Stop();
         
-        compute.Return(results.ToArray());
-        compute.ReleaseAccelerator(aidx);
+        Compute.Return(results.ToArray());
+        Compute.ReleaseAccelerator(aidx);
         results.Clear();
         Console.WriteLine($"Processed {totalBatches} batches of {m}x{k}x{n} matrix multiplies in: {sw.ElapsedMilliseconds} ms.");
     }
@@ -301,8 +292,8 @@ public static class SimpleTests
     public static void BigMatMulTest(bool gpu)
     {
         // this test has problems right now!
-        aidx = compute.RequestAccelerator(gpu);
-        Console.WriteLine(compute.IsGpuAccelerator(aidx) ? $"GPU accelerator {aidx}" : "CPU accelerator");
+        aidx = Compute.RequestAccelerator(gpu);
+        Console.WriteLine(Compute.IsGpuAccelerator(aidx) ? $"GPU accelerator {aidx}" : "CPU accelerator");
         Stopwatch sw = new();
         
         int m = 10000;
@@ -314,49 +305,49 @@ public static class SimpleTests
         
         float[,] a = RandomMatrix(m, k);
         float[,] b = RandomMatrix(k, n);
-        MemoryBuffer1D<float, Stride1D.Dense> aBuffer = compute.Get(aidx, mk);
-        MemoryBuffer1D<float, Stride1D.Dense> bBuffer = compute.Get(aidx, kn);
-        MemoryBuffer1D<float, Stride1D.Dense> resultBuffer = compute.Get(aidx, mn);
+        MemoryBuffer1D<float, Stride1D.Dense> aBuffer = Compute.Get(aidx, mk);
+        MemoryBuffer1D<float, Stride1D.Dense> bBuffer = Compute.Get(aidx, kn);
+        MemoryBuffer1D<float, Stride1D.Dense> resultBuffer = Compute.Get(aidx, mn);
         aBuffer.CopyFromCPU(MatrixProxy.Roll(a));
         bBuffer.CopyFromCPU(MatrixProxy.Roll(b));
         
         Console.WriteLine("Starting processing...");
         sw.Start();
-        compute.MatrixMultiply(aBuffer, bBuffer, resultBuffer, m, k, k, n, noCuBlas: false);
+        Compute.MatrixMultiply(aBuffer, bBuffer, resultBuffer, m, k, k, n, noCuBlas: false);
         Console.WriteLine("Finished processing!");
-        compute.Synchronize(aidx);
+        Compute.Synchronize(aidx);
         sw.Stop();
         
         Console.WriteLine($"{m}x{k}x{n} matrix multiply finished in: {sw.ElapsedMilliseconds} ms.");
-        compute.Return(resultBuffer, aBuffer, bBuffer);
-        compute.ReleaseAccelerator(aidx);
+        Compute.Return(resultBuffer, aBuffer, bBuffer);
+        Compute.ReleaseAccelerator(aidx);
     }
 
     public static void PoolTest(bool gpu)
     {
-        aidx = compute.RequestAccelerator(gpu);
-        Console.WriteLine(compute.IsGpuAccelerator(aidx) ? $"GPU accelerator {aidx}" : "CPU accelerator");
+        aidx = Compute.RequestAccelerator(gpu);
+        Console.WriteLine(Compute.IsGpuAccelerator(aidx) ? $"GPU accelerator {aidx}" : "CPU accelerator");
         Stopwatch sw = new();
 
         var (n, size) = (1000, 10000);
-        var kernels = compute.Load((i, r, a, b) => r[i] += (a[i] * a[i] - b[i] * b[i]) / (a[i] * a[i] + b[i] * b[i]));
-        var result = compute.Get(aidx, size);
+        var kernels = Compute.Load((i, r, a, b) => r[i] += (a[i] * a[i] - b[i] * b[i]) / (a[i] * a[i] + b[i] * b[i]));
+        var result = Compute.Get(aidx, size);
         
         sw.Start();
         for (int i = 0; i < n; i++)
         {
-            var bufferA = compute.Get(aidx, size).Set(RandomVector(size));
-            var bufferB = compute.Get(aidx, size).Set(RandomVector(size));
+            var bufferA = Compute.Get(aidx, size).Set(RandomVector(size));
+            var bufferB = Compute.Get(aidx, size).Set(RandomVector(size));
 
-            compute.Call(kernels, result, bufferA, bufferB);
-            compute.Return(bufferA, bufferB);
+            Compute.Call(kernels, result, bufferA, bufferB);
+            Compute.Return(bufferA, bufferB);
         }
-        compute.Synchronize(aidx);
+        Compute.Synchronize(aidx);
         sw.Stop();
         
         Console.WriteLine($"Processed {n} batches in {sw.ElapsedMilliseconds} ms.");
-        compute.Return(result);
-        compute.ReleaseAccelerator(aidx);
+        Compute.Return(result);
+        Compute.ReleaseAccelerator(aidx);
     }
     
     public static float[,] RandomMatrix(int rows, int cols)

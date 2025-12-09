@@ -6,7 +6,7 @@ namespace Jewels.Lazulite;
 public class TensorValue3 : Value<float[,,]>
 {
     public TensorValue3(float[,,] value, int aidx) : base(
-        Compute.Instance.Get(aidx, value.GetLength(0) * value.GetLength(1) * value.GetLength(2)),
+        Compute.Get(aidx, value.GetLength(0) * value.GetLength(1) * value.GetLength(2)),
         [value.GetLength(0), value.GetLength(1), value.GetLength(2)]) => FromHost(value);
     public TensorValue3(MemoryBuffer1D<float, Stride1D.Dense> buffer, int[] shape) : base(buffer, shape) { }
 
