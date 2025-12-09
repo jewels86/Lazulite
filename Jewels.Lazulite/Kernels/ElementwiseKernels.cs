@@ -7,14 +7,14 @@ namespace Jewels.Lazulite.Kernels;
 public static class ElementwiseKernels
 {
     #region Binary
-    public static void ElementwiseAddKernel(
+    public static void AddKernel(
         Index1D index, 
         ArrayView1D<float, Stride1D.Dense> result,
         ArrayView1D<float, Stride1D.Dense> a, 
         ArrayView1D<float, Stride1D.Dense> b) =>
         result[index] = a[index] + b[index];
     
-    public static void ElementwiseSubtractKernel(
+    public static void SubtractKernel(
         Index1D index, 
         ArrayView1D<float, Stride1D.Dense> result,
         ArrayView1D<float, Stride1D.Dense> a, 
@@ -28,28 +28,14 @@ public static class ElementwiseKernels
         ArrayView1D<float, Stride1D.Dense> b) =>
         result[index] = a[index] * b[index];
     
-    public static void ElementwiseDivideKernel(
+    public static void DivideKernel(
         Index1D index, 
         ArrayView1D<float, Stride1D.Dense> result,
         ArrayView1D<float, Stride1D.Dense> a, 
         ArrayView1D<float, Stride1D.Dense> b) =>
         result[index] = a[index] / b[index];
     
-    public static void ElementwiseModuloKernel(
-        Index1D index, 
-        ArrayView1D<float, Stride1D.Dense> result,
-        ArrayView1D<float, Stride1D.Dense> a, 
-        ArrayView1D<float, Stride1D.Dense> b) =>
-        result[index] = a[index] % b[index];
-    
-    public static void ElementwisePowerKernel(
-        Index1D index, 
-        ArrayView1D<float, Stride1D.Dense> result,
-        ArrayView1D<float, Stride1D.Dense> a, 
-        ArrayView1D<float, Stride1D.Dense> b) =>
-        result[index] = XMath.Pow(a[index], b[index]);
-    
-    public static void ElementwiseMaxKernel(
+    public static void MaxKernel(
         Index1D index, 
         ArrayView1D<float, Stride1D.Dense> result,
         ArrayView1D<float, Stride1D.Dense> a, 
@@ -58,93 +44,99 @@ public static class ElementwiseKernels
     #endregion
     
     #region Unary
-    public static void ElementwiseExpKernel(
+    public static void ExpKernel(
         Index1D index, 
         ArrayView1D<float, Stride1D.Dense> result,
         ArrayView1D<float, Stride1D.Dense> a) =>
         result[index] = XMath.Exp(a[index]);
 
-    public static void ElementwiseLogKernel(
+    public static void LogKernel(
         Index1D index, 
         ArrayView1D<float, Stride1D.Dense> result,
         ArrayView1D<float, Stride1D.Dense> a) =>
         result[index] = XMath.Log(a[index]);
     
-    public static void ElementwiseSqrtKernel(
+    public static void SqrtKernel(
         Index1D index, 
         ArrayView1D<float, Stride1D.Dense> result,
         ArrayView1D<float, Stride1D.Dense> a) =>
         result[index] = XMath.Sqrt(a[index]);
     
-    public static void ElementwiseAbsKernel(
+    public static void AbsKernel(
         Index1D index, 
         ArrayView1D<float, Stride1D.Dense> result,
         ArrayView1D<float, Stride1D.Dense> a) =>
         result[index] = XMath.Abs(a[index]);
     
-    public static void ElementwiseNegateKernel(
+    public static void NegateKernel(
         Index1D index, 
         ArrayView1D<float, Stride1D.Dense> result,
         ArrayView1D<float, Stride1D.Dense> a) =>
         result[index] = -a[index];
     
-    public static void ElementwiseTanhKernel(
+    public static void SinKernel(
         Index1D index, 
         ArrayView1D<float, Stride1D.Dense> result,
         ArrayView1D<float, Stride1D.Dense> a) =>
-        result[index] = XMath.Tanh(a[index]);
+        result[index] = XMath.Sin(a[index]);
     
-    public static void ElementwiseNaturalLogKernel(
+    public static void CosKernel(
         Index1D index, 
         ArrayView1D<float, Stride1D.Dense> result,
         ArrayView1D<float, Stride1D.Dense> a) =>
-        result[index] = XMath.Log(a[index], XMath.E);
+        result[index] = XMath.Cos(a[index]);
+    
+    public static void TanKernel(
+        Index1D index, 
+        ArrayView1D<float, Stride1D.Dense> result,
+        ArrayView1D<float, Stride1D.Dense> a) =>
+        result[index] = XMath.Tan(a[index]);
     #endregion
 
     #region Weird Ones
-    public static void ElementwiseScalarPowerKernel(
+    public static void ScalarPowerKernel(
         Index1D index, 
         ArrayView1D<float, Stride1D.Dense> result,
         ArrayView1D<float, Stride1D.Dense> a, 
         ArrayView1D<float, Stride1D.Dense> b) =>
         result[index] = XMath.Pow(a[index], b[0]);
 
-    public static void ElementwiseScalarMultiplyKernel(
+    public static void ScalarMultiplyKernel(
         Index1D index, 
         ArrayView1D<float, Stride1D.Dense> result,
         ArrayView1D<float, Stride1D.Dense> a,
         ArrayView1D<float, Stride1D.Dense> b) =>
         result[index] = a[index] * b[0];
     
-    public static void ElementwiseScalarDivideKernel(
+    public static void ScalarDivideKernel(
         Index1D index, 
         ArrayView1D<float, Stride1D.Dense> result,
         ArrayView1D<float, Stride1D.Dense> a,
         ArrayView1D<float, Stride1D.Dense> b) =>
         result[index] = a[index] / b[0];
     
-    public static void ElementwiseScalarMaxKernel(
+    public static void ScalarMaxKernel(
         Index1D index, 
         ArrayView1D<float, Stride1D.Dense> result,
         ArrayView1D<float, Stride1D.Dense> a,
         ArrayView1D<float, Stride1D.Dense> b) =>
         result[index] = XMath.Max(a[index], b[0]);
     
-    public static void ElementwiseFloatPowerKernel(
+    public static void FloatPowerKernel(
         Index1D index, 
         ArrayView1D<float, Stride1D.Dense> result,
         ArrayView1D<float, Stride1D.Dense> a, 
         float power) =>
         result[index] = XMath.Pow(a[index], power);
     
-    public static void ElementwiseFloatMultiplyKernel(
+    public static void FloatMultiplyKernel(
         Index1D index,
         ArrayView1D<float, Stride1D.Dense> result,
         ArrayView1D<float, Stride1D.Dense> a, 
         float b) =>
         result[index] = a[index] * b;
 
-    public static void ElementwiseFloatMaxKernel(
+    public static void FloatMaxKernel(
         Index1D index, 
         ArrayView1D<float, Stride1D.Dense> result,
         ArrayView1D<float, Stride1D.Dense> a, float b) =>

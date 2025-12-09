@@ -20,34 +20,37 @@ public partial class Compute
     #region Elementwise Kernels
     #region Binary
     public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>,
-        ArrayView1D<float, Stride1D.Dense>>[] ElementwiseAddKernels { get; private set; } = [];
+        ArrayView1D<float, Stride1D.Dense>>[] AddKernels { get; private set; } = [];
     public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>,
-        ArrayView1D<float, Stride1D.Dense>>[] ElementwiseSubtractKernels { get; private set; } = [];
+        ArrayView1D<float, Stride1D.Dense>>[] SubtractKernels { get; private set; } = [];
     public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>,
         ArrayView1D<float, Stride1D.Dense>>[] ElementwiseMultiplyKernels { get; private set; } = [];
     public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>,
-        ArrayView1D<float, Stride1D.Dense>>[] ElementwiseDivideKernels { get; private set; } = [];
+        ArrayView1D<float, Stride1D.Dense>>[] DivideKernels { get; private set; } = [];
     public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>,
-        ArrayView1D<float, Stride1D.Dense>>[] ElementwiseMaxKernels { get; private set; } = [];
+        ArrayView1D<float, Stride1D.Dense>>[] MaxKernels { get; private set; } = [];
     #endregion
     #region Unary
-    public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[] ElementwiseExpKernels { get; private set; } = [];
-    public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[] ElementwiseLogKernels { get; private set; } = [];
-    public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[] ElementwiseSqrtKernels { get; private set; } = [];
-    public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[] ElementwiseAbsKernels { get; private set; } = [];
-    public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[] ElementwiseNegateKernels { get; private set; } = [];
+    public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[] ExpKernels { get; private set; } = [];
+    public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[] LogKernels { get; private set; } = [];
+    public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[] SqrtKernels { get; private set; } = [];
+    public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[] AbsKernels { get; private set; } = [];
+    public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[] NegateKernels { get; private set; } = [];
+    public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[] SinKernels { get; private set; } = [];
+    public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[] CosKernels { get; private set; } = [];
+    public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[] TanKernels { get; private set; } = [];
     #endregion
     public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>,
-        ArrayView1D<float, Stride1D.Dense>>[] ElementwiseScalarPowerKernels { get; private set; } = [];
+        ArrayView1D<float, Stride1D.Dense>>[] ScalarPowerKernels { get; private set; } = [];
     public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>,
-        ArrayView1D<float, Stride1D.Dense>>[] ElementwiseScalarMultiplyKernels { get; private set; } = [];
+        ArrayView1D<float, Stride1D.Dense>>[] ScalarMultiplyKernels { get; private set; } = [];
     public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>,
-        ArrayView1D<float, Stride1D.Dense>>[] ElementwiseScalarDivideKernels { get; private set; } = [];
+        ArrayView1D<float, Stride1D.Dense>>[] ScalarDivideKernels { get; private set; } = [];
     public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, 
-        ArrayView1D<float, Stride1D.Dense>>[] ElementwiseScalarMaxKernels { get; private set; } = [];
-    public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, float>[] ElementwiseFloatPowerKernels = [];
-    public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, float>[] ElementwiseFloatMultiplyKernels = [];
-    public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, float>[] ElementwiseFloatMaxKernels = [];
+        ArrayView1D<float, Stride1D.Dense>>[] ScalarMaxKernels { get; private set; } = [];
+    public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, float>[] FloatPowerKernels = [];
+    public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, float>[] FloatMultiplyKernels = [];
+    public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, float>[] FloatMaxKernels = [];
     #endregion
     #region Matrix Kernels
     public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, 
@@ -94,23 +97,23 @@ public partial class Compute
             ArrayView1D<float, Stride1D.Dense>>[Accelerators.Count];
         SliceKernels = new Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, int, int>[Accelerators.Count];
 
-        ElementwiseAddKernels = new Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, 
+        AddKernels = new Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, 
             ArrayView1D<float, Stride1D.Dense>>[Accelerators.Count];
-        ElementwiseSubtractKernels = new Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, 
+        SubtractKernels = new Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, 
             ArrayView1D<float, Stride1D.Dense>>[Accelerators.Count];
         ElementwiseMultiplyKernels = new Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, 
             ArrayView1D<float, Stride1D.Dense>>[Accelerators.Count];
-        ElementwiseDivideKernels = new Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, 
+        DivideKernels = new Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, 
             ArrayView1D<float, Stride1D.Dense>>[Accelerators.Count];
 
-        ElementwiseSqrtKernels = new Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[Accelerators.Count];
-        ElementwiseNegateKernels = new Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[Accelerators.Count];
+        SqrtKernels = new Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[Accelerators.Count];
+        NegateKernels = new Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[Accelerators.Count];
 
-        ElementwiseScalarPowerKernels = new Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, 
+        ScalarPowerKernels = new Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, 
             ArrayView1D<float, Stride1D.Dense>>[Accelerators.Count];
-        ElementwiseScalarMultiplyKernels = new Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, 
+        ScalarMultiplyKernels = new Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, 
             ArrayView1D<float, Stride1D.Dense>>[Accelerators.Count];
-        ElementwiseScalarDivideKernels = new Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, 
+        ScalarDivideKernels = new Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, 
             ArrayView1D<float, Stride1D.Dense>>[Accelerators.Count];
 
         MatrixMultiplyKernels = new Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, 
@@ -128,26 +131,26 @@ public partial class Compute
                 ArrayView1D<float, Stride1D.Dense>>(ConcatKernel);
             SliceKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, int, int>(SliceKernel);
 
-            ElementwiseAddKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
-                ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>(ElementwiseAddKernel);
-            ElementwiseSubtractKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
-                ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>(ElementwiseSubtractKernel);
+            AddKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
+                ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>(AddKernel);
+            SubtractKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
+                ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>(SubtractKernel);
             ElementwiseMultiplyKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
                 ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>(ElementwiseMultiplyKernel);
-            ElementwiseDivideKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
-                ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>(ElementwiseDivideKernel);
+            DivideKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
+                ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>(DivideKernel);
 
-            ElementwiseSqrtKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
-                ArrayView1D<float, Stride1D.Dense>>(ElementwiseSqrtKernel);
-            ElementwiseNegateKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
-                ArrayView1D<float, Stride1D.Dense>>(ElementwiseNegateKernel);
+            SqrtKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
+                ArrayView1D<float, Stride1D.Dense>>(SqrtKernel);
+            NegateKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
+                ArrayView1D<float, Stride1D.Dense>>(NegateKernel);
 
-            ElementwiseScalarPowerKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
-                ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>(ElementwiseScalarPowerKernel);
-            ElementwiseScalarMultiplyKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
-                ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>(ElementwiseScalarMultiplyKernel);
-            ElementwiseScalarDivideKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
-                ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>(ElementwiseScalarDivideKernel);
+            ScalarPowerKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
+                ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>(ScalarPowerKernel);
+            ScalarMultiplyKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
+                ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>(ScalarMultiplyKernel);
+            ScalarDivideKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
+                ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>(ScalarDivideKernel);
 
             MatrixMultiplyKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
                 ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, int, int, int, int, float, float, int, int>(MatrixMultiplyKernel);
@@ -168,23 +171,23 @@ public partial class Compute
     {
         if (_extraScalarInitialized) return;
         
-        ElementwiseScalarMaxKernels = new Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, 
+        ScalarMaxKernels = new Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, 
             ArrayView1D<float, Stride1D.Dense>>[Accelerators.Count];
-        ElementwiseFloatPowerKernels = new Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, float>[Accelerators.Count];
-        ElementwiseFloatMultiplyKernels = new Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, float>[Accelerators.Count];
-        ElementwiseFloatMaxKernels = new Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, float>[Accelerators.Count];
+        FloatPowerKernels = new Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, float>[Accelerators.Count];
+        FloatMultiplyKernels = new Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, float>[Accelerators.Count];
+        FloatMaxKernels = new Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, float>[Accelerators.Count];
 
         foreach (var kvp in Accelerators)
         {
             var (aidx, accelerator) = kvp;
-            ElementwiseScalarMaxKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
-                ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>(ElementwiseScalarMaxKernel);
-            ElementwiseFloatPowerKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
-                ArrayView1D<float, Stride1D.Dense>, float>(ElementwiseFloatPowerKernel);
-            ElementwiseFloatMultiplyKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
-                ArrayView1D<float, Stride1D.Dense>, float>(ElementwiseFloatMultiplyKernel);
-            ElementwiseFloatMaxKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
-                ArrayView1D<float, Stride1D.Dense>, float>(ElementwiseFloatMaxKernel);
+            ScalarMaxKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
+                ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>(ScalarMaxKernel);
+            FloatPowerKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
+                ArrayView1D<float, Stride1D.Dense>, float>(FloatPowerKernel);
+            FloatMultiplyKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
+                ArrayView1D<float, Stride1D.Dense>, float>(FloatMultiplyKernel);
+            FloatMaxKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
+                ArrayView1D<float, Stride1D.Dense>, float>(FloatMaxKernel);
         }
         
         if (warmup) WarmupExtraScalarKernels();
@@ -195,24 +198,30 @@ public partial class Compute
     {
         if (_extraElementwiseInitialized) return;
         
-        ElementwiseMaxKernels = new Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, 
+        MaxKernels = new Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, 
             ArrayView1D<float, Stride1D.Dense>>[Accelerators.Count];
 
-        ElementwiseExpKernels = new Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[Accelerators.Count];
-        ElementwiseLogKernels = new Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[Accelerators.Count];
-        ElementwiseAbsKernels = new Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[Accelerators.Count];
+        ExpKernels = new Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[Accelerators.Count];
+        LogKernels = new Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[Accelerators.Count];
+        AbsKernels = new Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[Accelerators.Count];
         foreach (var kvp in Accelerators)
         {
             var (aidx, accelerator) = kvp;
-            ElementwiseMaxKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
-                ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>(ElementwiseMaxKernel);
+            MaxKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
+                ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>(MaxKernel);
 
-            ElementwiseExpKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
-                ArrayView1D<float, Stride1D.Dense>>(ElementwiseExpKernel);
-            ElementwiseLogKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
-                ArrayView1D<float, Stride1D.Dense>>(ElementwiseLogKernel);
-            ElementwiseAbsKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
-                ArrayView1D<float, Stride1D.Dense>>(ElementwiseAbsKernel);
+            ExpKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
+                ArrayView1D<float, Stride1D.Dense>>(ExpKernel);
+            LogKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
+                ArrayView1D<float, Stride1D.Dense>>(LogKernel);
+            AbsKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
+                ArrayView1D<float, Stride1D.Dense>>(AbsKernel);
+            SinKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
+                ArrayView1D<float, Stride1D.Dense>>(SinKernel);
+            CosKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
+                ArrayView1D<float, Stride1D.Dense>>(CosKernel);
+            TanKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
+                ArrayView1D<float, Stride1D.Dense>>(TanKernel);
         }
         
         if (warmup) WarmupExtraElementwiseKernels();
@@ -230,17 +239,17 @@ public partial class Compute
             Call(FillKernels, dummy, 1.0f);
             Call(CopyKernels, dummy, dummy);
 
-            Call(ElementwiseAddKernels, dummy, dummy, dummy);
-            Call(ElementwiseSubtractKernels, dummy, dummy, dummy);
+            Call(AddKernels, dummy, dummy, dummy);
+            Call(SubtractKernels, dummy, dummy, dummy);
             Call(ElementwiseMultiplyKernels, dummy, dummy, dummy);
-            Call(ElementwiseDivideKernels, dummy, dummy, dummy);
+            Call(DivideKernels, dummy, dummy, dummy);
 
-            Call(ElementwiseSqrtKernels, dummy, dummy);
-            Call(ElementwiseNegateKernels, dummy, dummy);
+            Call(SqrtKernels, dummy, dummy);
+            Call(NegateKernels, dummy, dummy);
 
-            Call(ElementwiseScalarPowerKernels, dummy, dummy, dummy);
-            Call(ElementwiseScalarMultiplyKernels, dummy, dummy, dummy);
-            Call(ElementwiseScalarDivideKernels, dummy, dummy, dummy);
+            Call(ScalarPowerKernels, dummy, dummy, dummy);
+            Call(ScalarMultiplyKernels, dummy, dummy, dummy);
+            Call(ScalarDivideKernels, dummy, dummy, dummy);
             Synchronize(i);
         }
     }
@@ -251,10 +260,10 @@ public partial class Compute
         {
             using var dummy = Get(i, 10);
 
-            Call(ElementwiseScalarMaxKernels, dummy, dummy, dummy);
-            Call(ElementwiseFloatPowerKernels, dummy, dummy, 1.0f);
-            Call(ElementwiseFloatMultiplyKernels, dummy, dummy, 1.0f);
-            Call(ElementwiseFloatMaxKernels, dummy, dummy, 1.0f);
+            Call(ScalarMaxKernels, dummy, dummy, dummy);
+            Call(FloatPowerKernels, dummy, dummy, 1.0f);
+            Call(FloatMultiplyKernels, dummy, dummy, 1.0f);
+            Call(FloatMaxKernels, dummy, dummy, 1.0f);
             Synchronize(i);
         }
     }
@@ -265,11 +274,14 @@ public partial class Compute
         {
             using var dummy = Get(i, 10);
 
-            Call(ElementwiseMaxKernels, dummy, dummy, dummy);
+            Call(MaxKernels, dummy, dummy, dummy);
 
-            Call(ElementwiseExpKernels, dummy, dummy);
-            Call(ElementwiseLogKernels, dummy, dummy);
-            Call(ElementwiseAbsKernels, dummy, dummy);
+            Call(ExpKernels, dummy, dummy);
+            Call(LogKernels, dummy, dummy);
+            Call(AbsKernels, dummy, dummy);
+            Call(SinKernels, dummy, dummy);
+            Call(CosKernels, dummy, dummy);
+            Call(TanKernels, dummy, dummy);
             Synchronize(i);
         }
     }
@@ -323,30 +335,30 @@ public partial class Compute
         ConcatKernels = [];
         SliceKernels = [];
         
-        ElementwiseAddKernels = [];
-        ElementwiseSubtractKernels = [];
+        AddKernels = [];
+        SubtractKernels = [];
         ElementwiseMultiplyKernels = [];
-        ElementwiseDivideKernels = [];
-        ElementwiseSqrtKernels = [];
-        ElementwiseNegateKernels = [];
+        DivideKernels = [];
+        SqrtKernels = [];
+        NegateKernels = [];
         
-        ElementwiseScalarPowerKernels = [];
-        ElementwiseScalarMultiplyKernels = [];
-        ElementwiseScalarDivideKernels = [];
+        ScalarPowerKernels = [];
+        ScalarMultiplyKernels = [];
+        ScalarDivideKernels = [];
         
         MatrixMultiplyKernels = [];
         MatrixVectorMultiplyKernels = [];
         OuterProductKernels = [];
         
-        ElementwiseScalarMaxKernels = [];
-        ElementwiseFloatPowerKernels = [];
-        ElementwiseFloatMultiplyKernels = [];
-        ElementwiseFloatMaxKernels = [];
+        ScalarMaxKernels = [];
+        FloatPowerKernels = [];
+        FloatMultiplyKernels = [];
+        FloatMaxKernels = [];
         
-        ElementwiseMaxKernels = [];
+        MaxKernels = [];
         
-        ElementwiseExpKernels = [];
-        ElementwiseLogKernels = [];
-        ElementwiseAbsKernels = [];
+        ExpKernels = [];
+        LogKernels = [];
+        AbsKernels = [];
     }
 }

@@ -62,7 +62,7 @@ public partial class Compute
         var aidx = x.AcceleratorIndex();
         var blas = GetCuBlas(aidx);
         if (blas is null || noCuBlas || x.Length < 1e3)
-            Call(ElementwiseFloatMultiplyKernels, x, x, alpha);
+            Call(FloatMultiplyKernels, x, x, alpha);
         else blas.Scal(alpha, x.AsGeneral());
     }
 

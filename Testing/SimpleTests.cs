@@ -94,9 +94,9 @@ public static class SimpleTests
         Console.WriteLine(f);
         
         f = compute.BinaryCallChain(a, 
-            (compute.ElementwiseAddKernels, b),
+            (ElementwiseAddKernels: compute.AddKernels, b),
             (compute.ElementwiseMultiplyKernels, c),
-            (compute.ElementwiseSubtractKernels, a)).AsScalar();
+            (ElementwiseSubtractKernels: compute.SubtractKernels, a)).AsScalar();
         // this is much better- we only allocate 1 value, f
         
         Console.WriteLine(f);

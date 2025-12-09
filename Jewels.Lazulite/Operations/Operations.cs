@@ -43,12 +43,12 @@ public partial class Compute
     public void Copy(MemoryBuffer1D<float, Stride1D.Dense> dest, MemoryBuffer1D<float, Stride1D.Dense> src) => Call(CopyKernels, dest, src);
 
     public void Add(MemoryBuffer1D<float, Stride1D.Dense> r, MemoryBuffer1D<float, Stride1D.Dense> a, MemoryBuffer1D<float, Stride1D.Dense> b) =>
-        Call(ElementwiseAddKernels, r, a, b);
+        Call(AddKernels, r, a, b);
     public MemoryBuffer1D<float, Stride1D.Dense> Add(MemoryBuffer1D<float, Stride1D.Dense> a, MemoryBuffer1D<float, Stride1D.Dense> b) => 
         Encase(a, r => Add(r, a, b));
 
     public void Subtract(MemoryBuffer1D<float, Stride1D.Dense> r, MemoryBuffer1D<float, Stride1D.Dense> a, MemoryBuffer1D<float, Stride1D.Dense> b) =>
-        Call(ElementwiseSubtractKernels, r, a, b);
+        Call(SubtractKernels, r, a, b);
     public MemoryBuffer1D<float, Stride1D.Dense> Subtract(MemoryBuffer1D<float, Stride1D.Dense> a, MemoryBuffer1D<float, Stride1D.Dense> b) => 
         Encase(a, r => Subtract(r, a, b));
 
@@ -58,72 +58,72 @@ public partial class Compute
         Encase(a, r => ElementwiseMultiply(r, a, b));
 
     public void Divide(MemoryBuffer1D<float, Stride1D.Dense> r, MemoryBuffer1D<float, Stride1D.Dense> a, MemoryBuffer1D<float, Stride1D.Dense> b) =>
-        Call(ElementwiseDivideKernels, r, a, b);
+        Call(DivideKernels, r, a, b);
     public MemoryBuffer1D<float, Stride1D.Dense> Divide(MemoryBuffer1D<float, Stride1D.Dense> a, MemoryBuffer1D<float, Stride1D.Dense> b) => 
         Encase(a, r => Divide(r, a, b));
 
     public void Max(MemoryBuffer1D<float, Stride1D.Dense> r, MemoryBuffer1D<float, Stride1D.Dense> a, MemoryBuffer1D<float, Stride1D.Dense> b) =>
-        Call(ElementwiseMaxKernels, r, a, b);
+        Call(MaxKernels, r, a, b);
     public MemoryBuffer1D<float, Stride1D.Dense> Max(MemoryBuffer1D<float, Stride1D.Dense> a, MemoryBuffer1D<float, Stride1D.Dense> b) => 
         Encase(a, r => Max(r, a, b));
 
     public void Exp(MemoryBuffer1D<float, Stride1D.Dense> r, MemoryBuffer1D<float, Stride1D.Dense> val) =>
-        Call(ElementwiseExpKernels, r, val);
+        Call(ExpKernels, r, val);
     public MemoryBuffer1D<float, Stride1D.Dense> Exp(MemoryBuffer1D<float, Stride1D.Dense> val) => 
         Encase(val, r => Exp(r, val));
 
     public void Log(MemoryBuffer1D<float, Stride1D.Dense> r, MemoryBuffer1D<float, Stride1D.Dense> val) =>
-        Call(ElementwiseLogKernels, r, val);
+        Call(LogKernels, r, val);
     public MemoryBuffer1D<float, Stride1D.Dense> Log(MemoryBuffer1D<float, Stride1D.Dense> val) => 
         Encase(val, r => Log(r, val));
 
     public void Sqrt(MemoryBuffer1D<float, Stride1D.Dense> r, MemoryBuffer1D<float, Stride1D.Dense> val) =>
-        Call(ElementwiseSqrtKernels, r, val);
+        Call(SqrtKernels, r, val);
     public MemoryBuffer1D<float, Stride1D.Dense> Sqrt(MemoryBuffer1D<float, Stride1D.Dense> val) => 
         Encase(val, r => Sqrt(r, val));
 
     public void Abs(MemoryBuffer1D<float, Stride1D.Dense> r, MemoryBuffer1D<float, Stride1D.Dense> val) =>
-        Call(ElementwiseAbsKernels, r, val);
+        Call(AbsKernels, r, val);
     public MemoryBuffer1D<float, Stride1D.Dense> Abs(MemoryBuffer1D<float, Stride1D.Dense> val) => 
         Encase(val, r => Abs(r, val));
 
     public void Negate(MemoryBuffer1D<float, Stride1D.Dense> r, MemoryBuffer1D<float, Stride1D.Dense> val) =>
-        Call(ElementwiseNegateKernels, r, val);
+        Call(NegateKernels, r, val);
     public MemoryBuffer1D<float, Stride1D.Dense> Negate(MemoryBuffer1D<float, Stride1D.Dense> val) => 
         Encase(val, r => Negate(r, val));
 
     public void ScalarPower(MemoryBuffer1D<float, Stride1D.Dense> r, MemoryBuffer1D<float, Stride1D.Dense> value, Value<float> scalar) =>
-        Call(ElementwiseScalarPowerKernels, r, value, scalar);
+        Call(ScalarPowerKernels, r, value, scalar);
     public MemoryBuffer1D<float, Stride1D.Dense> ScalarPower(MemoryBuffer1D<float, Stride1D.Dense> value, Value<float> scalar) => 
         Encase(value, r => ScalarPower(r, value, scalar));
 
     public void ScalarMultiply(MemoryBuffer1D<float, Stride1D.Dense> r, MemoryBuffer1D<float, Stride1D.Dense> value, Value<float> scalar) =>
-        Call(ElementwiseScalarMultiplyKernels, r, value, scalar);
+        Call(ScalarMultiplyKernels, r, value, scalar);
     public MemoryBuffer1D<float, Stride1D.Dense> ScalarMultiply(MemoryBuffer1D<float, Stride1D.Dense> value, Value<float> scalar) => 
         Encase(value, r => ScalarMultiply(r, value, scalar));
 
     public void ScalarDivide(MemoryBuffer1D<float, Stride1D.Dense> r, MemoryBuffer1D<float, Stride1D.Dense> value, Value<float> scalar) =>
-        Call(ElementwiseScalarDivideKernels, r, value, scalar);
+        Call(ScalarDivideKernels, r, value, scalar);
     public MemoryBuffer1D<float, Stride1D.Dense> ScalarDivide(MemoryBuffer1D<float, Stride1D.Dense> value, Value<float> scalar) => 
         Encase(value, r => ScalarDivide(r, value, scalar));
 
     public void ScalarMax(MemoryBuffer1D<float, Stride1D.Dense> r, MemoryBuffer1D<float, Stride1D.Dense> value, Value<float> scalar) =>
-        Call(ElementwiseScalarMaxKernels, r, value, scalar);
+        Call(ScalarMaxKernels, r, value, scalar);
     public MemoryBuffer1D<float, Stride1D.Dense> ScalarMax(MemoryBuffer1D<float, Stride1D.Dense> value, Value<float> scalar) => 
         Encase(value, r => ScalarMax(r, value, scalar));
     
     public void FloatPower(MemoryBuffer1D<float, Stride1D.Dense> r, MemoryBuffer1D<float, Stride1D.Dense> value, float scalar) =>
-        Call(ElementwiseFloatPowerKernels, r, value, scalar);
+        Call(FloatPowerKernels, r, value, scalar);
     public MemoryBuffer1D<float, Stride1D.Dense> FloatPower(MemoryBuffer1D<float, Stride1D.Dense> value, float scalar) => 
         Encase(value, r => FloatPower(r, value, scalar));
 
     public void FloatMultiply(MemoryBuffer1D<float, Stride1D.Dense> r, MemoryBuffer1D<float, Stride1D.Dense> value, float scalar) =>
-        Call(ElementwiseFloatMultiplyKernels, r, value, scalar);
+        Call(FloatMultiplyKernels, r, value, scalar);
     public MemoryBuffer1D<float, Stride1D.Dense> FloatMultiply(MemoryBuffer1D<float, Stride1D.Dense> value, float scalar) => 
         Encase(value, r => FloatMultiply(r, value, scalar));
 
     public void FloatMax(MemoryBuffer1D<float, Stride1D.Dense> r, MemoryBuffer1D<float, Stride1D.Dense> value, float scalar) =>
-        Call(ElementwiseFloatMaxKernels, r, value, scalar);
+        Call(FloatMaxKernels, r, value, scalar);
     public MemoryBuffer1D<float, Stride1D.Dense> FloatMax(MemoryBuffer1D<float, Stride1D.Dense> value, float scalar) => 
         Encase(value, r => FloatMax(r, value, scalar));
 
