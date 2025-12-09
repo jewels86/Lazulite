@@ -35,7 +35,7 @@ public static class Benchmarks
         Console.WriteLine($"Multiplying elementwise with {n} matrices...");
         
         Stopwatch sw = Stopwatch.StartNew();
-        for (int i = 0; i < n; i++) compute.Call(compute.ElementwiseMultiplyKernels, matrices[i], matrices[i], results[i]);
+        for (int i = 0; i < n; i++) compute.ElementwiseMultiply(results[i], matrices[i], matrices[i]);
         compute.Synchronize(aidx);
         sw.Stop();
         Console.WriteLine($"Elementwise multiplication took {sw.ElapsedMilliseconds} ms.");

@@ -13,28 +13,16 @@ public class VectorValue : Value<float[]>
     public override VectorValue Create(MemoryBuffer1D<float, Stride1D.Dense> buffer, int[] shape) => new(buffer);
     public override VectorProxy ToProxy() => new(this);
 
-    public static VectorValue operator +(VectorValue a, VectorValue b) => Compute.Instance.BinaryCall(Compute.Instance.ElementwiseAddKernels, a, b).AsVector();
-    public static VectorValue operator -(VectorValue a, VectorValue b) => Compute.Instance.BinaryCall(Compute.Instance.ElementwiseSubtractKernels, a, b).AsVector();
-    public static VectorValue operator *(VectorValue a, VectorValue b) => Compute.Instance.BinaryCall(Compute.Instance.ElementwiseMultiplyKernels, a, b).AsVector();
-    public static VectorValue operator *(VectorValue a, ScalarValue b) => new(Compute.Instance.BinaryCall(Compute.Instance.ElementwiseScalarMultiplyKernels, a, b));
-    public static VectorValue operator /(VectorValue a, VectorValue b) => Compute.Instance.BinaryCall(Compute.Instance.ElementwiseDivideKernels, a, b).AsVector();
-    public static VectorValue operator /(VectorValue a, ScalarValue b) => new(Compute.Instance.BinaryCall(Compute.Instance.ElementwiseScalarDivideKernels, a, b));
-    public static VectorValue operator -(VectorValue a) => Compute.Instance.UnaryCall(Compute.Instance.ElementwiseNegateKernels, a).AsVector();
-    public static VectorValue operator %(VectorValue a, VectorValue b) => Compute.Instance.BinaryCall(Compute.Instance.ElementwiseModuloKernels, a, b).AsVector();
+    public static VectorValue operator +(VectorValue a, VectorValue b) => Compute.Instance.Add(a, b).AsVector();
+    public static VectorValue operator -(VectorValue a, VectorValue b) => Compute.Instance.Subtract(a, b).AsVector();
+    public static VectorValue operator *(VectorValue a, VectorValue b) => Compute.Instance.ElementwiseMultiply(a, b).AsVector();
+    public static VectorValue operator *(VectorValue a, ScalarValue b) => Compute.Instance.ScalarMultiply(a, b).AsVector();
+    public static VectorValue operator /(VectorValue a, VectorValue b) => Compute.Instance.Divide(a, b).AsVector();
+    public static VectorValue operator /(VectorValue a, ScalarValue b) => Compute.Instance.ScalarDivide(a, b).AsVector();
+    public static VectorValue operator -(VectorValue a) => Compute.Instance.Negate(a).AsVector();
 
-    public ScalarValue Sum()
-    {
-        var result = new ScalarValue(0, AcceleratorIndex);
-        Compute.Instance.Sum(this, result);
-        return result;
-    }
-
-    public ScalarValue Dot(VectorValue b)
-    {
-        var result = new ScalarValue(0, AcceleratorIndex);
-        Compute.Instance.Dot(this, b, result);
-        return result;
-    }
+    public ScalarValue Sum() => Compute.Instance.Sum(this).AsScalar();
+    public ScalarValue Dot(VectorValue b) => Compute.Instance.Dot(this, b).AsScalar();
 }
 
 public class VectorProxy(VectorValue value) : ValueProxy<float[]>(value)

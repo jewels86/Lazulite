@@ -7,9 +7,9 @@ public static class MatrixKernels
 {
     public static void MatrixMultiplyKernel(
         Index1D index,
+        ArrayView1D<float, Stride1D.Dense> result,
         ArrayView1D<float, Stride1D.Dense> a,
         ArrayView1D<float, Stride1D.Dense> b,
-        ArrayView1D<float, Stride1D.Dense> result,
         int a0, int a1, int b0, int b1,
         float alpha, float beta,
         int transposeA, int transposeB)
@@ -35,9 +35,9 @@ public static class MatrixKernels
 
     public static void MatrixVectorMultiplyKernel(
         Index1D index,
+        ArrayView1D<float, Stride1D.Dense> result,
         ArrayView1D<float, Stride1D.Dense> matrix,
         ArrayView1D<float, Stride1D.Dense> vector,
-        ArrayView1D<float, Stride1D.Dense> result,
         int m, int n,
         float alpha, float beta, int transposeMatrix) // matrix is m x n, vector is n (or m if transposed), result is m (or n if transposed)
     {
@@ -64,8 +64,8 @@ public static class MatrixKernels
 
     public static void TransposeKernel(
         Index1D index,
-        ArrayView1D<float, Stride1D.Dense> matrix,
         ArrayView1D<float, Stride1D.Dense> result,
+        ArrayView1D<float, Stride1D.Dense> matrix,
         int m, int n) // matrix is m x n, result is n x m 
     {
         if (index >= m * n) return;

@@ -28,10 +28,6 @@ public partial class Compute
     public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>,
         ArrayView1D<float, Stride1D.Dense>>[] ElementwiseDivideKernels { get; private set; } = [];
     public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>,
-        ArrayView1D<float, Stride1D.Dense>>[] ElementwiseModuloKernels { get; private set; } = [];
-    public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>,
-        ArrayView1D<float, Stride1D.Dense>>[] ElementwisePowerKernels { get; private set; } = [];
-    public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>,
         ArrayView1D<float, Stride1D.Dense>>[] ElementwiseMaxKernels { get; private set; } = [];
     #endregion
     #region Unary
@@ -40,8 +36,6 @@ public partial class Compute
     public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[] ElementwiseSqrtKernels { get; private set; } = [];
     public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[] ElementwiseAbsKernels { get; private set; } = [];
     public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[] ElementwiseNegateKernels { get; private set; } = [];
-    public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[] ElementwiseTanhKernels { get; private set; } = [];
-    public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[] ElementwiseNaturalLogKernels { get; private set; } = [];
     #endregion
     public Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>,
         ArrayView1D<float, Stride1D.Dense>>[] ElementwiseScalarPowerKernels { get; private set; } = [];
@@ -201,26 +195,15 @@ public partial class Compute
     {
         if (_extraElementwiseInitialized) return;
         
-        ElementwiseModuloKernels = new Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, 
-            ArrayView1D<float, Stride1D.Dense>>[Accelerators.Count];
-        ElementwisePowerKernels = new Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, 
-            ArrayView1D<float, Stride1D.Dense>>[Accelerators.Count];
         ElementwiseMaxKernels = new Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, 
             ArrayView1D<float, Stride1D.Dense>>[Accelerators.Count];
 
         ElementwiseExpKernels = new Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[Accelerators.Count];
         ElementwiseLogKernels = new Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[Accelerators.Count];
         ElementwiseAbsKernels = new Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[Accelerators.Count];
-        ElementwiseTanhKernels = new Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[Accelerators.Count];
-        ElementwiseNaturalLogKernels = new Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[Accelerators.Count];
-
         foreach (var kvp in Accelerators)
         {
             var (aidx, accelerator) = kvp;
-            ElementwiseModuloKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
-                ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>(ElementwiseModuloKernel);
-            ElementwisePowerKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
-                ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>(ElementwisePowerKernel);
             ElementwiseMaxKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
                 ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>(ElementwiseMaxKernel);
 
@@ -230,10 +213,6 @@ public partial class Compute
                 ArrayView1D<float, Stride1D.Dense>>(ElementwiseLogKernel);
             ElementwiseAbsKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
                 ArrayView1D<float, Stride1D.Dense>>(ElementwiseAbsKernel);
-            ElementwiseTanhKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
-                ArrayView1D<float, Stride1D.Dense>>(ElementwiseTanhKernel);
-            ElementwiseNaturalLogKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
-                ArrayView1D<float, Stride1D.Dense>>(ElementwiseNaturalLogKernel);
         }
         
         if (warmup) WarmupExtraElementwiseKernels();
@@ -286,15 +265,11 @@ public partial class Compute
         {
             using var dummy = Get(i, 10);
 
-            Call(ElementwiseModuloKernels, dummy, dummy, dummy);
-            Call(ElementwisePowerKernels, dummy, dummy, dummy);
             Call(ElementwiseMaxKernels, dummy, dummy, dummy);
 
             Call(ElementwiseExpKernels, dummy, dummy);
             Call(ElementwiseLogKernels, dummy, dummy);
             Call(ElementwiseAbsKernels, dummy, dummy);
-            Call(ElementwiseTanhKernels, dummy, dummy);
-            Call(ElementwiseNaturalLogKernels, dummy, dummy);
             Synchronize(i);
         }
     }
@@ -368,14 +343,10 @@ public partial class Compute
         ElementwiseFloatMultiplyKernels = [];
         ElementwiseFloatMaxKernels = [];
         
-        ElementwiseModuloKernels = [];
-        ElementwisePowerKernels = [];
         ElementwiseMaxKernels = [];
         
         ElementwiseExpKernels = [];
         ElementwiseLogKernels = [];
         ElementwiseAbsKernels = [];
-        ElementwiseTanhKernels = [];
-        ElementwiseNaturalLogKernels = [];
     }
 }

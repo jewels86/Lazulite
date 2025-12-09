@@ -7,9 +7,9 @@ public static class VectorKernels
 {
     public static void OuterProductKernel(
         Index1D index,
+        ArrayView1D<float, Stride1D.Dense> result,
         ArrayView1D<float, Stride1D.Dense> x, 
         ArrayView1D<float, Stride1D.Dense> y, 
-        ArrayView1D<float, Stride1D.Dense> result, 
         int m, int n) // x is m, y is n, result is m x n
     {
         int totalElements = m * n;

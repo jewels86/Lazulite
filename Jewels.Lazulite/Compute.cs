@@ -11,7 +11,7 @@ public sealed partial class Compute : IDisposable
     public ConcurrentDictionary<int, Accelerator> Accelerators { get; } = [];
     public ConcurrentDictionary<string, int> AcceleratorIndices { get; } = [];
     public ConcurrentDictionary<int, bool> InUse { get; } = [];
-    public Context Context { get; private set; }
+    public Context Context { get; }
     public static Compute Instance => _lazyInstance.Value;
 
     private readonly ConcurrentDictionary<int, ConcurrentDictionary<int, ConcurrentStack<MemoryBuffer1D<float, Stride1D.Dense>>>> _pool = []; // _pool[aidx] -> stacks[size] -> buffers
@@ -416,7 +416,7 @@ public sealed partial class Compute : IDisposable
             buffer = stack.TryPop(out var result) ? result : Allocate(aidx, size);
         else buffer = Allocate(aidx, size);
 
-        Call(aidx, FillKernels, buffer.IntExtent, buffer, 0);
+        Call(FillKernels, buffer, 0);
         return buffer;
     }
     #endregion

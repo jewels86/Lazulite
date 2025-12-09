@@ -50,17 +50,18 @@ public static class ValueTests
         using var subBuffer = _compute.Get(aidx, 4);
         using var mulBuffer = _compute.Get(aidx, 4);
         using var divBuffer = _compute.Get(aidx, 4);
-        using var modBuffer = _compute.Get(aidx, 4);
-        using var powBuffer = _compute.Get(aidx, 4);
         using var maxBuffer = _compute.Get(aidx, 4);
         
-        _compute.Call(_compute.ElementwiseAddKernels, a.View, b.View, addBuffer.View);
-        _compute.Call(_compute.ElementwiseSubtractKernels, a.View, b.View, subBuffer.View);
-        _compute.Call(_compute.ElementwiseMultiplyKernels, a.View, b.View, mulBuffer.View);
-        _compute.Call(_compute.ElementwiseDivideKernels, a.View, b, divBuffer);
-        _compute.Call(_compute.ElementwiseModuloKernels, a.View, b, modBuffer);
-        _compute.Call(_compute.ElementwisePowerKernels, a.View, b, powBuffer);
-        _compute.Call(_compute.ElementwiseMaxKernels, a.View, b, maxBuffer);
+        // _compute.Call(_compute.ElementwiseAddKernels, a.View, b.View, addBuffer.View);
+        // _compute.Call(_compute.ElementwiseSubtractKernels, a.View, b.View, subBuffer.View);
+        // _compute.Call(_compute.ElementwiseMultiplyKernels, a.View, b.View, mulBuffer.View);
+        // _compute.Call(_compute.ElementwiseDivideKernels, a.View, b, divBuffer);
+        // _compute.Call(_compute.ElementwiseMaxKernels, a.View, b, maxBuffer);
+        _compute.Add(addBuffer, a, b);
+        _compute.Subtract(subBuffer, a, b);
+        _compute.ElementwiseMultiply(mulBuffer, a, b);
+        _compute.Divide(divBuffer, a, b);
+        _compute.Max(maxBuffer, a, b);
         
         _compute.Synchronize(aidx);
         
@@ -68,26 +69,24 @@ public static class ValueTests
         Console.WriteLine($"a - b: {string.Join(',', subBuffer.GetAsArray1D())} vs {string.Join(',', realA.Select((x, i) => x - realB[i]))}");
         Console.WriteLine($"a * b: {string.Join(',', mulBuffer.GetAsArray1D())} vs {string.Join(',', realA.Select((x, i) => x * realB[i]))}");
         Console.WriteLine($"a / b: {string.Join(',', divBuffer.GetAsArray1D())} vs {string.Join(',', realA.Select((x, i) => x / realB[i]))}");
-        Console.WriteLine($"a % b: {string.Join(',', modBuffer.GetAsArray1D())} vs {string.Join(',', realA.Select((x, i) => x % realB[i]))}");
-        Console.WriteLine($"a ^ b: {string.Join(',', powBuffer.GetAsArray1D())} vs {string.Join(',', realA.Select((x, i) => (float)Math.Pow(x, realB[i])))}");
-        Console.WriteLine($"max(a, b): {string.Join(',', maxBuffer.GetAsArray1D())} vs {string.Join(',', realA.Select((x, i) => (float)Math.Max(x, realB[i])))}");
+        Console.WriteLine($"max(a, b): {string.Join(',', maxBuffer.GetAsArray1D())} vs {string.Join(',', realA.Select((x, i) => Math.Max(x, realB[i])))}");
 
         using var expBuffer = _compute.Get(aidx, 4);
         using var logBuffer = _compute.Get(aidx, 4);
         using var sqrtBuffer = _compute.Get(aidx, 4);
         using var absBuffer = _compute.Get(aidx, 4);
         using var negateBuffer = _compute.Get(aidx, 4);
-        using var tanhBuffer = _compute.Get(aidx, 4);
-        using var sech2Buffer = _compute.Get(aidx, 4);
-        using var naturalLogBuffer = _compute.Get(aidx, 4);
         
-        _compute.Call(_compute.ElementwiseExpKernels, a.View, expBuffer.View);
-        _compute.Call(_compute.ElementwiseLogKernels, a.View, logBuffer.View);
-        _compute.Call(_compute.ElementwiseSqrtKernels, a.View, sqrtBuffer.View);
-        _compute.Call(_compute.ElementwiseAbsKernels, a.View, absBuffer.View);
-        _compute.Call(_compute.ElementwiseNegateKernels, a.View, negateBuffer.View);
-        _compute.Call(_compute.ElementwiseTanhKernels, a.View, tanhBuffer.View);
-        _compute.Call(_compute.ElementwiseNaturalLogKernels, a.View, naturalLogBuffer.View);
+        // _compute.Call(_compute.ElementwiseExpKernels, a.View, expBuffer.View);
+        // _compute.Call(_compute.ElementwiseLogKernels, a.View, logBuffer.View);
+        // _compute.Call(_compute.ElementwiseSqrtKernels, a.View, sqrtBuffer.View);
+        // _compute.Call(_compute.ElementwiseAbsKernels, a.View, absBuffer.View);
+        // _compute.Call(_compute.ElementwiseNegateKernels, a.View, negateBuffer.View);
+        _compute.Exp(expBuffer, a);
+        _compute.Log(logBuffer, a);
+        _compute.Sqrt(sqrtBuffer, a);
+        _compute.Abs(absBuffer, a);
+        _compute.Negate(negateBuffer, a);
         
         _compute.Synchronize(aidx);
         Console.WriteLine($"exp(a): {string.Join(',', expBuffer.GetAsArray1D())} vs {string.Join(',', realA.Select(x => (float)Math.Exp(x)))}");
@@ -95,8 +94,6 @@ public static class ValueTests
         Console.WriteLine($"sqrt(a): {string.Join(',', sqrtBuffer.GetAsArray1D())} vs {string.Join(',', realA.Select(x => (float)Math.Sqrt(x)))}");
         Console.WriteLine($"abs(a): {string.Join(',', absBuffer.GetAsArray1D())} vs {string.Join(',', realA.Select(Math.Abs))}");
         Console.WriteLine($"-a: {string.Join(',', negateBuffer.GetAsArray1D())} vs {string.Join(',', realA.Select(x => -x))}");
-        Console.WriteLine($"tanh(a): {string.Join(',', tanhBuffer.GetAsArray1D())} vs {string.Join(',', realA.Select(x => (float)Math.Tanh(x)))}");
-        Console.WriteLine($"ln(a): {string.Join(',', naturalLogBuffer.GetAsArray1D())} vs {string.Join(',', realA.Select(x => (float)Math.Log(x)))}");
         
         var dot = realA.Select((x, i) => x * realB[i]).Sum();
         using var dotBuffer = _compute.Dot(a, b);

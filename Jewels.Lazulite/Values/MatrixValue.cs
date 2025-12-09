@@ -15,13 +15,12 @@ public class MatrixValue : Value<float[,]>
 
     public override MatrixValue Create(MemoryBuffer1D<float, Stride1D.Dense> buffer, int[] shape) => new(buffer, shape);
     public override MatrixProxy ToProxy() => new(this);
-    
-    public static MatrixValue operator +(MatrixValue a, MatrixValue b) => Compute.Instance.BinaryCall(Compute.Instance.ElementwiseAddKernels, a, b).AsMatrix();
-    public static MatrixValue operator -(MatrixValue a, MatrixValue b) => Compute.Instance.BinaryCall(Compute.Instance.ElementwiseSubtractKernels, a, b).AsMatrix();
-    public static MatrixValue operator *(MatrixValue a, MatrixValue b) => Compute.Instance.BinaryCall(Compute.Instance.ElementwiseMultiplyKernels, a, b).AsMatrix();
-    public static MatrixValue operator /(MatrixValue a, MatrixValue b) => Compute.Instance.BinaryCall(Compute.Instance.ElementwiseDivideKernels, a, b).AsMatrix();
-    public static MatrixValue operator -(MatrixValue a) => Compute.Instance.UnaryCall(Compute.Instance.ElementwiseNegateKernels, a).AsMatrix();
-    public static MatrixValue operator %(MatrixValue a, MatrixValue b) => Compute.Instance.BinaryCall(Compute.Instance.ElementwiseModuloKernels, a, b).AsMatrix();
+
+    public static MatrixValue operator +(MatrixValue a, MatrixValue b) => Compute.Instance.Add(a, b).AsMatrix();
+    public static MatrixValue operator -(MatrixValue a, MatrixValue b) => Compute.Instance.Subtract(a, b).AsMatrix();
+    public static MatrixValue operator *(MatrixValue a, MatrixValue b) => Compute.Instance.ElementwiseMultiply(a, b).AsMatrix();
+    public static MatrixValue operator /(MatrixValue a, MatrixValue b) => Compute.Instance.Divide(a, b).AsMatrix();
+    public static MatrixValue operator -(MatrixValue a) => Compute.Instance.Negate(a).AsMatrix();
 }
 
 public class MatrixProxy(Value<float[,]> value) : ValueProxy<float[,]>(value)

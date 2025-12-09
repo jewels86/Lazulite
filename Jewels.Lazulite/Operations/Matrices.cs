@@ -6,10 +6,11 @@ namespace Jewels.Lazulite;
 
 public partial class Compute
 {
+    
     public void MatrixMultiply(
+        ArrayView1D<float, Stride1D.Dense> result,
         ArrayView1D<float, Stride1D.Dense> a,
         ArrayView1D<float, Stride1D.Dense> b,
-        ArrayView1D<float, Stride1D.Dense> result,
         int a0, int a1, int b0, int b1,
         float alpha = 1.0f, float beta = 0.0f,
         bool transposeA = false, bool transposeB = false,
@@ -18,7 +19,7 @@ public partial class Compute
         int aidx = a.AcceleratorIndex();
         var blas = GetCuBlas(aidx);
         if (blas is null || noCuBlas || result.Length < 1e3)
-            Call(aidx, MatrixMultiplyKernels, result.IntExtent, a, b, result, a0, a1, b0, b1, alpha, beta, transposeA ? 1 : 0, transposeB ? 1 : 0);
+            Call(MatrixMultiplyKernels, result, a, b, a0, a1, b0, b1, alpha, beta, transposeA ? 1 : 0, transposeB ? 1 : 0);
         else
         {
             int m = transposeA ? a1 : a0;
@@ -37,9 +38,9 @@ public partial class Compute
     }
 
     public void MatrixVectorMultiply(
+        ArrayView1D<float, Stride1D.Dense> result,
         ArrayView1D<float, Stride1D.Dense> matrix,
         ArrayView1D<float, Stride1D.Dense> vector,
-        ArrayView1D<float, Stride1D.Dense> result,
         int m, int n, float alpha = 1.0f, float beta = 0.0f,
         bool transposeMatrix = false, bool noCuBlas = false) // matrix is m x n, vector is n, result is m
     {
@@ -47,7 +48,7 @@ public partial class Compute
         var blas = GetCuBlas(aidx);
 
         if (blas is null || noCuBlas || matrix.Length < 1e3)
-            Call(aidx, MatrixVectorMultiplyKernels, result.IntExtent, matrix, vector, result, m, n, alpha, beta, transposeMatrix ? 1 : 0);
+            Call(MatrixVectorMultiplyKernels, result, matrix, vector, m, n, alpha, beta, transposeMatrix ? 1 : 0);
         else
             blas.Gemv(
             transposeMatrix ? CuBlasOperation.Transpose : CuBlasOperation.NonTranspose,
@@ -58,8 +59,8 @@ public partial class Compute
     }
 
     public void Transpose(
-        ArrayView1D<float, Stride1D.Dense> matrix,
         ArrayView1D<float, Stride1D.Dense> result,
+        ArrayView1D<float, Stride1D.Dense> matrix,
         int m, int n) =>
-        Call(TransposeKernels, matrix, result, m, n);
+        Call(TransposeKernels, result, matrix, m, n);
 }

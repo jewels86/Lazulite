@@ -14,12 +14,11 @@ public class ScalarValue : Value<float>
     public override ScalarValue Create(MemoryBuffer1D<float, Stride1D.Dense> buffer, int[] shape) => new(buffer);
     public override ScalarProxy ToProxy() => new(this);
     
-    public static ScalarValue operator +(ScalarValue a, ScalarValue b) => Compute.Instance.BinaryCall(Compute.Instance.ElementwiseAddKernels, a, b).AsScalar();
-    public static ScalarValue operator -(ScalarValue a, ScalarValue b) => Compute.Instance.BinaryCall(Compute.Instance.ElementwiseSubtractKernels, a, b).AsScalar();
-    public static ScalarValue operator *(ScalarValue a, ScalarValue b) => Compute.Instance.BinaryCall(Compute.Instance.ElementwiseMultiplyKernels, a, b).AsScalar();
-    public static ScalarValue operator /(ScalarValue a, ScalarValue b) => Compute.Instance.BinaryCall(Compute.Instance.ElementwiseDivideKernels, a, b).AsScalar();
-    public static ScalarValue operator -(ScalarValue a) => Compute.Instance.UnaryCall(Compute.Instance.ElementwiseNegateKernels, a).AsScalar();
-    public static ScalarValue operator %(ScalarValue a, ScalarValue b) => Compute.Instance.BinaryCall(Compute.Instance.ElementwiseModuloKernels, a, b).AsScalar();
+    public static ScalarValue operator +(ScalarValue a, ScalarValue b) => Compute.Instance.Add(a, b).AsScalar();
+    public static ScalarValue operator -(ScalarValue a, ScalarValue b) => Compute.Instance.Subtract(a, b).AsScalar();
+    public static ScalarValue operator *(ScalarValue a, ScalarValue b) => Compute.Instance.ElementwiseMultiply(a, b).AsScalar();
+    public static ScalarValue operator /(ScalarValue a, ScalarValue b) => Compute.Instance.Divide(a, b).AsScalar();
+    public static ScalarValue operator -(ScalarValue a) => Compute.Instance.Negate(a).AsScalar();
 }
 
 public class ScalarProxy(ScalarValue value) : ValueProxy<float>(value)
