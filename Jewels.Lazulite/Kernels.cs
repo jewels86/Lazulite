@@ -36,9 +36,9 @@ public partial class Compute
     public static Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[] SqrtKernels { get; private set; } = [];
     public static Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[] AbsKernels { get; private set; } = [];
     public static Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[] NegateKernels { get; private set; } = [];
-    public static Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[] SinKernels { get; private set; } = [];
-    public static Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[] CosKernels { get; private set; } = [];
-    public static Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[] TanKernels { get; private set; } = [];
+    public static Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[] SineKernels { get; private set; } = [];
+    public static Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[] CosineKernels { get; private set; } = [];
+    public static Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[] TangentKernels { get; private set; } = [];
     #endregion
     public static Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>,
         ArrayView1D<float, Stride1D.Dense>>[] ScalarPowerKernels { get; private set; } = [];
@@ -204,9 +204,9 @@ public partial class Compute
         ExpKernels = new Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[Accelerators.Count];
         LogKernels = new Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[Accelerators.Count];
         AbsKernels = new Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[Accelerators.Count];
-        SinKernels = new Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[Accelerators.Count];
-        CosKernels = new Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[Accelerators.Count];
-        TanKernels = new Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[Accelerators.Count];
+        SineKernels = new Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[Accelerators.Count];
+        CosineKernels = new Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[Accelerators.Count];
+        TangentKernels = new Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>[Accelerators.Count];
         foreach (var kvp in Accelerators)
         {
             var (aidx, accelerator) = kvp;
@@ -219,12 +219,12 @@ public partial class Compute
                 ArrayView1D<float, Stride1D.Dense>>(LogKernel);
             AbsKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
                 ArrayView1D<float, Stride1D.Dense>>(AbsKernel);
-            SinKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
-                ArrayView1D<float, Stride1D.Dense>>(SinKernel);
-            CosKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
-                ArrayView1D<float, Stride1D.Dense>>(CosKernel);
-            TanKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
-                ArrayView1D<float, Stride1D.Dense>>(TanKernel);
+            SineKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
+                ArrayView1D<float, Stride1D.Dense>>(SineKernel);
+            CosineKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
+                ArrayView1D<float, Stride1D.Dense>>(CosineKernel);
+            TangentKernels[aidx] = accelerator.LoadAutoGroupedStreamKernel<Index1D, ArrayView1D<float, Stride1D.Dense>,
+                ArrayView1D<float, Stride1D.Dense>>(TangentKernel);
         }
         
         if (warmup) WarmupExtraElementwiseKernels();
@@ -282,9 +282,9 @@ public partial class Compute
             Call(ExpKernels, dummy, dummy);
             Call(LogKernels, dummy, dummy);
             Call(AbsKernels, dummy, dummy);
-            Call(SinKernels, dummy, dummy);
-            Call(CosKernels, dummy, dummy);
-            Call(TanKernels, dummy, dummy);
+            Call(SineKernels, dummy, dummy);
+            Call(CosineKernels, dummy, dummy);
+            Call(TangentKernels, dummy, dummy);
             Synchronize(i);
         }
     }

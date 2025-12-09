@@ -13,6 +13,9 @@ public partial class Compute
     public static Value<T> Sqrt<T>(Value<T> val) where T : notnull => val.CreateAlike(Sqrt(val.Data));
     public static Value<T> Abs<T>(Value<T> val) where T : notnull => val.CreateAlike(Abs(val.Data));
     public static Value<T> Negate<T>(Value<T> val) where T : notnull => val.CreateAlike(Negate(val.Data));
+    public static Value<T> Sine<T>(Value<T> val) where T : notnull => val.CreateAlike(Sine(val.Data));
+    public static Value<T> Cosine<T>(Value<T> val) where T : notnull => val.CreateAlike(Cosine(val.Data));
+    public static Value<T> Tangent<T>(Value<T> val) where T : notnull => val.CreateAlike(Tangent(val.Data));
     
     public static Value<T> ScalarPower<T>(Value<T> value, Value<float> scalar) where T : notnull => value.CreateAlike(ScalarPower(value.Data, scalar));
     public static Value<T> ScalarMultiply<T>(Value<T> value, Value<float> scalar) where T : notnull => value.CreateAlike(ScalarMultiply(value.Data, scalar));

@@ -91,6 +91,21 @@ public partial class Compute
         Call(NegateKernels, r, val);
     public static MemoryBuffer1D<float, Stride1D.Dense> Negate(MemoryBuffer1D<float, Stride1D.Dense> val) => 
         Encase(val, r => Negate(r, val));
+    
+    public static void Sine(MemoryBuffer1D<float, Stride1D.Dense> r, MemoryBuffer1D<float, Stride1D.Dense> val) =>
+        Call(SineKernels, r, val);
+    public static MemoryBuffer1D<float, Stride1D.Dense> Sine(MemoryBuffer1D<float, Stride1D.Dense> val) =>
+        Encase(val, r => Sine(r, val));
+    
+    public static void Cosine(MemoryBuffer1D<float, Stride1D.Dense> r, MemoryBuffer1D<float, Stride1D.Dense> val) =>
+        Call(CosineKernels, r, val);
+    public static MemoryBuffer1D<float, Stride1D.Dense> Cosine(MemoryBuffer1D<float, Stride1D.Dense> val) =>
+        Encase(val, r => Cosine(r, val));
+    
+    public static void Tangent(MemoryBuffer1D<float, Stride1D.Dense> r, MemoryBuffer1D<float, Stride1D.Dense> val) =>
+        Call(TangentKernels, r, val);
+    public static MemoryBuffer1D<float, Stride1D.Dense> Tangent(MemoryBuffer1D<float, Stride1D.Dense> val) =>
+        Encase(val, r => Tangent(r, val));
 
     public static void ScalarPower(MemoryBuffer1D<float, Stride1D.Dense> r, MemoryBuffer1D<float, Stride1D.Dense> value, Value<float> scalar) =>
         Call(ScalarPowerKernels, r, value, scalar);

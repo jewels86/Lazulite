@@ -74,19 +74,19 @@ public static class ElementwiseKernels
         ArrayView1D<float, Stride1D.Dense> a) =>
         result[index] = -a[index];
     
-    public static void SinKernel(
+    public static void SineKernel(
         Index1D index, 
         ArrayView1D<float, Stride1D.Dense> result,
         ArrayView1D<float, Stride1D.Dense> a) =>
         result[index] = XMath.Sin(a[index]);
     
-    public static void CosKernel(
+    public static void CosineKernel(
         Index1D index, 
         ArrayView1D<float, Stride1D.Dense> result,
         ArrayView1D<float, Stride1D.Dense> a) =>
         result[index] = XMath.Cos(a[index]);
     
-    public static void TanKernel(
+    public static void TangentKernel(
         Index1D index, 
         ArrayView1D<float, Stride1D.Dense> result,
         ArrayView1D<float, Stride1D.Dense> a) =>
