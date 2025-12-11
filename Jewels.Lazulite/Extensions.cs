@@ -7,6 +7,7 @@ public static class MemoryBufferExtensions
 {
     public static int AcceleratorIndex(this MemoryBuffer1D<float, Stride1D.Dense> buffer) => Compute.GetAcceleratorIndex(buffer.Accelerator);
     public static void Return(this MemoryBuffer1D<float, Stride1D.Dense> buffer) => Compute.Return(buffer);
+    public static void Return(this MemoryBuffer1D<float, Stride1D.Dense>[] buffers) => Compute.Return(buffers);
 
     public static MemoryBuffer1D<float, Stride1D.Dense> Set(this MemoryBuffer1D<float, Stride1D.Dense> buffer, float[] value)
     {

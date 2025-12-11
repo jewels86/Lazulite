@@ -3,7 +3,7 @@ using ILGPU.Runtime;
 
 namespace Jewels.Lazulite;
 
-public static class KernelProgramming
+public static partial class KernelProgramming
 {
     public static (float x, float y, float z) Vector3Get(ArrayView1D<float, Stride1D.Dense> array, int i)
     {
