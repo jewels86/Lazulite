@@ -11,6 +11,9 @@ public partial class KernelProgramming
     public static int BlockIndexOf(int i, int blockSize, int blockIndex) => blockIndex * blockSize + i;
     public static int BlockFromIndex(int index, int blockSize, int blockIndex) => index - blockIndex * blockSize;
     
+    public static int CyclicIndexOf(int i, int size) => i % size;
+    public static int CyclicCycleCount(int i, int size) => i / size;
+    
     public static int TiledIndexOf(int row, int col, int tileRows, int tileCols, int matrixCols)
     {
         int tileRow = row / tileRows;
