@@ -25,7 +25,7 @@ public class MatrixValue : Value<float[,]>
 
 public class MatrixProxy(Value<float[,]> value) : ValueProxy<float[,]>(value)
 {
-    public float this[int i, int j] => FlatData[KernelProgramming.IndexOf(i, j, Shape[1])];
+    public float this[int i, int j] => FlatData[KernelProgramming.MatrixIndexOf(i, j, Shape[1])];
     public override float Get(int[] index) => this[index[0], index[1]];
     public override float[,] ToHost() => Unroll(FlatData, Shape[1]);
     
@@ -36,7 +36,7 @@ public class MatrixProxy(Value<float[,]> value) : ValueProxy<float[,]>(value)
         Parallel.For(0, rows, i =>
         {
             for (int j = 0; j < cols; j++)
-                vector[KernelProgramming.IndexOf(i, j, cols)] = value[i, j];
+                vector[KernelProgramming.MatrixIndexOf(i, j, cols)] = value[i, j];
         });
         return vector;
     }
@@ -48,7 +48,7 @@ public class MatrixProxy(Value<float[,]> value) : ValueProxy<float[,]>(value)
         Parallel.For(0, rows, i =>
         {
             for (int j = 0; j < cols; j++)
-                matrix[i, j] = rolled[KernelProgramming.IndexOf(i, j, cols)];
+                matrix[i, j] = rolled[KernelProgramming.MatrixIndexOf(i, j, cols)];
         });
         return matrix;
     }
