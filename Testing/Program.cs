@@ -9,6 +9,8 @@ class Program
         Compute.InitializeKernelsAsync();
         Compute.WaitForInitializationAsync();
         
+        Others.IndexingTest();
+        
         //SimpleTests.FillTest(false);
         SimpleTests.FillTest(true);
         
