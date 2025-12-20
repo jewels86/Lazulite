@@ -27,7 +27,6 @@ public class VectorValue : Value<float[]>
 
 public class VectorProxy(VectorValue value) : ValueProxy<float[]>(value)
 {
-    public float this[int i] => FlatData[i];
     public override float Get(int[] index) => FlatData[index[0]];
     public override float[] ToHost() => FlatData;
 }

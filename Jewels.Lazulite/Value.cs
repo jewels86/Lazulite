@@ -19,6 +19,7 @@ public interface IValue : IDisposable
     // unless of course the implementation is not Value<T>
     // then you're just doing something wrong and should probably fix it
     public IValue Zeros();
+    public IValue Clone();
     public IValue CreateAlike(MemoryBuffer1D<float, Stride1D.Dense> buffer);
     public IValue Create(MemoryBuffer1D<float, Stride1D.Dense> buffer, int[] shape);
     public IValueProxy ToProxy();
@@ -44,10 +45,7 @@ public abstract class Value<T>(MemoryBuffer1D<float, Stride1D.Dense> data, int[]
         return Unroll(Data.View.GetAsArray1D());
     }
     public void FromHost(T value) => Data.CopyFromCPU(Roll(value));
-    public void UpdateWith(Value<T> other)
-    {
-        Data.CopyFrom(other.Data);
-    }
+    public void UpdateWith(Value<T> other) => Data.CopyFrom(other.Data);
 
     public void Dispose()
     {
@@ -57,6 +55,7 @@ public abstract class Value<T>(MemoryBuffer1D<float, Stride1D.Dense> data, int[]
     }
 
     public Value<T> Zeros() => Create(Compute.GetLike(this), Shape);
+    public Value<T> Clone() => CreateAlike(Data.Clone());
     public Value<T> CreateAlike(MemoryBuffer1D<float, Stride1D.Dense> buffer) => Create(buffer, Shape);
 
     public abstract T Unroll(float[] rolled);
@@ -69,6 +68,7 @@ public abstract class Value<T>(MemoryBuffer1D<float, Stride1D.Dense> data, int[]
     public static implicit operator ArrayView1D<float, Stride1D.Dense>(Value<T> value) => value.Data.View;
     
     IValue IValue.Zeros() => Zeros();
+    IValue IValue.Clone() => Clone();
     IValue IValue.CreateAlike(MemoryBuffer1D<float, Stride1D.Dense> buffer) => CreateAlike(buffer);
     IValue IValue.Create(MemoryBuffer1D<float, Stride1D.Dense> buffer, int[] shape) => Create(buffer, shape);
     IValueProxy IValue.ToProxy() => ToProxy();
@@ -94,4 +94,6 @@ public abstract class ValueProxy<T>(float[] flatData, int[] shape) : IValueProxy
 
     public abstract float Get(int[] index);
     public abstract T ToHost();
+
+    public float this[int i] => FlatData[i];
 }
