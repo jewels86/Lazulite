@@ -75,6 +75,7 @@ public abstract class Value<T>(MemoryBuffer1D<float, Stride1D.Dense> data, int[]
     void IValue.UpdateWith(IValue other) => UpdateWith((Value<T>)other);
 }
 
+#region Proxies
 public interface IValueProxy
 {
     // these are used for the same purpose as IValue- they let you get a proxy without knowing the host type
@@ -97,3 +98,4 @@ public abstract class ValueProxy<T>(float[] flatData, int[] shape) : IValueProxy
 
     public float this[int i] => FlatData[i];
 }
+#endregion

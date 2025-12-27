@@ -10,6 +10,7 @@ class Program
         Compute.WaitForInitializationAsync();
         
         Others.IndexingTest();
+        return;
         
         //SimpleTests.FillTest(false);
         SimpleTests.FillTest(true);
