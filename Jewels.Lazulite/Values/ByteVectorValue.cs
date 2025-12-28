@@ -28,9 +28,11 @@ public class ByteVectorProxy(ByteVectorValue value) : ValueProxy<byte[]>(value)
     public override float Get(int[] index) => FlatData[index[0]];
     public override byte[] ToHost() => Unroll(FlatData, OriginalLength);
     
-    public static float BytesToFloat(byte b0, byte b1, byte b2, byte b3)
+    public static float BytesToFloat(byte b0, byte b1, byte b2, byte b3, bool bigEndian = true)
     {
-        var packed = (b0 << 24) | (b1 << 16) | (b2 << 8) | b3; // big endian
+        int packed;
+        if (bigEndian) packed = (b0 << 24) | (b1 << 16) | (b2 << 8) | b3; // big endian
+        else packed = (b3 << 24) | (b2 << 16) | (b1 << 8) | b0; // little endian
         return Interop.FloatAsInt(packed);
     }
     
@@ -44,7 +46,7 @@ public class ByteVectorProxy(ByteVectorValue value) : ValueProxy<byte[]>(value)
         return (b0, b1, b2, b3);
     }
     
-    public static float[] Roll(byte[] value)
+    public static float[] Roll(byte[] value, bool bigEndian = true)
     {
         var floatCount = (value.Length + 3) / 4; // round up
         var result = new float[floatCount];
@@ -57,7 +59,7 @@ public class ByteVectorProxy(ByteVectorValue value) : ValueProxy<byte[]>(value)
             byte b2 = baseIdx + 2 < value.Length ? value[baseIdx + 2] : (byte)0;
             byte b3 = baseIdx + 3 < value.Length ? value[baseIdx + 3] : (byte)0;
             
-            result[i] = BytesToFloat(b0, b1, b2, b3);
+            result[i] = BytesToFloat(b0, b1, b2, b3, bigEndian);
         }
         
         return result;
