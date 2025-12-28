@@ -32,7 +32,7 @@ public class ByteVectorProxy(ByteVectorValue value) : ValueProxy<byte[]>(value)
     {
         int packed;
         if (bigEndian) packed = b0 << 24 | b1 << 16 | b2 << 8 | b3;
-        else packed = b3 << 24 | b2 << 16 | b1 << 8 | b0;
+        else packed = b0 | b1 << 8 | b2 << 16 | b3 << 24;
         return Interop.FloatAsInt(packed);
     }
 
