@@ -31,26 +31,27 @@ public class ByteVectorProxy(ByteVectorValue value) : ValueProxy<byte[]>(value)
     public static float BytesToFloat(byte b0, byte b1, byte b2, byte b3, bool bigEndian = true)
     {
         int packed;
-        if (bigEndian) packed = (b0 << 24) | (b1 << 16) | (b2 << 8) | b3; // big endian
-        else packed = (b3 << 24) | (b2 << 16) | (b1 << 8) | b0; // little endian
+        if (bigEndian) packed = b0 << 24 | b1 << 16 | b2 << 8 | b3;
+        else packed = b3 << 24 | b2 << 16 | b1 << 8 | b0;
         return Interop.FloatAsInt(packed);
     }
-    
-    public static (byte, byte, byte, byte) FloatToBytes(float value)
+
+    public static (byte, byte, byte, byte) FloatToBytes(float value, bool bigEndian = true)
     {
         var packed = Interop.FloatAsInt(value);
-        var b0 = (byte)((packed >> 24) & 0xFF);
-        var b1 = (byte)((packed >> 16) & 0xFF);
-        var b2 = (byte)((packed >> 8) & 0xFF);
+        var b0 = (byte)(packed >> 24 & 0xFF);
+        var b1 = (byte)(packed >> 16 & 0xFF);
+        var b2 = (byte)(packed >> 8 & 0xFF);
         var b3 = (byte)(packed & 0xFF);
-        return (b0, b1, b2, b3);
+    
+        return bigEndian ? (b0, b1, b2, b3) : (b3, b2, b1, b0);
     }
     
     public static float[] Roll(byte[] value, bool bigEndian = true)
     {
-        var floatCount = (value.Length + 3) / 4; // round up
+        var floatCount = (value.Length + 3) / 4;
         var result = new float[floatCount];
-        
+    
         for (int i = 0; i < floatCount; i++)
         {
             int baseIdx = i * 4;
@@ -58,30 +59,30 @@ public class ByteVectorProxy(ByteVectorValue value) : ValueProxy<byte[]>(value)
             byte b1 = baseIdx + 1 < value.Length ? value[baseIdx + 1] : (byte)0;
             byte b2 = baseIdx + 2 < value.Length ? value[baseIdx + 2] : (byte)0;
             byte b3 = baseIdx + 3 < value.Length ? value[baseIdx + 3] : (byte)0;
-            
+        
             result[i] = BytesToFloat(b0, b1, b2, b3, bigEndian);
         }
-        
+    
         return result;
     }
-    
-    public static byte[] Unroll(float[] rolled, int originalLength)
+
+    public static byte[] Unroll(float[] rolled, int originalLength, bool bigEndian = true)
     {
         byte[] result = new byte[originalLength];
         int byteIndex = 0;
-        
+    
         foreach (float f in rolled)
         {
             if (byteIndex >= originalLength) break;
-            
-            var (b0, b1, b2, b3) = FloatToBytes(f);
-            
+        
+            var (b0, b1, b2, b3) = FloatToBytes(f, bigEndian);
+        
             if (byteIndex < originalLength) result[byteIndex++] = b0;
             if (byteIndex < originalLength) result[byteIndex++] = b1;
             if (byteIndex < originalLength) result[byteIndex++] = b2;
             if (byteIndex < originalLength) result[byteIndex++] = b3;
         }
-        
+    
         return result;
     }
 }
