@@ -137,47 +137,6 @@ public static class SimpleTests
         forcesBuffer.CopyFromCPU(forces);
         var extent = new Index1D(n);
 
-        void GravityKernel(Index1D index, ArrayView1D<float, Stride1D.Dense> rs, ArrayView1D<float, Stride1D.Dense> ms, ArrayView1D<float, Stride1D.Dense> fs, float g, int total)
-        {
-            int i = index.X;
-            var (fx, fy, fz) = (0f, 0f, 0f);
-            var (rx, ry, rz) = KernelProgramming.Vector3Get(rs, i);
-
-            for (int j = 0; j < total; j++)
-            {
-                if (i == j) continue;
-
-                var (jrx, jry, jrz) = KernelProgramming.Vector3Get(rs, j);
-                var (dx, dy, dz) = KernelProgramming.Vector3Subtract((jrx, jry, jrz), (rx, ry, rz));
-
-                var r2 = KernelProgramming.Vector3Magnitude2((dx, dy, dz));
-                var f = g * ms[i] * ms[j] / r2;
-
-                var (dfx, dfy, dfz) = KernelProgramming.Vector3Multiply((dx, dy, dz), f);
-                (fx, fy, fz) = KernelProgramming.Vector3Add((fx, fy, fz), (dfx, dfy, dfz));
-            }
-
-            (fx, fy, fz) = KernelProgramming.Vector3Divide((fx, fy, fz), ms[i]);
-            KernelProgramming.Vector3Set(fs, i, (fx, fy, fz));
-        }
-
-        void EulerKernel(Index1D index, ArrayView1D<float, Stride1D.Dense> rs, ArrayView1D<float, Stride1D.Dense> vs, ArrayView1D<float, Stride1D.Dense> fs, ArrayView1D<float, Stride1D.Dense> ms, float dt_)
-        {
-            int i = index.X;
-            var (x, y, z) = KernelProgramming.Vector3Get(rs, i);
-            var (vx, vy, vz) = KernelProgramming.Vector3Get(vs, i);
-            var (fx, fy, fz) = KernelProgramming.Vector3Get(fs, i);
-
-            var (ax, ay, az) = KernelProgramming.Vector3Divide((fx, fy, fz), ms[i]);
-            var (dvx, dvy, dvz) = KernelProgramming.Vector3Multiply((ax, ay, az), dt_);
-            var (vx2, vy2, vz2) = KernelProgramming.Vector3Add((vx, vy, vz), (dvx, dvy, dvz));
-            KernelProgramming.Vector3Set(vs, i, (vx2, vy2, vz2));
-
-            var (drx, dry, drz) = KernelProgramming.Vector3Multiply((vx2, vy2, vz2), dt_);
-            var (x2, y2, z2) = KernelProgramming.Vector3Add((x, y, z), (drx, dry, drz));
-            KernelProgramming.Vector3Set(rs, i, (x2, y2, z2));
-        }
-
         KernelStorage<Action<Index1D, ArrayView1D<float, Stride1D.Dense>,
             ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, float, int>> gravityKernels = new((index, rs, ms, fs, g, total) =>
         {

@@ -1,7 +1,9 @@
 ﻿using System.Collections.Concurrent;
 using ILGPU;
 using ILGPU.Runtime;
+using ILGPU.Runtime.CPU;
 using ILGPU.Runtime.Cuda;
+using ILGPU.Runtime.OpenCL;
 
 namespace Jewels.Lazulite;
 
@@ -25,7 +27,7 @@ public static partial class Compute
 
         HashSet<(AcceleratorType, string, long)> seen = [];
 
-        int aidx = 0; // soon id like to sort this by performance
+        int aidx = 0;
         foreach (Device device in Context.Devices.OrderByDescending(d => d.MemorySize).Where(device => seen.Add((device.AcceleratorType, device.Name, device.MemorySize))))
         {
             Accelerators[aidx] = device.CreateAccelerator(Context);
@@ -76,16 +78,30 @@ public static partial class Compute
     }
     #endregion
     #region Accelerator Management
-    public static int RequestAccelerator(bool gpu = true)
+    public static int RequestAccelerator(bool requireGPU = true)
     {
         Accelerator accelerator;
         
-        if (gpu) accelerator = Accelerators.Values.FirstOrDefault(a => a is CudaAccelerator) ?? Accelerators.Values.First();
+        if (requireGPU) accelerator = Accelerators.Values.FirstOrDefault(a => a is CudaAccelerator) ?? Accelerators.Values.First();
         else accelerator = Accelerators.Values.First();
         
         var aidx = GetAcceleratorIndex(accelerator);
         return aidx;
     }
+
+    public static int RequestCPU()
+    {
+        var accelerator = Accelerators.Values.First(a => a is CPUAccelerator);
+        return GetAcceleratorIndex(accelerator);    
+    }
+
+    public static int RequestGPU()
+    {
+        var accelerator = Accelerators.Values.First(a => a is CudaAccelerator or CLAccelerator);
+        return GetAcceleratorIndex(accelerator);   
+    }
+
+    public static int RequestOptimalAccelerator() => GetAcceleratorIndex(Accelerators.Values.First());
     #endregion
     #endregion
 
