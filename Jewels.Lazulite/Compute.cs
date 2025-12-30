@@ -38,7 +38,6 @@ public static partial class Compute
         InitializeCuBlas();
         
         AppDomain.CurrentDomain.ProcessExit += (_, _) => Dispose();
-        Console.WriteLine("Compute initialized.");
     }
 
     #region Management
@@ -64,7 +63,7 @@ public static partial class Compute
         for (int i = 0; i < Accelerators.Count; i++) Synchronize(i);
     }
 
-    public static void Dispose()
+    private static void Dispose()
     {
         if (_disposed) return;
         GC.WaitForPendingFinalizers();
@@ -73,6 +72,7 @@ public static partial class Compute
         foreach (var accelerator in Accelerators.Values) accelerator.Dispose();
         foreach (var blas in _cublasHandles.Values) blas?.Dispose();
         CleanupCuBlas();
+        _disposed = true;
     }
     #endregion
     #region Accelerator Management
