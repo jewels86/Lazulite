@@ -54,3 +54,8 @@ public static class ValueExtensions
         return value;
     }
 }
+
+public static class ArrayExtensions
+{
+    public static float[] ToFloats(this int[] ints) => ints.Select(i => (float)i).ToArray();
+}
