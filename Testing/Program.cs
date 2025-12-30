@@ -6,12 +6,6 @@ class Program
 {
     public static void Main(string[] args)
     {
-        Compute.InitializeKernelsAsync();
-        Compute.WaitForInitializationAsync();
-        
-        Others.IndexingTest();
-        return;
-        
         //SimpleTests.FillTest(false);
         SimpleTests.FillTest(true);
         

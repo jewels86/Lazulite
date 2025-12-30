@@ -40,7 +40,6 @@ public static class SimpleTests
         sw.Stop();
         Console.WriteLine($"Filled {n} vectors of size {size} in {sw.ElapsedMilliseconds} (pre-allocations - {n * size} elements) where allocations are done in-loop.");
         Compute.Synchronize(aidx);
-        Compute.ReleaseAccelerator(aidx);
     }
     
     public static void SimpleMathTest(bool gpu)
@@ -71,8 +70,6 @@ public static class SimpleTests
         Compute.Synchronize(aidx);
         sw.Stop();
         
-        Compute.ReleaseAccelerator(aidx);
-        
         Console.WriteLine($"Squared each element of {n} {size}x{size} matrices ({size * size * n} elements) in {sw.ElapsedMilliseconds} ms.");
     }
 
@@ -92,13 +89,15 @@ public static class SimpleTests
         
         Console.WriteLine(f);
         
-        var addMultSub = Compute.Load((i, r, a_, b_, c_) => r[i] = (a_[i] + b_[i]) * c_[i] - a_[i]);
+        KernelStorage<Action<Index1D, 
+            ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, 
+            ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>> addMultSub
+            = new((i, r, a_, b_, c_) => r[i] = (a_[i] + b_[i]) * c_[i] - a_[i]);
         Compute.Call(addMultSub, f.Data.View, a.Data.View, b.Data.View, c.Data.View);
         // this is much better- we only allocate 1 value, f, and we can fuse the operations into one kernel call
         Console.WriteLine(f);
         
         Compute.Synchronize(aidx);
-        Compute.ReleaseAccelerator(aidx);
     }
     
     public static void PhysicsTest(bool gpu)
@@ -179,8 +178,48 @@ public static class SimpleTests
             KernelProgramming.Vector3Set(rs, i, (x2, y2, z2));
         }
 
-        var gravityKernels = Compute.Load((Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, float, int>)GravityKernel);
-        var eulerKernels = Compute.Load((Action<Index1D, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, float>)EulerKernel);
+        KernelStorage<Action<Index1D, ArrayView1D<float, Stride1D.Dense>,
+            ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, float, int>> gravityKernels = new((index, rs, ms, fs, g, total) =>
+        {
+            int i = index.X;
+            var (fx, fy, fz) = (0f, 0f, 0f);
+            var (rx, ry, rz) = KernelProgramming.Vector3Get(rs, i);
+
+            for (int j = 0; j < total; j++)
+            {
+                if (i == j) continue;
+
+                var (jrx, jry, jrz) = KernelProgramming.Vector3Get(rs, j);
+                var (dx, dy, dz) = KernelProgramming.Vector3Subtract((jrx, jry, jrz), (rx, ry, rz));
+
+                var r2 = KernelProgramming.Vector3Magnitude2((dx, dy, dz));
+                var f = g * ms[i] * ms[j] / r2;
+
+                var (dfx, dfy, dfz) = KernelProgramming.Vector3Multiply((dx, dy, dz), f);
+                (fx, fy, fz) = KernelProgramming.Vector3Add((fx, fy, fz), (dfx, dfy, dfz));
+            }
+
+            (fx, fy, fz) = KernelProgramming.Vector3Divide((fx, fy, fz), ms[i]);
+            KernelProgramming.Vector3Set(fs, i, (fx, fy, fz));
+        });
+        KernelStorage<Action<Index1D,
+            ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>,
+            ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>, float>> eulerKernels = new((index, rs, vs, fs, ms, dt_) =>
+        {
+            int i = index.X;
+            var (x, y, z) = KernelProgramming.Vector3Get(rs, i);
+            var (vx, vy, vz) = KernelProgramming.Vector3Get(vs, i);
+            var (fx, fy, fz) = KernelProgramming.Vector3Get(fs, i);
+
+            var (ax, ay, az) = KernelProgramming.Vector3Divide((fx, fy, fz), ms[i]);
+            var (dvx, dvy, dvz) = KernelProgramming.Vector3Multiply((ax, ay, az), dt_);
+            var (vx2, vy2, vz2) = KernelProgramming.Vector3Add((vx, vy, vz), (dvx, dvy, dvz));
+            KernelProgramming.Vector3Set(vs, i, (vx2, vy2, vz2));
+
+            var (drx, dry, drz) = KernelProgramming.Vector3Multiply((vx2, vy2, vz2), dt_);
+            var (x2, y2, z2) = KernelProgramming.Vector3Add((x, y, z), (drx, dry, drz));
+            KernelProgramming.Vector3Set(rs, i, (x2, y2, z2));
+        });
         
         sw.Start();
         for (float t = 0; t < finalT; t += dt)
@@ -192,8 +231,6 @@ public static class SimpleTests
         sw.Stop();
         
         Compute.Return(positionsBuffer, velocitiesBuffer, massesBuffer, forcesBuffer);
-        
-        Compute.ReleaseAccelerator(aidx);
         
         Console.WriteLine($"Total timesteps: {finalT / dt}");
         Console.WriteLine($"Total bodies: {n}");
@@ -244,7 +281,6 @@ public static class SimpleTests
         
         Compute.Return(results.ToArray());
         Compute.Clear(aidx);
-        Compute.ReleaseAccelerator(aidx);
         results.Clear();
         
         var gpuIndices = Compute.Accelerators.Values
@@ -284,7 +320,6 @@ public static class SimpleTests
         sw.Stop();
         
         Compute.Return(results.ToArray());
-        Compute.ReleaseAccelerator(aidx);
         results.Clear();
         Console.WriteLine($"Processed {totalBatches} batches of {m}x{k}x{n} matrix multiplies in: {sw.ElapsedMilliseconds} ms.");
     }
@@ -320,7 +355,6 @@ public static class SimpleTests
         
         Console.WriteLine($"{m}x{k}x{n} matrix multiply finished in: {sw.ElapsedMilliseconds} ms.");
         Compute.Return(resultBuffer, aBuffer, bBuffer);
-        Compute.ReleaseAccelerator(aidx);
     }
 
     public static void PoolTest(bool gpu)
@@ -330,7 +364,9 @@ public static class SimpleTests
         Stopwatch sw = new();
 
         var (n, size) = (1000, 10000);
-        var kernels = Compute.Load((i, r, a, b) => r[i] += (a[i] * a[i] - b[i] * b[i]) / (a[i] * a[i] + b[i] * b[i]));
+        KernelStorage<Action<Index1D, ArrayView1D<float, Stride1D.Dense>,
+            ArrayView1D<float, Stride1D.Dense>, ArrayView1D<float, Stride1D.Dense>>> kernels = new((i, r, a, b) => 
+            r[i] += (a[i] * a[i] - b[i] * b[i]) / (a[i] * a[i] + b[i] * b[i]));
         var result = Compute.Get(aidx, size);
         
         sw.Start();
@@ -347,7 +383,6 @@ public static class SimpleTests
         
         Console.WriteLine($"Processed {n} batches in {sw.ElapsedMilliseconds} ms.");
         Compute.Return(result);
-        Compute.ReleaseAccelerator(aidx);
     }
     
     public static float[,] RandomMatrix(int rows, int cols)

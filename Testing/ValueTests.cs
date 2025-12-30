@@ -30,8 +30,6 @@ public static class ValueTests
         sw.Stop();
         Console.WriteLine($"ToProxy elapsed time: {sw.ElapsedMilliseconds}");
         Console.WriteLine($"Matrix sum at (0, 0): {proxy[0, 0]}");
-        
-        Compute.ReleaseAccelerator(_aidx);
     }
 
     public static void OpsTest(bool gpu)
@@ -98,8 +96,6 @@ public static class ValueTests
         using var dotBuffer = Compute.Dot(a, b);
         Compute.Synchronize(aidx);
         Console.WriteLine($"dot(a, b): {dot} vs {dotBuffer.GetAsArray1D()[0]}");
-        
-        Compute.ReleaseAccelerator(aidx);
     }
 
     public static void MemoryTest(bool gpu)
@@ -128,7 +124,5 @@ public static class ValueTests
         var f = Compute.Get(aidx, 1);
         Console.WriteLine(f.GetAsArray1D()[0]);
         Console.WriteLine(f.GetHashCode());
-        
-        Compute.ReleaseAccelerator(aidx);
     }
 }

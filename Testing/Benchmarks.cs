@@ -38,7 +38,6 @@ public static class Benchmarks
         sw.Stop();
         Console.WriteLine($"Elementwise multiplication took {sw.ElapsedMilliseconds} ms.");
         
-        Compute.ReleaseAccelerator(aidx);
         foreach (var matrix in matrices) matrix.Dispose();
         foreach (var result in results) result.Dispose();
     }
@@ -63,7 +62,6 @@ public static class Benchmarks
         sw.Stop();
         Console.WriteLine($"Elementwise multiplication took {sw.ElapsedMilliseconds} ms.");
         
-        Compute.ReleaseAccelerator(aidx);
         foreach (var matrix in matrices) matrix.Dispose();
         foreach (var result in results) result.Dispose();
     }
@@ -92,7 +90,6 @@ public static class Benchmarks
         
         Console.WriteLine($"Multiplication took {sw.ElapsedMilliseconds} ms.");
         
-        Compute.ReleaseAccelerator(aidx);
         foreach (var matrix in matrices) matrix.Dispose();
         foreach (var result in results) result.Dispose();
     }

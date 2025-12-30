@@ -10,9 +10,9 @@ public static partial class Compute
     #region Properties & Fields
     public static ConcurrentDictionary<int, Accelerator> Accelerators { get; } = [];
     public static ConcurrentDictionary<string, int> AcceleratorIndices { get; } = [];
-    public static ConcurrentDictionary<int, bool> InUse { get; } = [];
     public static Context Context { get; }
 
+    private static bool _disposed;
     private static readonly ConcurrentDictionary<int, ConcurrentDictionary<int, ConcurrentStack<MemoryBuffer1D<float, Stride1D.Dense>>>> _pool = []; // _pool[aidx] -> stacks[size] -> buffers
     #endregion
 
@@ -31,12 +31,14 @@ public static partial class Compute
             Accelerators[aidx] = device.CreateAccelerator(Context);
             AcceleratorIndices[Accelerators[aidx].Name] = aidx;
             
-            InUse[aidx] = false;
             _pool[aidx] = [];
             
             aidx++;
         }
         InitializeCuBlas();
+        
+        AppDomain.CurrentDomain.ProcessExit += (_, _) => Dispose();
+        Console.WriteLine("Compute initialized.");
     }
 
     #region Management
@@ -64,6 +66,7 @@ public static partial class Compute
 
     public static void Dispose()
     {
+        if (_disposed) return;
         GC.WaitForPendingFinalizers();
         ClearAll();
         Context.Dispose();
@@ -76,21 +79,12 @@ public static partial class Compute
     public static int RequestAccelerator(bool gpu = true)
     {
         Accelerator accelerator;
-        var available = InUse.Values.Select((b, i) => (b, i)).Where(t => !t.b).Select((_, i) => i).ToList();
         
-        if (available.Count == 0) throw new Exception("No accelerators available.");
-        if (gpu) accelerator = Accelerators.Values.FirstOrDefault(a => a is CudaAccelerator) ?? Accelerators[available[0]];
-        else accelerator = Accelerators[available[0]];
+        if (gpu) accelerator = Accelerators.Values.FirstOrDefault(a => a is CudaAccelerator) ?? Accelerators.Values.First();
+        else accelerator = Accelerators.Values.First();
         
         var aidx = GetAcceleratorIndex(accelerator);
-        InUse[aidx] = true;
         return aidx;
-    }
-
-    public static void ReleaseAccelerator(int aidx)
-    {
-        InUse[aidx] = false;
-        Clear(aidx);
     }
     #endregion
     #endregion
@@ -479,8 +473,6 @@ public static partial class Compute
         where T11 : struct
         where T12 : struct
         where T13 : struct => Call(a.AcceleratorIndex(), kernel, a.IntExtent, a, b, c, d, e, f, g, h, i, j, k, l, m, n);
-    
-   
 
     #endregion
     #region Binary Calls
