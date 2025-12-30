@@ -25,8 +25,8 @@ public static partial class Compute
 
         HashSet<(AcceleratorType, string, long)> seen = [];
 
-        int aidx = 0;
-        foreach (Device device in Context.Devices.Where(device => seen.Add((device.AcceleratorType, device.Name, device.MemorySize))))
+        int aidx = 0; // soon id like to sort this by performance
+        foreach (Device device in Context.Devices.OrderByDescending(d => d.MemorySize).Where(device => seen.Add((device.AcceleratorType, device.Name, device.MemorySize))))
         {
             Accelerators[aidx] = device.CreateAccelerator(Context);
             AcceleratorIndices[Accelerators[aidx].Name] = aidx;
